@@ -1,0 +1,87 @@
+{
+  "name": "mirrorworld-lib-template",
+  "version": "0.1.0",
+  "license": "MIT",
+  "private": "true",
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=10"
+  },
+  "scripts": {
+    "postinstall": "preconstruct dev",
+    "dev": "preconstruct dev",
+    "clean": "yarn workspaces run clean",
+    "prebuild": "yarn clean",
+    "build": "yarn prebuild && preconstruct build",
+    "start": "preconstruct watch",
+    "release": "yarn build && yarn publish",
+    "size": "size-limit",
+    "analyze": "size-limit --why",
+    "pkg": "manypkg run",
+    "pkgs:check": "manypkg check",
+    "pkgs:fix": "manypkg fix",
+    "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
+    "test": "jest --ci --coverage --maxWorkers=2"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint"
+    }
+  },
+  "prettier": {
+    "printWidth": 80,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  },
+  "author": "codebender828",
+  "size-limit": [
+    {
+      "path": "packages/core/mirrorworld-core.esm.js",
+      "limit": "10 KB"
+    },
+    {
+      "path": "packages/core/mirrorworld-core.cjs.js",
+      "limit": "10 KB"
+    }
+  ],
+  "dependencies": {
+    "@babel/core": "^7.15.0",
+    "@babel/preset-env": "^7.15.0",
+    "@babel/preset-typescript": "^7.15.0",
+    "@changesets/cli": "^2.23.0",
+    "@manypkg/cli": "^0.18.0",
+    "@preconstruct/cli": "^2.1.1",
+    "@size-limit/preset-small-lib": "^5.0.3",
+    "@typescript-eslint/eslint-plugin": "^4.29.3",
+    "@typescript-eslint/parser": "^4.29.3",
+    "concurrently": "^6.2.1",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.1",
+    "husky": "^8.0.1",
+    "prettier": "^2.3.2",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "size-limit": "^5.0.3",
+    "tslib": "^2.3.1",
+    "typescript": "^4.3.5",
+    "vue": "^3.2.6"
+  },
+  "preconstruct": {
+    "packages": [
+      "packages/*"
+    ]
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^17.0.3",
+    "@commitlint/config-conventional": "^17.0.3",
+    "@types/jest": "^28.1.3",
+    "esbuild": "^0.14.48",
+    "esbuild-jest": "^0.5.0",
+    "jest": "^28.1.2",
+    "lint-staged": "^13.0.3"
+  }
+}
