@@ -10,10 +10,12 @@ module.exports = {
       },
     ],
   },
+  testEnvironment: '@happy-dom/jest-environment',
   transformIgnorePatterns: ['/node_modules/(?!lodash.)'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   testMatch: ['**/**/*.test.(js|jsx|ts|tsx)'],
+  setupFiles: ['./jest.setup.ts'],
 };

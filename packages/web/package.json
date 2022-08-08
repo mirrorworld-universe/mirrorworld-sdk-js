@@ -1,0 +1,47 @@
+{
+  "name": "@mirrorworld/web3.js",
+  "version": "0.0.0",
+  "description": "Mirror World Web SDK",
+  "keywords": [
+    "mirrorworld",
+    "web3",
+    "sdk",
+    "solana",
+    "ethereum",
+    "polygon",
+    "aptos",
+    "sui",
+    "bnb chain"
+  ],
+  "author": "Jonathan Bakebwa <codebender828@gmail.com>",
+  "homepage": "https://github.com/mirrorworld-universe/mirrorworld.web3.js#readme",
+  "license": "MIT",
+  "main": "dist/mirrorworld-web3.js.cjs.js",
+  "module": "dist/mirrorworld-web3.js.esm.js",
+  "repository": "https://github.com/mirrorworld-universe/mirrorworld.web3.js/tree/main/packages/web",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "preconstruct": {
+    "entrypoints": [
+      "index.ts"
+    ]
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "bugs": {
+    "url": "https://github.com/mirrorworld-universe/mirrorworld.web3.js/issues"
+  },
+  "scripts": {
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@types/bson": "^4.2.0",
+    "axios": "^0.27.2",
+    "bson": "^4.6.5",
+    "joi": "^17.6.0",
+    "mitt": "^3.0.0"
+  }
+}

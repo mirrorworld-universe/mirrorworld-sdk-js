@@ -1,4 +1,4 @@
-import MyLib from '@mirrorworld/core';
+import MyLib from '../src';
 
 describe('blah', () => {
   it('works', () => {
