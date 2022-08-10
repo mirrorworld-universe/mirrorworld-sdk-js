@@ -1,5 +1,11 @@
 # @mirrorworld/web3.js
 
+## 1.0.0-alpha.1
+
+### Patch Changes
+
+- Fixes regenerator runtime bug"
+
 ## 1.0.0-alpha.0
 
 ### Major Changes

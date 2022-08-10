@@ -1,6 +1,6 @@
 {
   "name": "@mirrorworld/utils",
-  "version": "0.0.0",
+  "version": "0.0.1-alpha.0",
   "description": "Mirror World Web SDK utils",
   "keywords": [
     "mirrorworld",
