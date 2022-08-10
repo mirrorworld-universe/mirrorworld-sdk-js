@@ -3,18 +3,33 @@
 [Mirror World's](https://mirrorworld.fun/developer) Official TypeScript/JavaScript SDK
 
 ## Getting started
-1. Create a developer account at https://app.mirrorworld.fun
+1. Create a developer account at https://app.mirrorworld.fun. Create project and create an API Key.
 2. Install SDK in your project
+
 ```bash
-# Install all dependencies
 yarn install @mirrorworld/web3.js
 ```
 
-## Documentation
-You can view the documentation for Mirror World SDK for Mobile on our [Official Documentation Site](https://docs.mirrorworld.fun)
-
 ## Usage
+```ts
+import { MirrorWorld, ClusterEnvironment } from "@mirrorworld/web3.js"
 
+const mirrorworld = ref<MirrorWorld>(
+  new MirrorWorld({
+    apiKey: "YOUR_SECRET_API_KEY",
+    env: ClusterEnvironment.testnet, // Can be ClusterEnvionment.mainnet for mainnet
+    clientId: "YOUR_CLIENT_ID"
+  })
+)
+
+// Login user with Social Authentication
+async function login() {
+  const { refreshToken } = await mirrorworld.value.login()
+}
+```
+
+## Full API Documentation
+You can view the documentation for Mirror World SDK for Mobile on our [Official Documentation Site](https://docs.mirrorworld.fun/web/web-installation)
 
 ## Features:
 1. Authentication
@@ -40,22 +55,22 @@ You can view the documentation for Mirror World SDK for Mobile on our [Official 
 ## Roadmap
 See Roadmap here:
 1. **Wallet**
-    1. Transaction signing (In progress)
-    2. Crypto On-ramping (In progress)
+   - [-] Transaction signing (In progress)
+   - [-] Crypto On-ramping (In progress)
 2. **Marketplace**
-    1. Create Marketplace Instance (In progress)
-    2. Collection indexing and querying (In progress)
+   - [-] Create Marketplace Instance (In progress)
+   - [-] Collection indexing and querying (In progress)
 3. **Cross-chain Support**
-    1. Ethereum Support
-    2. Polygon Support
-    3. Aptos Support
-    4. Sui Support
+   - [ ] Ethereum Support
+   - [ ] Polygon Support
+   - [ ] Aptos Support
+   - [ ] Sui Support
 
 ## Community
-**Discord**: [Join Discord](https://discord.com/invite/Vxrw4rqaDM)
-**Twitter**: [Follow us](https://twitter.com/joinmirrorworld)
-**Telegram Group**: [Join](https://t.me/mirrorworld_sdk)
-**Telegram Channel**: [Subscribe](https://t.me/mirrorworld_news)
+- **Discord**: [Join Discord](https://discord.com/invite/Vxrw4rqaDM)
+- **Twitter**: [Follow us](https://twitter.com/joinmirrorworld)
+- **Telegram Group**: [Join](https://t.me/mirrorworld_sdk)
+- **Telegram Channel**: [Subscribe](https://t.me/mirrorworld_news)
 
 ## Licence
 MIT License
