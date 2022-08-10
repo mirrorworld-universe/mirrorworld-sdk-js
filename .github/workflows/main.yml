@@ -29,7 +29,7 @@ jobs:
         run: yarn lint --no-error-on-unmatched-pattern
 
       - name: Test
-        run: yarn test
+        run: NODE_ENV=staging yarn jest
 
       - name: Build
         run: yarn build

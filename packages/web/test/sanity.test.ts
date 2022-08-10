@@ -8,7 +8,6 @@ const apiKey = process.env.API_KEY!;
 const clientId = process.env.CLIENT_ID!;
 
 const createLoginCredentials = () => {
-  // TODO: Replace with real account form MailSlurp
   return {
     email: 'testaccount4@gmail.com',
     password: 'testaccount4',
@@ -25,7 +24,12 @@ export const createInstance = (options?: Partial<MirrorWorldOptions>) =>
   new MirrorWorld({
     apiKey,
     clientId,
-    env: ClusterEnvironment.local,
+    env:
+      process.env.NODE_ENV === 'staging'
+        ? ClusterEnvironment.testnet
+        : process.env.NODE_ENV === 'production'
+        ? ClusterEnvironment.mainnet
+        : ClusterEnvironment.local,
   });
 
 describe('Core SDK tests', () => {
@@ -65,10 +69,10 @@ describe('Core SDK tests', () => {
 
     it('should initialize api client instance correctly', () => {
       const mw = createInstance();
-      expect(mw._api).toBeDefined();
-      expect(mw._api instanceof MirrorWorldAPIClient);
-      expect(mw._api.auth instanceof Axios);
-      expect(mw._api.auth.defaults.baseURL).toEqual(apiServer);
+      expect(mw._api.client).toBeDefined();
+      expect(mw._api.client instanceof MirrorWorldAPIClient);
+      expect(mw._api.client instanceof Axios);
+      expect(mw._api.client.defaults.baseURL).toEqual(apiServer);
     });
   });
   describe('Authentication tests', () => {
