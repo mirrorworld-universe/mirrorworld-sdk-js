@@ -46,7 +46,8 @@ export type MirrorWorldEvents = {
   login: unknown;
   logout: unknown;
   ready: undefined;
-  'auth:refreshToken': undefined;
+  'auth:refreshToken'?: string;
+  'update:user'?: undefined;
 };
 
 export type MirrorWorldEventKey = keyof MirrorWorldEvents;

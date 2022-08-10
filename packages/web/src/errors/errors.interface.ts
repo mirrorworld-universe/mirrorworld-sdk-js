@@ -14,6 +14,21 @@ const __ErrorCodes__ = {
     code: '000102',
     message: `No refresh token found. Please login to continue`,
   },
+  INVALID_TRANSFER_SPL_TOKEN_PAYLOAD: {
+    error: 'INVALID_TRANSFER_SPL_TOKEN_PAYLOAD',
+    code: '000103',
+    message: `Validation failed for transfer token payload`,
+  },
+  INVALID_TRANSFER_SOL_PAYLOAD: {
+    error: 'INVALID_TRANSFER_SOL_PAYLOAD',
+    code: '000104',
+    message: `Validation failed for transfer SOL payload`,
+  },
+  INVALID_CREATE_VERIFIED_COLLECTION_PAYLOAD: {
+    error: 'INVALID_CREATE_VERIFIED_COLLECTION_PAYLOAD',
+    code: '000105',
+    message: `Validation failed for create verified collection`,
+  },
 };
 export type MirrorWorldSDKErrorCodes = typeof __ErrorCodes__;
 export type MirrorWorldSDKErrorKey = keyof MirrorWorldSDKErrorCodes;

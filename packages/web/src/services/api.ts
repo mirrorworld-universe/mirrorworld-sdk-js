@@ -18,7 +18,7 @@ export interface ErrorAPIResponse {
 // Will set cookies when cookies are responded with by browser.
 axios.defaults.withCredentials = true;
 
-export function throwError(response: ErrorAPIResponse) {
+export function throwError(response: ErrorAPIResponse): void {
   const error = new Error(
     `E:${response.code}: ${response.error}: ${response.message}`
   );
@@ -29,20 +29,20 @@ export function throwError(response: ErrorAPIResponse) {
   throw error;
 }
 
-export function handleAPIError(response: ErrorAPIResponse) {
+export function handleAPIError(response: ErrorAPIResponse): void {
   if ('code' in response) {
     throwError(response);
   }
 }
 
 export class MirrorWorldAPIClient {
-  auth: AxiosInstance;
+  client: AxiosInstance;
   constructor({
     env = ClusterEnvironment.mainnet,
     apiKey,
     clientId,
   }: MirrorWorldAPIClientOptions) {
-    this.auth = axios.create({
+    this.client = axios.create({
       withCredentials: true,
       baseURL:
         env === ClusterEnvironment.testnet
@@ -54,11 +54,11 @@ export class MirrorWorldAPIClient {
           : 'http://localhost:4000',
     });
 
-    MirrorWorldAPIClient.defineRequestHandlers(this.auth, apiKey, clientId);
-    MirrorWorldAPIClient.defineErrorResponseHandlers(this.auth);
+    MirrorWorldAPIClient.defineRequestHandlers(this.client, apiKey, clientId);
+    MirrorWorldAPIClient.defineErrorResponseHandlers(this.client);
   }
 
-  static defineErrorResponseHandlers(client: AxiosInstance) {
+  static defineErrorResponseHandlers(client: AxiosInstance): void {
     client.interceptors.response.use((response) => {
       if (response.data.error && response.data.code && response.data.message) {
         handleAPIError(response.data);
@@ -72,7 +72,7 @@ export class MirrorWorldAPIClient {
     apiKey: string,
     clientId: string,
     authToken?: string
-  ) {
+  ): void {
     client.interceptors.request.use((config) => {
       const _config: AxiosRequestConfig = {
         ...config,
