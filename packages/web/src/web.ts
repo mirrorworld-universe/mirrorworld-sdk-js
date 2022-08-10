@@ -12,7 +12,20 @@ import { IResponse } from './types/response.type';
 import { IUser } from './types/user.type';
 import { AxiosRequestConfig } from 'axios';
 import { canUseDom } from './utils';
-import { ICreateVerifiedCollectionPayload, ISolanaNFT } from './types/nft';
+import {
+  CancelListingPayload,
+  CreateVerifiedCollectionPayload,
+  CreateVerifiedSubCollectionPayload,
+  ICreateVerifiedCollectionPayload,
+  ICreateVerifiedSubCollectionPayload,
+  IListNFTPayload,
+  ISolanaNFT,
+  IVerifiedCollection,
+  ListNFTPayload,
+  MintNFTPayload,
+  TransferNFTPayload,
+  UpdateListingPayload,
+} from './types/nft';
 import {
   ISolanaToken,
   TransferSOLPayload,
@@ -27,7 +40,18 @@ import {
   transferSOLSchema,
   transferSPLTokenSchema,
 } from './validators/token.validators';
-import { createVerifiedCollectionSchema } from './validators/nft.validators';
+import {
+  createVerifiedCollectionSchema,
+  createVerifiedSubCollectionSchema,
+  mintNFTSchema,
+  transferNFTSchema,
+} from './validators/nft.validators';
+import {
+  buyNFTSchema,
+  cancelNFTListingSchema,
+  listNFTSchema,
+} from './validators/marketplace.validators';
+import { INFTListing } from './types/marketplace';
 
 export class MirrorWorld {
   // System variables
@@ -389,11 +413,9 @@ export class MirrorWorld {
    * @service Marketplace
    * Create Verified Collection
    */
-  async createVerifiedCollection(payload: {
-    name: ICreateVerifiedCollectionPayload['name'];
-    symbol: ICreateVerifiedCollectionPayload['symbol'];
-    metadataUri: ICreateVerifiedCollectionPayload['url'];
-  }): Promise<ITransferSPLTokenResponse> {
+  async createVerifiedCollection(
+    payload: CreateVerifiedCollectionPayload
+  ): Promise<IVerifiedCollection> {
     const result = createVerifiedCollectionSchema.validate({
       name: payload.name,
       symbol: payload.symbol,
@@ -402,10 +424,149 @@ export class MirrorWorld {
     if (result.error) {
       throw result.error;
     }
-    const response = await this.api.post<ITransferSPLTokenResponse>(
+    const response = await this.api.post<IResponse<IVerifiedCollection>>(
       `/v1/solana/mint/collection`,
       result.value
     );
-    return response.data;
+    return response.data.data;
+  }
+
+  /**
+   * @service Marketplace
+   * Create Verified SubCollection
+   */
+  async createVerifiedSubCollection(
+    payload: CreateVerifiedSubCollectionPayload
+  ): Promise<IVerifiedCollection> {
+    const result = createVerifiedSubCollectionSchema.validate({
+      name: payload.name,
+      symbol: payload.symbol,
+      url: payload.metadataUri,
+      collection_mint: payload.parentCollection,
+    });
+    if (result.error) {
+      throw result.error;
+    }
+    const response = await this.api.post<IResponse<IVerifiedCollection>>(
+      `/v1/solana/mint/sub-collection`,
+      result.value
+    );
+    return response.data.data;
+  }
+
+  /**
+   * @service Marketplace
+   * Mint NFT into collection
+   */
+  async mintNFT(payload: MintNFTPayload): Promise<IVerifiedCollection> {
+    const result = mintNFTSchema.validate({
+      name: payload.name,
+      symbol: payload.symbol,
+      url: payload.metadataUri,
+      collection_mint: payload.collection,
+    });
+    if (result.error) {
+      throw result.error;
+    }
+    const response = await this.api.post<IResponse<IVerifiedCollection>>(
+      `/v1/solana/mint/nft`,
+      result.value
+    );
+    return response.data.data;
+  }
+
+  /**
+   * @service Marketplace
+   * List NFT ion Mirror World Marketplace
+   */
+  async listNFT(payload: ListNFTPayload): Promise<INFTListing> {
+    const result = listNFTSchema.validate({
+      mint_address: payload.mintAddress,
+      price: payload.price,
+    });
+    if (result.error) {
+      throw result.error;
+    }
+    const response = await this.api.post<IResponse<INFTListing>>(
+      `/v1/solana/marketplace/list`,
+      result.value
+    );
+    return response.data.data;
+  }
+
+  /**
+   * @service Marketplace
+   * Purchase NFT on Mirror World Marketplace
+   */
+  async buyNFT(payload: ListNFTPayload): Promise<INFTListing> {
+    const result = buyNFTSchema.validate({
+      mint_address: payload.mintAddress,
+      price: payload.price,
+    });
+    if (result.error) {
+      throw result.error;
+    }
+    const response = await this.api.post<IResponse<INFTListing>>(
+      `/v1/solana/marketplace/buy`,
+      result.value
+    );
+    return response.data.data;
+  }
+
+  /**
+   * @service Marketplace
+   * Update NFT Listing on Mirror World Marketplace
+   */
+  async updateNFTListing(payload: UpdateListingPayload): Promise<INFTListing> {
+    const result = buyNFTSchema.validate({
+      mint_address: payload.mintAddress,
+      price: payload.price,
+    });
+    if (result.error) {
+      throw result.error;
+    }
+    const response = await this.api.post<IResponse<INFTListing>>(
+      `/v1/solana/marketplace/update`,
+      result.value
+    );
+    return response.data.data;
+  }
+
+  /**
+   * @service Marketplace
+   * Cancel listing NFT on Mirror World Marketplace
+   */
+  async cancelNFTListing(payload: CancelListingPayload): Promise<INFTListing> {
+    const result = cancelNFTListingSchema.validate({
+      mint_address: payload.mintAddress,
+      price: payload.price,
+    });
+    if (result.error) {
+      throw result.error;
+    }
+    const response = await this.api.post<IResponse<INFTListing>>(
+      `/v1/solana/marketplace/cancel`,
+      result.value
+    );
+    return response.data.data;
+  }
+
+  /**
+   * @service Marketplace
+   * Transfer NFT from holder's wallet to another address
+   */
+  async transferNFT(payload: TransferNFTPayload): Promise<INFTListing> {
+    const result = transferNFTSchema.validate({
+      mint_address: payload.mintAddress,
+      to_wallet_address: payload.recipientAddress,
+    });
+    if (result.error) {
+      throw result.error;
+    }
+    const response = await this.api.post<IResponse<INFTListing>>(
+      `/v1/solana/marketplace/transfer`,
+      result.value
+    );
+    return response.data.data;
   }
 }

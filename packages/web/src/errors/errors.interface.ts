@@ -29,7 +29,43 @@ const __ErrorCodes__ = {
     code: '000105',
     message: `Validation failed for create verified collection`,
   },
+  INVALID_CREATE_VERIFIED_SUB_COLLECTION_PAYLOAD: {
+    error: 'INVALID_CREATE_VERIFIED_SUB_COLLECTION_PAYLOAD',
+    code: '000106',
+    message: `Validation failed for create verified sub-collection`,
+  },
+  INVALID_MINT_NFT_PAYLOAD: {
+    error: 'INVALID_MINT_NFT_PAYLOAD',
+    code: '000107',
+    message: `Validation failed for mint collection NFT`,
+  },
+  INVALID_LIST_NFT_PAYLOAD: {
+    error: 'INVALID_LIST_NFT_PAYLOAD',
+    code: '000108',
+    message: `Validation failed for create nft listing`,
+  },
+  INVALID_PURCHASE_NFT_PAYLOAD: {
+    error: 'INVALID_PURCHASE_NFT_PAYLOAD',
+    code: '000109',
+    message: `Validation failed for purchase nft`,
+  },
+  INVALID_CANCEL_LISTING_NFT_PAYLOAD: {
+    error: 'INVALID_CANCEL_LISTING_NFT_PAYLOAD',
+    code: '000110',
+    message: `Validation failed for cancel nft listing`,
+  },
+  INVALID_UPDATE_LISTING_NFT_PAYLOAD: {
+    error: 'INVALID_UPDATE_LISTING_NFT_PAYLOAD',
+    code: '000111',
+    message: `Validation failed for update nft listing`,
+  },
+  INVALID_TRANSFER_NFT_PAYLOAD: {
+    error: 'INVALID_TRANSFER_NFT_PAYLOAD',
+    code: '000112',
+    message: `Validation failed for transfer NFT`,
+  },
 };
+
 export type MirrorWorldSDKErrorCodes = typeof __ErrorCodes__;
 export type MirrorWorldSDKErrorKey = keyof MirrorWorldSDKErrorCodes;
 export type ErrorBody<

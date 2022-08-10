@@ -1,0 +1,11 @@
+{
+  "mode": "pre",
+  "tag": "alpha",
+  "initialVersions": {
+    "@mirrorworld/utils": "0.0.0",
+    "@mirrorworld/web3.js": "0.0.0"
+  },
+  "changesets": [
+    "happy-badgers-develop"
+  ]
+}
