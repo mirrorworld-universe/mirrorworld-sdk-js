@@ -54,8 +54,8 @@ See Roadmap here:
 ## Community
 **Discord**: [Join Discord](https://discord.com/invite/Vxrw4rqaDM)
 **Twitter**: [Follow us](https://twitter.com/joinmirrorworld)
-**Telegram Group**: [Follow us](https://t.me/mirrorworld_sdk)
-**Telegram Channel**: [Follow us](https://t.me/mirrorworld_news)
+**Telegram Group**: [Join](https://t.me/mirrorworld_sdk)
+**Telegram Channel**: [Subscribe](https://t.me/mirrorworld_news)
 
 ## Licence
 MIT License
