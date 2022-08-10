@@ -36,5 +36,8 @@
   },
   "scripts": {
     "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.18.9"
   }
 }
