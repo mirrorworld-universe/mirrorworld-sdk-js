@@ -11,13 +11,8 @@ export interface IUser {
 }
 
 export interface Wallet {
-  id: number;
   eth_address: string;
   sol_address: string;
-  user_id: number;
-  username: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface UserWithWallet extends IUser {
