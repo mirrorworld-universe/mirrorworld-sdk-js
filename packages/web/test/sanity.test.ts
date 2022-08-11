@@ -149,8 +149,10 @@ describe('Core SDK tests', () => {
       const credentials = createLoginCredentials();
       await mw.loginWithEmail(credentials);
       const user = await mw.fetchUser();
+      const wallet = user.wallet;
       expect(user).toBeDefined();
       expect(user).toMatchObject(mw.user!);
+      expect(wallet).toMatchObject(mw.wallet!);
     });
   });
   describe('Marketplace tests', () => {
