@@ -1,5 +1,11 @@
 # @mirrorworld/web3.js
 
+## 1.0.0-alpha.3
+
+### Patch Changes
+
+- Fixes walelt poperties
+
 ## 1.0.0-alpha.2
 
 ### Minor Changes
