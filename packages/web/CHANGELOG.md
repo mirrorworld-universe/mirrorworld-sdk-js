@@ -1,5 +1,11 @@
 # @mirrorworld/web3.js
 
+## 1.0.0-alpha.2
+
+### Minor Changes
+
+- Feat appends wallet object to the user's object
+
 ## 1.0.0-alpha.1
 
 ### Patch Changes
