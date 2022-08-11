@@ -9,16 +9,13 @@ import { emitter } from './events/emitter';
 import { clientOptionsSchema } from './validators';
 import { LoginEmailCredentials } from './types/auth';
 import { IResponse } from './types/response.type';
-import { IUser } from './types/user.type';
+import { IUser, UserWithWallet, Wallet } from './types/user.type';
 import { AxiosRequestConfig } from 'axios';
 import { canUseDom } from './utils';
 import {
   CancelListingPayload,
   CreateVerifiedCollectionPayload,
   CreateVerifiedSubCollectionPayload,
-  ICreateVerifiedCollectionPayload,
-  ICreateVerifiedSubCollectionPayload,
-  IListNFTPayload,
   ISolanaNFT,
   IVerifiedCollection,
   ListNFTPayload,
@@ -63,7 +60,7 @@ export class MirrorWorld {
   _transactions: ISolanaTransaction[] = [];
 
   // User variables
-  _user?: IUser;
+  _user?: UserWithWallet;
 
   // private values
   public userRefreshToken?: string;
@@ -120,13 +117,18 @@ export class MirrorWorld {
   }
 
   /** Get current user */
-  get user(): IUser {
+  get user(): UserWithWallet {
     return this._user!;
   }
 
-  private set user(value: IUser) {
+  private set user(value: UserWithWallet) {
     this.emit('update:user', undefined);
     this._user = value;
+  }
+
+  /** Get current user's wallet */
+  get wallet(): Wallet {
+    return this._user!.wallet!;
   }
 
   /** Get current user tokens */
@@ -203,7 +205,7 @@ export class MirrorWorld {
       IResponse<{
         access_token: string;
         refresh_token: string;
-        user: IUser;
+        user: UserWithWallet;
       }>
     >('/v1/auth/login', credentials);
     const accessToken = response.data.data.access_token;
@@ -222,7 +224,7 @@ export class MirrorWorld {
       IResponse<{
         access_token: string;
         refresh_token: string;
-        user: IUser;
+        user: UserWithWallet;
       }>
     >('/v1/auth/refresh-token', {
       headers: {
@@ -242,7 +244,9 @@ export class MirrorWorld {
   }
 
   async fetchUser(): Promise<IUser> {
-    const response = await this.api.get<IResponse<IUser>>('/v1/auth/me').then();
+    const response = await this.api
+      .get<IResponse<UserWithWallet>>('/v1/auth/me')
+      .then();
     const user = response.data.data;
     this.user = user;
     return user;
