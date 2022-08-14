@@ -1,5 +1,11 @@
 # @mirrorworld/web3.js
 
+## 1.0.0-alpha.4
+
+### Major Changes
+
+- Parses the transaction response body. This is a breaking change.
+
 ## 1.0.0-alpha.3
 
 ### Patch Changes
