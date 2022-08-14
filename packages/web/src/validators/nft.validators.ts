@@ -114,7 +114,7 @@ export const mintNFTSchema = joi.object<IMintNFTPayload>({
         'INVALID_MINT_NFT_PAYLOAD',
         toErrorMessage(
           'INVALID_MINT_NFT_PAYLOAD',
-          '`parentCollection` should be a valid mint address'
+          '`collection` should be a valid collection address'
         )
       )
     ),
