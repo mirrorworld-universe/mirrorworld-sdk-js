@@ -177,7 +177,7 @@ describe('Core SDK tests', () => {
       expect(wallet).toMatchObject(mw.wallet!);
     });
   });
-  describe.only('Marketplace tests', () => {
+  describe('Marketplace tests', () => {
     let globalRootCollection: IVerifiedCollection;
     let globalSubCollection: IVerifiedCollection;
 
