@@ -145,3 +145,114 @@ export interface IVerifiedCollection {
   signature: string;
   status: string;
 }
+
+export interface QueryNFTsBase {
+  limit: number;
+  offset: number;
+}
+
+export type QueryNftsFilters =
+  | 'mint_addresses'
+  | 'creators'
+  | 'update_authorities'
+  | 'owners';
+export type ComputeNFTQueryRequestPayload<T extends QueryNftsFilters> =
+  QueryNFTsBase &
+    {
+      [K in T]: string[];
+    };
+
+export interface QueryNFTsByMintAddressesPayload
+  extends Omit<
+    ComputeNFTQueryRequestPayload<'mint_addresses'>,
+    'mint_addresses'
+  > {
+  mintAddresses: string[];
+}
+
+export interface QueryNFTsByCreatorsPayload
+  extends Omit<ComputeNFTQueryRequestPayload<'creators'>, 'creators'> {
+  creatorAddresses: string[];
+}
+
+export interface QueryNFTsByUpdateAuthoritiesPayload
+  extends Omit<
+    ComputeNFTQueryRequestPayload<'update_authorities'>,
+    'update_authorities'
+  > {
+  updateAuthorities: string[];
+}
+
+export interface QueryNFTsByOwnersPayload
+  extends Omit<ComputeNFTQueryRequestPayload<'owners'>, 'owners'> {
+  owners: string[];
+}
+
+export type QueryUsersNFTsPayload = QueryNFTsByOwnersPayload;
+
+export interface SolanaNFTExtended {
+  name: string;
+  sellerFeeBasisPoints: number;
+  updateAuthorityAddress: string;
+  description: string;
+  image: string;
+  externalUrl: string;
+  creators: Creator[];
+  owner: Owner;
+  attributes: MetadataAttributes[];
+  listings: SolanaNFTListing[];
+}
+
+export interface Owner {
+  address: string;
+}
+export interface MetadataAttributes {
+  trait_type: string;
+  value: string;
+}
+
+export interface SolanaNFTListing {
+  id: number;
+  tradeState: string;
+  seller: string;
+  metadata: string;
+  purchaseId: null | string;
+  price: number;
+  tokenSize: number;
+  createdAt: string;
+  canceledAt: null | string;
+}
+
+export interface SolanaNFTAuctionActivitiesPayload {
+  mintAddress: string;
+  auctionActivities: SolanaNFTAuctionActivity[];
+  tokenTransfers: SolanaNFTTransfersEntity[];
+}
+
+export interface SolanaNFTAuctionActivity {
+  id: number;
+  mintAddress: string;
+  txSignature: string;
+  amount: number;
+  receiptType: string;
+  tokenPrice: string;
+  blockTimeCreated: string;
+  blockTimeCanceled?: null;
+  tradeState: string;
+  auctionHouseAddress: string;
+  sellerAddress: string;
+  buyerAddress?: null;
+  metadata: string;
+  blockTime: string;
+}
+
+export interface SolanaNFTTransfersEntity {
+  id: number;
+  mintAddress: string;
+  txSignature: string;
+  fromWalletAddress?: null;
+  toWalletAddress: string;
+  amount: number;
+  blockTime: string;
+  slot: number;
+}
