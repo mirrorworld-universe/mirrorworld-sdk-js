@@ -199,7 +199,7 @@ describe('Core SDK tests', () => {
       expect(collection.symbol).toEqual(collectionPayload.symbol);
       globalRootCollection = collection;
     });
-    it('should successfully create sub-collection', async () => {
+    it.skip('should successfully create sub-collection', async () => {
       try {
         await waitFor(5000);
         const subCollectionSymbol = `${Math.round(Math.random() * 1000)}`;
