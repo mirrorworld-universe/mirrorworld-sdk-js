@@ -1,7 +1,10 @@
-import { Axios } from 'axios';
+import axios, { Axios } from 'axios';
 import { MirrorWorld, MirrorWorldOptions } from '../src';
 import { ClusterEnvironment } from '../src/services/cluster';
 import { MirrorWorldAPIClient } from '../src/services/api';
+import { collectionSchema } from './utils/schemas';
+import { IVerifiedCollection } from '../src/types/nft';
+import { random, waitFor } from './utils/timers';
 
 const apiServer = process.env.MIRRORWORLD_API_SERVER;
 const apiKey = process.env.API_KEY!;
@@ -9,10 +12,29 @@ const clientId = process.env.CLIENT_ID!;
 
 const createLoginCredentials = () => {
   return {
-    email: 'testaccount4@gmail.com',
-    password: 'testaccount4',
+    email: 'testaccount1@gmail.com',
+    password: 'testaccount1',
   };
 };
+
+async function requestSolAirdrop(address: string) {
+  if (process.env.NODE_ENV !== 'staging') {
+    return console.warn(
+      '[requestSolAirdrop]: Request airdrop is only available on Staging'
+    );
+  }
+  try {
+    const response = await axios.post('https://api.devnet.solana.com', {
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'requestAirdrop',
+      params: [address, 2000000000],
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Error requesting SOL airdrop');
+  }
+}
 
 let _mw: MirrorWorld;
 beforeAll(async () => {
@@ -156,9 +178,84 @@ describe('Core SDK tests', () => {
     });
   });
   describe('Marketplace tests', () => {
-    it.todo('should successfully create NFT collection');
-    it.todo('should successfully create sub-collection');
-    it.todo('should successfully create mint NFT');
+    let globalRootCollection: IVerifiedCollection;
+    let globalSubCollection: IVerifiedCollection;
+
+    it('should successfully create NFT collection', async () => {
+      const collectionSymbol = `${Math.round(Math.random() * 1000)}`;
+      const metadataUri =
+        'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json';
+
+      const collectionPayload = {
+        name: `TEST_NFT_${collectionSymbol}`,
+        symbol: `TST${collectionSymbol}`,
+        metadataUri,
+      };
+      const collection = await _mw.createVerifiedCollection(collectionPayload);
+      expect(collection).toBeTruthy();
+      expect(collectionSchema.validate(collection).error).toBeFalsy();
+      expect(collection.name).toEqual(collectionPayload.name);
+      expect(collection.url).toEqual(collectionPayload.metadataUri);
+      expect(collection.symbol).toEqual(collectionPayload.symbol);
+      globalRootCollection = collection;
+    });
+    it.skip('should successfully create sub-collection', async () => {
+      try {
+        await waitFor(5000);
+        const subCollectionSymbol = `${Math.round(Math.random() * 1000)}`;
+        const metadataUri =
+          'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json';
+
+        const subCollectionPayload = {
+          name: `TEST_SUB_NFT_${subCollectionSymbol}`,
+          symbol: `SUBC${subCollectionSymbol}`,
+          metadataUri,
+          parentCollection: globalRootCollection.mint_address,
+        };
+
+        const subCollection = await _mw.createVerifiedSubCollection(
+          subCollectionPayload
+        );
+        expect(subCollection).toBeTruthy();
+        expect(collectionSchema.validate(subCollection).error).toBeFalsy();
+        expect(subCollection.name).toEqual(subCollectionPayload.name);
+        expect(subCollection.url).toEqual(subCollectionPayload.metadataUri);
+        expect(subCollection.symbol).toEqual(subCollectionPayload.symbol);
+        expect(subCollection.collection).toEqual(
+          globalRootCollection.collection
+        );
+        globalSubCollection = subCollection;
+      } catch (e: any) {
+        console.error(e);
+      }
+    });
+    it.skip('should successfully mint into NFT root collection', async () => {
+      await waitFor(5000);
+      const mintNFTPayload = {
+        name: `TEST_NFT_${random()}`,
+        symbol: `SYM${random()}`,
+        metadataUri:
+          'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json',
+        collection: globalRootCollection.mint_address!,
+      };
+
+      const mintNFT = await _mw.mintNFT(mintNFTPayload);
+      expect(mintNFT).toBeTruthy();
+    });
+
+    it.skip('should successfully mint into NFT sub collection', async () => {
+      await waitFor(5000);
+      const mintNFTPayload = {
+        name: `TEST_NFT_${random()}`,
+        symbol: `SYM${random()}`,
+        metadataUri:
+          'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json',
+        collection: globalSubCollection.mint_address!,
+      };
+
+      const mintNFT = await _mw.mintNFT(mintNFTPayload);
+      expect(mintNFT).toBeTruthy();
+    });
     it.todo('should successfully list NFT');
     it.todo('should successfully transfer NFT');
     it.todo('should successfully cancel listing of NFT');

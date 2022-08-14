@@ -23,3 +23,5 @@ config({
   debug: true,
   path: resolve(__dirname, environmentVariablesPath[process.env.NODE_ENV]),
 });
+
+jest.setTimeout(20000);

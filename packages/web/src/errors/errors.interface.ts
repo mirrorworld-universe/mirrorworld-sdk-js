@@ -64,6 +64,31 @@ const __ErrorCodes__ = {
     code: '000112',
     message: `Validation failed for transfer NFT`,
   },
+  INVALID_FETCH_NFT_BY_MINT_ADDRESSES_PAYLOAD: {
+    error: 'INVALID_FETCH_NFT_BY_MINT_ADDRESSES_PAYLOAD',
+    code: '000113',
+    message: `Validation failed for fetch NFTs by mint addresses`,
+  },
+  INVALID_FETCH_NFT_BY_CREATOR_ADDRESSES_PAYLOAD: {
+    error: 'INVALID_FETCH_NFT_BY_CREATOR_ADDRESSES_PAYLOAD',
+    code: '000114',
+    message: `Validation failed for fetch NFTs by creator addresses`,
+  },
+  INVALID_FETCH_NFT_BY_UPDATE_AUTHORITIES_PAYLOAD: {
+    error: 'INVALID_FETCH_NFT_BY_UPDATE_AUTHORITIES_PAYLOAD',
+    code: '000115',
+    message: `Validation failed for fetch NFTs by update authorities addresses`,
+  },
+  INVALID_FETCH_NFT_BY_OWNERS_PAYLOAD: {
+    error: 'INVALID_FETCH_NFT_BY_OWNERS_PAYLOAD',
+    code: '000116',
+    message: `Validation failed for fetch NFTs by update authorities addresses`,
+  },
+  ERROR_USER_NOT_AUTHENTICATED: {
+    error: 'ERROR_USER_NOT_AUTHENTICATED',
+    code: '000117',
+    message: `User is not authenticated. Please login`,
+  },
 };
 
 export type MirrorWorldSDKErrorCodes = typeof __ErrorCodes__;

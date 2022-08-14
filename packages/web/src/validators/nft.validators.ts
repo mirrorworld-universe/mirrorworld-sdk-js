@@ -1,4 +1,5 @@
 import {
+  ComputeNFTQueryRequestPayload,
   ICreateVerifiedCollectionPayload,
   ICreateVerifiedSubCollectionPayload,
   IMintNFTPayload,
@@ -113,7 +114,7 @@ export const mintNFTSchema = joi.object<IMintNFTPayload>({
         'INVALID_MINT_NFT_PAYLOAD',
         toErrorMessage(
           'INVALID_MINT_NFT_PAYLOAD',
-          '`parentCollection` should be a valid mint address'
+          '`collection` should be a valid collection address'
         )
       )
     ),
@@ -178,6 +179,174 @@ export const transferNFTSchema = joi.object<ITransferNFTPayload>({
         toErrorMessage(
           'INVALID_TRANSFER_NFT_PAYLOAD',
           '`recipientAddress` should be a valid wallet address'
+        )
+      )
+    ),
+});
+
+export const fetchNFTsByMintAddressesSchema = joi.object<
+  ComputeNFTQueryRequestPayload<'mint_addresses'>
+>({
+  mint_addresses: joi
+    .array()
+    .items(joi.string())
+    .required()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_FETCH_NFT_BY_MINT_ADDRESSES_PAYLOAD',
+        toErrorMessage(
+          'INVALID_FETCH_NFT_BY_MINT_ADDRESSES_PAYLOAD',
+          '`mintAddresses` should be a valid array of mint addresses'
+        )
+      )
+    ),
+  limit: joi
+    .number()
+    .required()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_FETCH_NFT_BY_MINT_ADDRESSES_PAYLOAD',
+        toErrorMessage(
+          'INVALID_FETCH_NFT_BY_MINT_ADDRESSES_PAYLOAD',
+          '`limit` should be a integer'
+        )
+      )
+    ),
+  offset: joi
+    .number()
+    .required()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_FETCH_NFT_BY_MINT_ADDRESSES_PAYLOAD',
+        toErrorMessage(
+          'INVALID_FETCH_NFT_BY_MINT_ADDRESSES_PAYLOAD',
+          '`offset` should be a integer'
+        )
+      )
+    ),
+});
+
+export const fetchNFTsByCreatorAddressesSchema = joi.object<
+  ComputeNFTQueryRequestPayload<'creators'>
+>({
+  creators: joi
+    .array()
+    .items(joi.string())
+    .required()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_FETCH_NFT_BY_CREATOR_ADDRESSES_PAYLOAD',
+        toErrorMessage(
+          'INVALID_FETCH_NFT_BY_CREATOR_ADDRESSES_PAYLOAD',
+          '`creators` should be a valid array of creator addresses'
+        )
+      )
+    ),
+  limit: joi
+    .number()
+    .required()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_FETCH_NFT_BY_CREATOR_ADDRESSES_PAYLOAD',
+        toErrorMessage(
+          'INVALID_FETCH_NFT_BY_CREATOR_ADDRESSES_PAYLOAD',
+          '`limit` should be a integer'
+        )
+      )
+    ),
+  offset: joi
+    .number()
+    .required()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_FETCH_NFT_BY_CREATOR_ADDRESSES_PAYLOAD',
+        toErrorMessage(
+          'INVALID_FETCH_NFT_BY_CREATOR_ADDRESSES_PAYLOAD',
+          '`offset` should be a integer'
+        )
+      )
+    ),
+});
+
+export const fetchNFTsByUpdateAuthoritiesSchema = joi.object<
+  ComputeNFTQueryRequestPayload<'update_authorities'>
+>({
+  update_authorities: joi
+    .array()
+    .items(joi.string())
+    .required()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_FETCH_NFT_BY_UPDATE_AUTHORITIES_PAYLOAD',
+        toErrorMessage(
+          'INVALID_FETCH_NFT_BY_UPDATE_AUTHORITIES_PAYLOAD',
+          '`udpateAuthorities` should be a valid array of update authority addresses'
+        )
+      )
+    ),
+  limit: joi
+    .number()
+    .required()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_FETCH_NFT_BY_UPDATE_AUTHORITIES_PAYLOAD',
+        toErrorMessage(
+          'INVALID_FETCH_NFT_BY_UPDATE_AUTHORITIES_PAYLOAD',
+          '`limit` should be a integer'
+        )
+      )
+    ),
+  offset: joi
+    .number()
+    .required()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_FETCH_NFT_BY_UPDATE_AUTHORITIES_PAYLOAD',
+        toErrorMessage(
+          'INVALID_FETCH_NFT_BY_UPDATE_AUTHORITIES_PAYLOAD',
+          '`offset` should be a integer'
+        )
+      )
+    ),
+});
+
+export const fetchNFTsByOwnerAddressesSchema = joi.object<
+  ComputeNFTQueryRequestPayload<'owners'>
+>({
+  owners: joi
+    .array()
+    .items(joi.string())
+    .required()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_FETCH_NFT_BY_OWNERS_PAYLOAD',
+        toErrorMessage(
+          'INVALID_FETCH_NFT_BY_OWNERS_PAYLOAD',
+          '`owners` should be a valid array of owner addresses'
+        )
+      )
+    ),
+  limit: joi
+    .number()
+    .required()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_FETCH_NFT_BY_UPDATE_AUTHORITIES_PAYLOAD',
+        toErrorMessage(
+          'INVALID_FETCH_NFT_BY_UPDATE_AUTHORITIES_PAYLOAD',
+          '`limit` should be a integer'
+        )
+      )
+    ),
+  offset: joi
+    .number()
+    .required()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_FETCH_NFT_BY_UPDATE_AUTHORITIES_PAYLOAD',
+        toErrorMessage(
+          'INVALID_FETCH_NFT_BY_UPDATE_AUTHORITIES_PAYLOAD',
+          '`offset` should be a integer'
         )
       )
     ),

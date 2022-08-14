@@ -20,6 +20,12 @@ import {
   IVerifiedCollection,
   ListNFTPayload,
   MintNFTPayload,
+  QueryNFTsByCreatorsPayload,
+  QueryNFTsByMintAddressesPayload,
+  QueryNFTsByOwnersPayload,
+  QueryNFTsByUpdateAuthoritiesPayload,
+  SolanaNFTAuctionActivitiesPayload,
+  SolanaNFTExtended,
   TransferNFTPayload,
   UpdateListingPayload,
 } from './types/nft';
@@ -40,6 +46,10 @@ import {
 import {
   createVerifiedCollectionSchema,
   createVerifiedSubCollectionSchema,
+  fetchNFTsByCreatorAddressesSchema,
+  fetchNFTsByMintAddressesSchema,
+  fetchNFTsByOwnerAddressesSchema,
+  fetchNFTsByUpdateAuthoritiesSchema,
   mintNFTSchema,
   transferNFTSchema,
 } from './validators/nft.validators';
@@ -49,6 +59,7 @@ import {
   listNFTSchema,
 } from './validators/marketplace.validators';
 import { INFTListing } from './types/marketplace';
+import { throwError } from './errors/errors.interface';
 
 export class MirrorWorld {
   // System variables
@@ -58,6 +69,7 @@ export class MirrorWorld {
   _api: MirrorWorldAPIClient;
   _tokens: ISolanaToken[] = [];
   _transactions: ISolanaTransaction[] = [];
+  _nfts: SolanaNFTExtended[] = [];
 
   // User variables
   _user?: UserWithWallet;
@@ -151,9 +163,17 @@ export class MirrorWorld {
     this._transactions = value;
   }
 
+  get nfts(): SolanaNFTExtended[] {
+    return this._nfts;
+  }
+
+  set nfts(value: SolanaNFTExtended[]) {
+    this._nfts = value;
+  }
+
   /** Get current user */
   get isLoggedIn(): boolean {
-    return !!this.user?.email && !!this.userRefreshToken;
+    return !!this.user && !!this.userRefreshToken;
   }
 
   emit<T extends MirrorWorldEventKey>(
@@ -368,6 +388,43 @@ export class MirrorWorld {
   }
 
   /**
+   * Fetches the current user's NFTs.
+   */
+  async getNFTs(payload: {
+    limit: number;
+    offset: number;
+  }): Promise<SolanaNFTExtended[]> {
+    if (!this.user && !this.isLoggedIn) {
+      throwError('ERROR_USER_NOT_AUTHENTICATED');
+    }
+    const nfts = await this.fetchNFTsByOwnerAddresses({
+      owners: [this.user.wallet.sol_address],
+      ...payload,
+    });
+    this.nfts = nfts;
+    return nfts;
+  }
+
+  /**
+   * Fetches the NFTs owned by a specific address.
+   */
+  async getNFTsOwnedByAddress(
+    address: string,
+    payload: {
+      limit: number;
+      offset: number;
+    }
+  ): Promise<SolanaNFTExtended[]> {
+    if (!this.user && !this.isLoggedIn) {
+      throwError('ERROR_USER_NOT_AUTHENTICATED');
+    }
+    return await this.fetchNFTsByOwnerAddresses({
+      owners: [address],
+      ...payload,
+    });
+  }
+
+  /**
    * Transfer SPL token to a recipient
    */
   async transferSPLToken(payload: {
@@ -385,11 +442,11 @@ export class MirrorWorld {
     if (result.error) {
       throw result.error;
     }
-    const response = await this.api.post<ITransferSPLTokenResponse>(
+    const response = await this.api.post<IResponse<ITransferSPLTokenResponse>>(
       `/v1/wallet/transfer-token`,
       result.value
     );
-    return response.data;
+    return response.data.data;
   }
 
   /**
@@ -406,11 +463,11 @@ export class MirrorWorld {
     if (result.error) {
       throw result.error;
     }
-    const response = await this.api.post<ITransferSPLTokenResponse>(
+    const response = await this.api.post<IResponse<ITransferSPLTokenResponse>>(
       `/v1/wallet/transfer-sol`,
       result.value
     );
-    return response.data;
+    return response.data.data;
   }
 
   /**
@@ -572,5 +629,114 @@ export class MirrorWorld {
       result.value
     );
     return response.data.data;
+  }
+
+  /**
+   * @service Marketplace
+   * Fetch NFTs By Mint Addresses. Returns a detailed payload of all NFTs whose `mintAddresses`
+   * are provided
+   */
+  async fetchNFTsByMintAddresses(
+    payload: QueryNFTsByMintAddressesPayload
+  ): Promise<SolanaNFTExtended[]> {
+    const result = fetchNFTsByMintAddressesSchema.validate({
+      mint_addresses: payload.mintAddresses,
+      limit: payload.limit,
+      offset: payload.offset,
+    });
+    if (result.error) {
+      throw result.error;
+    }
+    const response = await this.api.post<
+      IResponse<{
+        nfts: SolanaNFTExtended[];
+      }>
+    >(`/v1/solana/nft/mints`, result.value);
+    return response.data?.data?.nfts;
+  }
+
+  /**
+   * @service Marketplace
+   * Fetch NFTs By Creator Addresses. Returns a detailed payload of all NFTs whose `creatorAddresses`
+   * are provided
+   */
+  async fetchNFTsByCreatorAddresses(
+    payload: QueryNFTsByCreatorsPayload
+  ): Promise<SolanaNFTExtended[]> {
+    const result = fetchNFTsByCreatorAddressesSchema.validate({
+      creators: payload.creatorAddresses,
+      limit: payload.limit,
+      offset: payload.offset,
+    });
+    if (result.error) {
+      throw result.error;
+    }
+    const response = await this.api.post<
+      IResponse<{
+        nfts: SolanaNFTExtended[];
+      }>
+    >(`/v1/solana/nft/creators`, result.value);
+    return response.data?.data?.nfts;
+  }
+
+  /**
+   * @service Marketplace
+   * Fetch NFTs By Update Authorities Addresses. Returns a detailed payload of all NFTs whose `updateAuthorities`
+   * are provided
+   */
+  async fetchNFTsByUpdateAuthorities(
+    payload: QueryNFTsByUpdateAuthoritiesPayload
+  ): Promise<SolanaNFTExtended[]> {
+    const result = fetchNFTsByUpdateAuthoritiesSchema.validate({
+      update_authorities: payload.updateAuthorities,
+      limit: payload.limit,
+      offset: payload.offset,
+    });
+    if (result.error) {
+      throw result.error;
+    }
+    const response = await this.api.post<
+      IResponse<{
+        nfts: SolanaNFTExtended[];
+      }>
+    >(`/v1/solana/nft/udpate-authorities`, result.value);
+    return response.data?.data?.nfts;
+  }
+
+  /**
+   * @service Marketplace
+   * Fetch NFTs By Owners Addresses. Returns a detailed payload of all NFTs whose `owners`
+   * are provided
+   */
+  async fetchNFTsByOwnerAddresses(
+    payload: QueryNFTsByOwnersPayload
+  ): Promise<SolanaNFTExtended[]> {
+    const result = fetchNFTsByOwnerAddressesSchema.validate({
+      owners: payload.owners,
+      limit: payload.limit,
+      offset: payload.offset,
+    });
+    if (result.error) {
+      throw result.error;
+    }
+    const response = await this.api.post<
+      IResponse<{
+        nfts: SolanaNFTExtended[];
+      }>
+    >(`/v1/solana/nft/owners`, result.value);
+    return response.data?.data?.nfts;
+  }
+
+  /**
+   * @service Marketplace
+   * Fetch Solana NFT Marketplace Activity
+   */
+  async fetchNFTMarketplaceActivity(
+    mintAddress: string
+  ): Promise<SolanaNFTAuctionActivitiesPayload> {
+    const response = await this.api.get<
+      IResponse<SolanaNFTAuctionActivitiesPayload>
+    >(`/v1/solana/activity/${mintAddress}`);
+    return response.data?.data;
   }
 }
