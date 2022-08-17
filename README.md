@@ -36,12 +36,17 @@ You can view the documentation for Mirror World SDK for Mobile on our [Official 
     1. Social Authentication
     2. Login with Email/Password
 2. Marketplace
-    1. Mint NFTs
-    2. List NFTs
-    3. Buy NFTs
-    4. Cancel Listing
-    5. Update Listing
-    6. Transfer NFT
+   1. Get current user's NFTs
+   2. Mint NFTs
+   3. List NFTs
+   4. Buy NFTs
+   5. Cancel Listing
+   6. Update Listing
+   7. Transfer NFT
+   8. Query NFTs by owners
+   9. Query NFTs by creator addresses
+   10. Query NFTs by update authorities
+   11. Get NFT details
 3. Wallet
     1. Get account activity
     2. Get account tokens

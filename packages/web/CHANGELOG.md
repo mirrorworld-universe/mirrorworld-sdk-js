@@ -1,5 +1,11 @@
 # @mirrorworld/web3.js
 
+## 1.0.0-alpha.5
+
+### Major Changes
+
+- BREAKING CHANGE: Points to corresponding cluster for Solana API environments
+
 ## 1.0.0-alpha.4
 
 ### Major Changes
