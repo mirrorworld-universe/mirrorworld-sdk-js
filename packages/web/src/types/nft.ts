@@ -256,3 +256,15 @@ export interface SolanaNFTTransfersEntity {
   blockTime: string;
   slot: number;
 }
+
+export interface ISolanaNFTMintResult {
+  mint_address: string;
+  url: string;
+  update_authority: string;
+  creator_address: string;
+  name: string;
+  symbol: string;
+  collection: string;
+  signature: string;
+  status: string;
+}

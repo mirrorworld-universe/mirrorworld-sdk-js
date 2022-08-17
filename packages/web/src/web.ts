@@ -17,6 +17,7 @@ import {
   CreateVerifiedCollectionPayload,
   CreateVerifiedSubCollectionPayload,
   ISolanaNFT,
+  ISolanaNFTMintResult,
   IVerifiedCollection,
   ListNFTPayload,
   MintNFTPayload,
@@ -104,7 +105,7 @@ export class MirrorWorld {
         await this.defineInternalListeners();
       }
     });
-    this.emit('ready', undefined);
+    MirrorWorld.emit('ready', undefined);
     return this;
   }
 
@@ -128,13 +129,22 @@ export class MirrorWorld {
     return this._env;
   }
 
+  /** Get instance's environment */
+  get network(): 'mainnet' | 'devnet' {
+    return this._env === ClusterEnvironment.mainnet
+      ? 'mainnet'
+      : this._env === ClusterEnvironment.testnet
+      ? 'devnet'
+      : 'devnet';
+  }
+
   /** Get current user */
   get user(): UserWithWallet {
     return this._user!;
   }
 
   private set user(value: UserWithWallet) {
-    this.emit('update:user', undefined);
+    MirrorWorld.emit('update:user', undefined);
     this._user = value;
   }
 
@@ -176,7 +186,7 @@ export class MirrorWorld {
     return !!this.user && !!this.userRefreshToken;
   }
 
-  emit<T extends MirrorWorldEventKey>(
+  private static emit<T extends MirrorWorldEventKey>(
     event: T,
     payload: MirrorWorldEvents[T]
   ): void {
@@ -234,8 +244,8 @@ export class MirrorWorld {
     this.useCredentials({
       accessToken,
     });
-    this.emit('login:email', this.user);
-    this.emit('login', this.user);
+    MirrorWorld.emit('login:email', this.user);
+    MirrorWorld.emit('login', this.user);
     return this;
   }
 
@@ -259,7 +269,7 @@ export class MirrorWorld {
     this.useCredentials({
       accessToken,
     });
-    this.emit('auth:refreshToken', this.userRefreshToken);
+    MirrorWorld.emit('auth:refreshToken', this.userRefreshToken);
     return user;
   }
 
@@ -358,7 +368,7 @@ export class MirrorWorld {
    */
   async getNftDetails(mintAddress: string): Promise<ISolanaNFT> {
     const response = await this.api.get<IResponse<ISolanaNFT>>(
-      `/v1/solana/nft/${mintAddress}`
+      `/v1/${this.network}/solana/nft/${mintAddress}`
     );
     return response.data.data;
   }
@@ -486,7 +496,7 @@ export class MirrorWorld {
       throw result.error;
     }
     const response = await this.api.post<IResponse<IVerifiedCollection>>(
-      `/v1/solana/mint/collection`,
+      `/v1/${this.network}/solana/mint/collection`,
       result.value
     );
     return response.data.data;
@@ -509,7 +519,7 @@ export class MirrorWorld {
       throw result.error;
     }
     const response = await this.api.post<IResponse<IVerifiedCollection>>(
-      `/v1/solana/mint/sub-collection`,
+      `/v1/${this.network}/solana/mint/sub-collection`,
       result.value
     );
     return response.data.data;
@@ -519,7 +529,7 @@ export class MirrorWorld {
    * @service Marketplace
    * Mint NFT into collection
    */
-  async mintNFT(payload: MintNFTPayload): Promise<IVerifiedCollection> {
+  async mintNFT(payload: MintNFTPayload): Promise<ISolanaNFTMintResult> {
     const result = mintNFTSchema.validate({
       name: payload.name,
       symbol: payload.symbol,
@@ -529,8 +539,8 @@ export class MirrorWorld {
     if (result.error) {
       throw result.error;
     }
-    const response = await this.api.post<IResponse<IVerifiedCollection>>(
-      `/v1/solana/mint/nft`,
+    const response = await this.api.post<IResponse<ISolanaNFTMintResult>>(
+      `/v1/${this.network}/solana/mint/nft`,
       result.value
     );
     return response.data.data;
@@ -549,7 +559,7 @@ export class MirrorWorld {
       throw result.error;
     }
     const response = await this.api.post<IResponse<INFTListing>>(
-      `/v1/solana/marketplace/list`,
+      `/v1/${this.network}/solana/marketplace/list`,
       result.value
     );
     return response.data.data;
@@ -568,7 +578,7 @@ export class MirrorWorld {
       throw result.error;
     }
     const response = await this.api.post<IResponse<INFTListing>>(
-      `/v1/solana/marketplace/buy`,
+      `/v1/${this.network}/solana/marketplace/buy`,
       result.value
     );
     return response.data.data;
@@ -587,7 +597,7 @@ export class MirrorWorld {
       throw result.error;
     }
     const response = await this.api.post<IResponse<INFTListing>>(
-      `/v1/solana/marketplace/update`,
+      `/v1/${this.network}/solana/marketplace/update`,
       result.value
     );
     return response.data.data;
@@ -606,7 +616,7 @@ export class MirrorWorld {
       throw result.error;
     }
     const response = await this.api.post<IResponse<INFTListing>>(
-      `/v1/solana/marketplace/cancel`,
+      `/v1/${this.network}/solana/marketplace/cancel`,
       result.value
     );
     return response.data.data;
@@ -625,7 +635,7 @@ export class MirrorWorld {
       throw result.error;
     }
     const response = await this.api.post<IResponse<INFTListing>>(
-      `/v1/solana/marketplace/transfer`,
+      `/v1/${this.network}/solana/marketplace/transfer`,
       result.value
     );
     return response.data.data;
@@ -651,7 +661,7 @@ export class MirrorWorld {
       IResponse<{
         nfts: SolanaNFTExtended[];
       }>
-    >(`/v1/solana/nft/mints`, result.value);
+    >(`/v1/${this.network}/solana/nft/mints`, result.value);
     return response.data?.data?.nfts;
   }
 
@@ -675,7 +685,7 @@ export class MirrorWorld {
       IResponse<{
         nfts: SolanaNFTExtended[];
       }>
-    >(`/v1/solana/nft/creators`, result.value);
+    >(`/v1/${this.network}/solana/nft/creators`, result.value);
     return response.data?.data?.nfts;
   }
 
@@ -699,7 +709,7 @@ export class MirrorWorld {
       IResponse<{
         nfts: SolanaNFTExtended[];
       }>
-    >(`/v1/solana/nft/udpate-authorities`, result.value);
+    >(`/v1/${this.network}/solana/nft/udpate-authorities`, result.value);
     return response.data?.data?.nfts;
   }
 
@@ -723,7 +733,7 @@ export class MirrorWorld {
       IResponse<{
         nfts: SolanaNFTExtended[];
       }>
-    >(`/v1/solana/nft/owners`, result.value);
+    >(`/v1/${this.network}/solana/nft/owners`, result.value);
     return response.data?.data?.nfts;
   }
 
@@ -736,7 +746,7 @@ export class MirrorWorld {
   ): Promise<SolanaNFTAuctionActivitiesPayload> {
     const response = await this.api.get<
       IResponse<SolanaNFTAuctionActivitiesPayload>
-    >(`/v1/solana/activity/${mintAddress}`);
+    >(`/v1/${this.network}/solana/activity/${mintAddress}`);
     return response.data?.data;
   }
 }
