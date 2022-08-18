@@ -28,8 +28,26 @@ async function login() {
 }
 ```
 
+## WebSocket Usage
+```ts
+import Websocket from "@mirrorworld/websocket";
+import { ClusterEnvironment } from "@mirrorworld/web3.js"
+
+const websocket = new Websocket({
+   apiKey: "YOUR_SECRET_API_KEY",
+   clientId: "YOUR_CLIENT_ID",
+   env: ClusterEnvironment.testnet
+});
+
+// Establish connection
+websocket.connect();
+
+// Subscribe callback function to a topic
+websocket.onEvent('market_update', (data) => console.log(data));
+```
+
 ## Full API Documentation
-You can view the documentation for Mirror World SDK for Mobile on our [Official Documentation Site](https://docs.mirrorworld.fun/web/web-installation)
+You can view the documentation for Mirror World SDK for Mobile on our [Official Documentation Site](https://docs.mirrorworld.fun/overview/introduction)
 
 ## Features:
 1. Authentication
