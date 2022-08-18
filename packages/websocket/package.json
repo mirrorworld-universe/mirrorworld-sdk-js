@@ -1,0 +1,46 @@
+{
+  "name": "@mirrorworld/websocket",
+  "version": "1.0.0-alpha.0",
+  "description": "Mirror World Web SDK WebSocket",
+  "keywords": [
+    "mirrorworld",
+    "web3",
+    "sdk",
+    "solana",
+    "ethereum",
+    "polygon",
+    "aptos",
+    "sui",
+    "bnb chain"
+  ],
+  "author": "Jonathan Bakebwa <codebender828@gmail.com>",
+  "homepage": "https://github.com/mirrorworld-universe/mirrorworld.web3.js#readme",
+  "license": "MIT",
+  "main": "dist/mirrorworld-websocket.cjs.js",
+  "module": "dist/mirrorworld-websocket.esm.js",
+  "repository": "https://github.com/mirrorworld-universe/mirrorworld.web3.js/tree/main/packages/websocket",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "preconstruct": {
+    "entrypoints": [
+      "index.ts"
+    ]
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "bugs": {
+    "url": "https://github.com/mirrorworld-universe/mirrorworld.web3.js/issues"
+  },
+  "scripts": {
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.18.9",
+    "@types/phoenix": "^1.5.4",
+    "phoenix": "^1.6.11",
+    "axios": "^0.27.2"
+  }
+}

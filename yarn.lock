@@ -2548,6 +2548,11 @@
   resolved "https://registry.yarnpkg.com/@types/parse-json/-/parse-json-4.0.0.tgz#2f8bb441434d163b35fb8ffdccd7138927ffb8c0"
   integrity sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==
 
+"@types/phoenix@^1.5.4":
+  version "1.5.4"
+  resolved "https://registry.npmjs.org/@types/phoenix/-/phoenix-1.5.4.tgz#c08a1da6d7b4e365f6a1fe1ff9aada55f5356d24"
+  integrity sha512-L5eZmzw89eXBKkiqVBcJfU1QGx9y+wurRIEgt0cuLH0hwNtVUxtx+6cu0R2STwWj468sjXyBYPYDtGclUd1kjQ==
+
 "@types/prettier@^2.1.5":
   version "2.6.3"
   resolved "https://registry.yarnpkg.com/@types/prettier/-/prettier-2.6.3.tgz#68ada76827b0010d0db071f739314fa429943d0a"
@@ -8078,6 +8083,11 @@ pbkdf2@^3.0.3:
     ripemd160 "^2.0.1"
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
+
+phoenix@^1.6.11:
+  version "1.6.11"
+  resolved "https://registry.npmjs.org/phoenix/-/phoenix-1.6.11.tgz#e29c3658c8fd6ba509e87130d2b1b20adc6a9a53"
+  integrity sha512-z/MSg9yY20JhTSj6tKmOYE9p+PuU+FVstYtgBfIZPGNLKhSuV9Zcs9LLLKWeiJ9EUzaXS/QeO8Po4+jJnyNfMw==
 
 picocolors@^1.0.0:
   version "1.0.0"
