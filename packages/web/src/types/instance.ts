@@ -5,15 +5,8 @@ export interface MirrorWorldOptions {
   /**
    * Initializes the SDK with an instance for the application
    * whose Client ID is passed in the `clientId` option.
-   *
-   * This `clientId` is a sensitive variable. No not make it publicly
-   * accessible in your public Github code.
-   *
-   * Therefore, it cannot be used to refresh authorization
-   * in a different application. This is so that the user is
-   * protected against any potential malicious applications.
    */
-  clientId: string;
+  clientId?: string;
   /**
    * API Key used to authenticate your API requests to Mirror World.
    */
