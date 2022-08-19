@@ -6,7 +6,7 @@ export interface MirrorWorldOptions {
    * Initializes the SDK with an instance for the application
    * whose Client ID is passed in the `clientId` option.
    */
-  clientId?: string;
+  clientId?: string | undefined;
   /**
    * API Key used to authenticate your API requests to Mirror World.
    */

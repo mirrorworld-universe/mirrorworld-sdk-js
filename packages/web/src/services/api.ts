@@ -5,7 +5,7 @@ import { ClusterEnvironment } from './cluster';
 export interface MirrorWorldAPIClientOptions {
   env?: ClusterEnvironment;
   apiKey: string;
-  clientId: string;
+  clientId?: string;
 }
 
 export interface ErrorAPIResponse {
@@ -54,7 +54,7 @@ export class MirrorWorldAPIClient {
           : 'http://localhost:4000',
     });
 
-    MirrorWorldAPIClient.defineRequestHandlers(this.client, apiKey, clientId);
+    MirrorWorldAPIClient.defineRequestHandlers(this.client, apiKey);
     MirrorWorldAPIClient.defineErrorResponseHandlers(this.client);
   }
 
@@ -70,7 +70,6 @@ export class MirrorWorldAPIClient {
   static defineRequestHandlers(
     client: AxiosInstance,
     apiKey: string,
-    clientId: string,
     authToken?: string
   ): void {
     client.interceptors.request.use((config) => {
@@ -79,7 +78,6 @@ export class MirrorWorldAPIClient {
         headers: {
           ...config.headers,
           ['x-api-key']: apiKey,
-          ['x-client-id']: clientId,
           ...(authToken && { Authorization: `Bearer ${authToken}` }),
         },
         withCredentials: true,
@@ -91,7 +89,7 @@ export class MirrorWorldAPIClient {
 
 export interface ClientOptions {
   apiKey: string;
-  clientId: string;
+  clientId?: string;
 }
 
 export function createAPIClient(
