@@ -46,7 +46,7 @@ jobs:
 
     - name: Lint
     # Why do we add the "--no-error-on-unmatched-pattern" flag on this command?
-    # The reason is that eslint may not locate the built files in Windows CI environment
+    # The reason is that eslint may not locate the built files in  Windows CI environment
     # We therefore silently fail the command in this scenario.
       run: yarn lint --no-error-on-unmatched-pattern
 
