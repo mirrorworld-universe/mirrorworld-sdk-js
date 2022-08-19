@@ -115,7 +115,7 @@ export class MirrorWorld {
   }
 
   /** Get application's clientId instance */
-  private get clientId(): string {
+  private get clientId(): string | undefined {
     return this._clientId;
   }
 
