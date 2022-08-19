@@ -16,59 +16,59 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Get Yarn cache path
-        id: yarn-cache
-        run: echo "::set-output name=dir::$(yarn cache dir)"
+    - name: Get Yarn cache path
+      id: yarn-cache
+      run: echo "::set-output name=dir::$(yarn cache dir)"
 
-      - name: Checkout Repo
-        uses: actions/checkout@master
-        with:
-          # This makes Actions fetch all Git history
-          # so that Changesets can generate changelogs with the correct commits
-          fetch-depth: 0
+    - name: Checkout Repo
+      uses: actions/checkout@master
+      with:
+        # This makes Actions fetch all Git history
+        # so that Changesets can generate changelogs with the correct commits
+        fetch-depth: 0
 
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@master
-        with:
-          node-version: 16
+    - name: Use Node.js 16.x
+      uses: actions/setup-node@master
+      with:
+        node-version: 16
 
-      - name: Load Yarn cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.yarn-cache.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+    - name: Load Yarn cache
+      uses: actions/cache@v2
+      with:
+        path: ${{ steps.yarn-cache.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile --ignore-engines
+    - name: Install dependencies
+      run: yarn install --frozen-lockfile --ignore-engines
 
 
-      - name: Lint
-      # Why do we add the "--no-error-on-unmatched-pattern" flag on this command?
-      # The reason is that eslint may not locate the built files in Windows CI environment
-      # We therefore silently fail the command in this scenario.
+    - name: Lint
+    # Why do we add the "--no-error-on-unmatched-pattern" flag on this command?
+    # The reason is that eslint may not locate the built files in Windows CI environment
+    # We therefore silently fail the command in this scenario.
       run: yarn lint --no-error-on-unmatched-pattern
 
-      - name: Test
-        run: NODE_ENV=staging yarn jest --verbose --ci --coverage --maxWorkers=2
+    - name: Test
+      run: NODE_ENV=staging yarn jest --verbose --ci --coverage --maxWorkers=2
 
-      - name: Build
-        run: yarn build
+    - name: Build
+      run: yarn build
 
-      # TODO: Uncomment when ready to start testing RCs
+    # TODO: Uncomment when ready to start testing RCs
 
-      - name: Setup CI Git User
-        run: |
-          git config --global user.name "codebender828"
-          git config --global user.email "jbakebwa@163.com"
+    - name: Setup CI Git User
+      run: |
+        git config --global user.name "codebender828"
+        git config --global user.email "jbakebwa@163.com"
 
-      - name: Create Release Pull Request
-        uses: changesets/action@master
-        with:
-          publish: yarn changeset publish
-          title: "chore(release): version packages and publish"
-          commit: "chore(release): version packages"
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Create Release Pull Request
+      uses: changesets/action@master
+      with:
+        publish: yarn changeset publish
+        title: "chore(release): version packages and publish"
+        commit: "chore(release): version packages"
+      env:
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
