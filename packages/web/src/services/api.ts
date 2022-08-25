@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-
+import { throwError as throwAppError } from '../errors/errors.interface';
 import { ClusterEnvironment } from './cluster';
 
 export interface MirrorWorldAPIClientOptions {
@@ -35,12 +35,58 @@ export function handleAPIError(response: ErrorAPIResponse): void {
   }
 }
 
+const isValidAPIKey = (key: string) => key.startsWith('mw_');
+const isValidTestAPIKey = (key: string) => key.startsWith('mw_test');
+export const mapServiceKeyToEnvironment = (
+  apiKey: string,
+  environment: ClusterEnvironment
+) => {
+  if (!isValidAPIKey(apiKey)) throwAppError('INVALID_API_KEY');
+  if (isValidTestAPIKey(apiKey)) {
+    //  Staging API Key
+    if (environment !== ClusterEnvironment.testnet)
+      throwAppError('INVALID_API_ENVIRONMENT');
+    else
+      return {
+        environment: 'devnet',
+        baseURL: 'https://api-staging.mirrorworld.fun/v1/devnet',
+      };
+  } else {
+    //  Production API Key
+    return {
+      environment: 'mainnet',
+      baseURL: 'https://api.mirrorworld.fun/v1/mainnet',
+    };
+  }
+};
+
+export const mapServiceKeyToAuthView = (
+  apiKey: string,
+  environment: ClusterEnvironment
+) => {
+  if (!isValidAPIKey(apiKey)) throwAppError('INVALID_API_KEY');
+  if (isValidTestAPIKey(apiKey)) {
+    //  Staging API Key
+    if (environment !== ClusterEnvironment.testnet)
+      throwAppError('INVALID_API_ENVIRONMENT');
+    else
+      return {
+        baseURL: 'https://auth-staging.mirrorworld.fun',
+      };
+  } else {
+    //  Production API Key
+    return {
+      baseURL: 'https://auth.mirrorworld.fun',
+    };
+  }
+};
+
 export class MirrorWorldAPIClient {
   client: AxiosInstance;
+  sso: AxiosInstance;
   constructor({
     env = ClusterEnvironment.mainnet,
     apiKey,
-    clientId,
   }: MirrorWorldAPIClientOptions) {
     this.client = axios.create({
       withCredentials: true,
@@ -54,8 +100,16 @@ export class MirrorWorldAPIClient {
           : 'http://localhost:4000',
     });
 
+    const params = mapServiceKeyToEnvironment(apiKey, env)!;
+    this.sso = axios.create({
+      withCredentials: true,
+      baseURL: params.baseURL,
+    });
+
     MirrorWorldAPIClient.defineRequestHandlers(this.client, apiKey);
+    MirrorWorldAPIClient.defineRequestHandlers(this.sso, apiKey);
     MirrorWorldAPIClient.defineErrorResponseHandlers(this.client);
+    MirrorWorldAPIClient.defineErrorResponseHandlers(this.sso);
   }
 
   static defineErrorResponseHandlers(client: AxiosInstance): void {
@@ -89,16 +143,14 @@ export class MirrorWorldAPIClient {
 
 export interface ClientOptions {
   apiKey: string;
-  clientId?: string;
 }
 
 export function createAPIClient(
-  { apiKey, clientId }: ClientOptions,
+  { apiKey }: ClientOptions,
   environment = ClusterEnvironment.mainnet
 ): MirrorWorldAPIClient {
   return new MirrorWorldAPIClient({
     env: environment,
     apiKey,
-    clientId,
   });
 }

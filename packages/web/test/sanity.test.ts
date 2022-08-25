@@ -45,13 +45,7 @@ beforeAll(async () => {
 export const createInstance = (options?: Partial<MirrorWorldOptions>) =>
   new MirrorWorld({
     apiKey,
-    clientId,
-    env:
-      process.env.NODE_ENV === 'staging'
-        ? ClusterEnvironment.testnet
-        : process.env.NODE_ENV === 'production'
-        ? ClusterEnvironment.mainnet
-        : ClusterEnvironment.local,
+    env: ClusterEnvironment.testnet,
   });
 
 describe('Core SDK tests', () => {
@@ -59,7 +53,6 @@ describe('Core SDK tests', () => {
     it('should properly create instance of sdk with correct params', () => {
       const mirrorworld = new MirrorWorld({
         apiKey,
-        clientId,
         env: ClusterEnvironment.local,
       });
       expect(mirrorworld instanceof MirrorWorld).toBe(true);
@@ -69,7 +62,6 @@ describe('Core SDK tests', () => {
       expect(() => {
         // @ts-expect-error Missing params
         return new MirrorWorld({
-          clientId,
           env: ClusterEnvironment.local,
         });
       }).toThrow();

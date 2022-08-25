@@ -3,7 +3,11 @@ import {
   MirrorWorldEvents,
   MirrorWorldOptions,
 } from './types/instance';
-import { createAPIClient, MirrorWorldAPIClient } from './services/api';
+import {
+  createAPIClient,
+  mapServiceKeyToAuthView,
+  MirrorWorldAPIClient,
+} from './services/api';
 import { ClusterEnvironment } from './services/cluster';
 import { emitter } from './events/emitter';
 import { clientOptionsSchema } from './validators';
@@ -64,7 +68,6 @@ import { throwError } from './errors/errors.interface';
 
 export class MirrorWorld {
   // System variables
-  _clientId: MirrorWorldOptions['clientId'];
   _apiKey: MirrorWorldOptions['apiKey'];
   _env: MirrorWorldOptions['env'];
   _api: MirrorWorldAPIClient;
@@ -85,17 +88,14 @@ export class MirrorWorld {
     }
     const {
       apiKey,
-      clientId,
       env = ClusterEnvironment.mainnet,
       autoLoginCredentials,
     } = result.value;
-    this._clientId = clientId;
     this._apiKey = apiKey;
     this._env = env;
     this._api = createAPIClient(
       {
         apiKey,
-        clientId,
       },
       env
     );
@@ -114,9 +114,9 @@ export class MirrorWorld {
     return this._api.client;
   }
 
-  /** Get application's clientId instance */
-  private get clientId(): string | undefined {
-    return this._clientId;
+  /* Get sdk's api client instance */
+  private get sso() {
+    return this._api.sso;
   }
 
   /** Get application's apiKey instance */
@@ -231,7 +231,7 @@ export class MirrorWorld {
   async loginWithEmail(
     credentials: LoginEmailCredentials
   ): Promise<MirrorWorld> {
-    const response = await this.api.post<
+    const response = await this.sso.post<
       IResponse<{
         access_token: string;
         refresh_token: string;
@@ -250,7 +250,7 @@ export class MirrorWorld {
   }
 
   private async refreshAccessToken(refreshToken: string) {
-    const response = await this.api.get<
+    const response = await this.sso.get<
       IResponse<{
         access_token: string;
         refresh_token: string;
@@ -274,7 +274,7 @@ export class MirrorWorld {
   }
 
   async fetchUser(): Promise<IUser> {
-    const response = await this.api
+    const response = await this.sso
       .get<IResponse<UserWithWallet>>('/v1/auth/me')
       .then();
     const user = response.data.data;
@@ -283,11 +283,8 @@ export class MirrorWorld {
   }
 
   private get authView() {
-    return this._env === ClusterEnvironment.testnet
-      ? `https://auth-staging.mirrorworld.fun/${this.apiKey}`
-      : this._env === ClusterEnvironment.mainnet
-      ? `https://auth.mirrorworld.fun/${this.apiKey}`
-      : `https://auth-staging.mirrorworld.fun/${this.apiKey}`;
+    const result = mapServiceKeyToAuthView(this.apiKey, this._env)!;
+    return `${result.baseURL}/${this.apiKey}`;
   }
 
   login() {

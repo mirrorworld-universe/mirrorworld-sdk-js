@@ -24,15 +24,6 @@ export const clientOptionsSchema = joi.object<MirrorWorldOptions>({
         toErrorMessage('INVALID_OPTIONS', '`apiKey` is required')
       )
     ),
-  clientId: joi
-    .string()
-    .required()
-    .error(
-      MirrorWorldSDKError.new(
-        'INVALID_OPTIONS',
-        toErrorMessage('INVALID_OPTIONS', '`clientId` is required')
-      )
-    ),
   autoLoginCredentials: joi
     .string()
     .optional()

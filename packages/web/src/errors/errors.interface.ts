@@ -89,6 +89,16 @@ const __ErrorCodes__ = {
     code: '000117',
     message: `User is not authenticated. Please login`,
   },
+  INVALID_API_KEY: {
+    error: 'INVALID_API_KEY',
+    code: '000118',
+    message: `You are currently using an deprecated API Key. Please create a new API Key for your project on the Mirror World Dashboard (https://app.mirrorworld.fun)`,
+  },
+  INVALID_API_ENVIRONMENT: {
+    error: 'INVALID_API_ENVIRONMENT',
+    code: '000119',
+    message: `The API Key you provided cannot be used in the staging environment. Only \`ClusterEnvironment.testnet\` is available on staging.`,
+  },
 };
 
 export type MirrorWorldSDKErrorCodes = typeof __ErrorCodes__;
