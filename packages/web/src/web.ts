@@ -365,7 +365,7 @@ export class MirrorWorld {
    */
   async getNftDetails(mintAddress: string): Promise<ISolanaNFT> {
     const response = await this.api.get<IResponse<ISolanaNFT>>(
-      `/v1/${this.network}/solana/nft/${mintAddress}`
+      `/solana/nft/${mintAddress}`
     );
     return response.data.data;
   }
@@ -493,7 +493,7 @@ export class MirrorWorld {
       throw result.error;
     }
     const response = await this.api.post<IResponse<IVerifiedCollection>>(
-      `/v1/${this.network}/solana/mint/collection`,
+      `/solana/mint/collection`,
       result.value
     );
     return response.data.data;
@@ -516,7 +516,7 @@ export class MirrorWorld {
       throw result.error;
     }
     const response = await this.api.post<IResponse<IVerifiedCollection>>(
-      `/v1/${this.network}/solana/mint/sub-collection`,
+      `/solana/mint/sub-collection`,
       result.value
     );
     return response.data.data;
@@ -537,7 +537,7 @@ export class MirrorWorld {
       throw result.error;
     }
     const response = await this.api.post<IResponse<ISolanaNFTMintResult>>(
-      `/v1/${this.network}/solana/mint/nft`,
+      `/solana/mint/nft`,
       result.value
     );
     return response.data.data;
@@ -556,7 +556,7 @@ export class MirrorWorld {
       throw result.error;
     }
     const response = await this.api.post<IResponse<INFTListing>>(
-      `/v1/${this.network}/solana/marketplace/list`,
+      `/solana/marketplace/list`,
       result.value
     );
     return response.data.data;
@@ -575,7 +575,7 @@ export class MirrorWorld {
       throw result.error;
     }
     const response = await this.api.post<IResponse<INFTListing>>(
-      `/v1/${this.network}/solana/marketplace/buy`,
+      `/solana/marketplace/buy`,
       result.value
     );
     return response.data.data;
@@ -594,7 +594,7 @@ export class MirrorWorld {
       throw result.error;
     }
     const response = await this.api.post<IResponse<INFTListing>>(
-      `/v1/${this.network}/solana/marketplace/update`,
+      `/solana/marketplace/update`,
       result.value
     );
     return response.data.data;
@@ -613,7 +613,7 @@ export class MirrorWorld {
       throw result.error;
     }
     const response = await this.api.post<IResponse<INFTListing>>(
-      `/v1/${this.network}/solana/marketplace/cancel`,
+      `/solana/marketplace/cancel`,
       result.value
     );
     return response.data.data;
@@ -632,7 +632,7 @@ export class MirrorWorld {
       throw result.error;
     }
     const response = await this.api.post<IResponse<INFTListing>>(
-      `/v1/${this.network}/solana/marketplace/transfer`,
+      `/solana/marketplace/transfer`,
       result.value
     );
     return response.data.data;
@@ -658,7 +658,7 @@ export class MirrorWorld {
       IResponse<{
         nfts: SolanaNFTExtended[];
       }>
-    >(`/v1/${this.network}/solana/nft/mints`, result.value);
+    >(`/solana/nft/mints`, result.value);
     return response.data?.data?.nfts;
   }
 
@@ -682,7 +682,7 @@ export class MirrorWorld {
       IResponse<{
         nfts: SolanaNFTExtended[];
       }>
-    >(`/v1/${this.network}/solana/nft/creators`, result.value);
+    >(`/solana/nft/creators`, result.value);
     return response.data?.data?.nfts;
   }
 
@@ -706,7 +706,7 @@ export class MirrorWorld {
       IResponse<{
         nfts: SolanaNFTExtended[];
       }>
-    >(`/v1/${this.network}/solana/nft/udpate-authorities`, result.value);
+    >(`/solana/nft/udpate-authorities`, result.value);
     return response.data?.data?.nfts;
   }
 
@@ -730,7 +730,7 @@ export class MirrorWorld {
       IResponse<{
         nfts: SolanaNFTExtended[];
       }>
-    >(`/v1/${this.network}/solana/nft/owners`, result.value);
+    >(`/solana/nft/owners`, result.value);
     return response.data?.data?.nfts;
   }
 
@@ -743,7 +743,7 @@ export class MirrorWorld {
   ): Promise<SolanaNFTAuctionActivitiesPayload> {
     const response = await this.api.get<
       IResponse<SolanaNFTAuctionActivitiesPayload>
-    >(`/v1/${this.network}/solana/activity/${mintAddress}`);
+    >(`/solana/activity/${mintAddress}`);
     return response.data?.data;
   }
 }
