@@ -1,5 +1,22 @@
 # @mirrorworld/utils
 
+## 1.0.0
+
+### Major Changes
+
+- 66325f6: Parses the transaction response body. This is a breaking change.
+
+### Minor Changes
+
+- 1353467: Feat appends wallet object to the user's object
+
+### Patch Changes
+
+- db0e203: Fixes regenerator runtime bug"
+- 9cd34a7: Improve types for clientId
+- 7b59b15: Make cleintId otpionsal
+- d7cedc9: Fixes walelt poperties
+
 ## 1.0.0-alpha.5
 
 ### Patch Changes

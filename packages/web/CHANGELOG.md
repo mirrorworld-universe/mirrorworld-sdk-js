@@ -1,5 +1,25 @@
 # @mirrorworld/web3.js
 
+## 1.0.0
+
+### Major Changes
+
+- 13ed995: Initial prerelease of Mirror World SDK for TypeScript/JavaScript
+- 66325f6: Parses the transaction response body. This is a breaking change.
+- 36cd2fe: BREAKING CHANGE: Points to corresponding cluster for Solana API environments
+
+### Minor Changes
+
+- 1353467: Feat appends wallet object to the user's object
+
+### Patch Changes
+
+- db0e203: Fixes regenerator runtime bug"
+- 9a1aa7d: Map AP Key to HTTP Environemtn and Cluster Environemnt
+- 9cd34a7: Improve types for clientId
+- 7b59b15: Make cleintId otpionsal
+- d7cedc9: Fixes walelt poperties
+
 ## 1.0.0-alpha.7
 
 ### Patch Changes
