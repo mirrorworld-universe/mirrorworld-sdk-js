@@ -3,13 +3,14 @@ import { MirrorWorld, MirrorWorldOptions } from '../src';
 import { ClusterEnvironment } from '../src/services/cluster';
 import { MirrorWorldAPIClient } from '../src/services/api';
 import { collectionSchema } from './utils/schemas';
-import { IVerifiedCollection } from '../src/types/nft';
+import { IVerifiedCollection, SolanaCommitment } from '../src/types/nft';
 import { random, waitFor } from './utils/timers';
 
 const apiServer = process.env.MIRRORWORLD_API_SERVER;
+const apiServiceServer = `${apiServer}/v1/devnet`;
 const apiKey = process.env.API_KEY!;
 const clientId = process.env.CLIENT_ID!;
-
+jest.setTimeout(60000);
 const createLoginCredentials = () => {
   return {
     email: 'testaccount1@gmail.com',
@@ -49,7 +50,7 @@ export const createInstance = (options?: Partial<MirrorWorldOptions>) =>
   });
 
 describe('Core SDK tests', () => {
-  describe('Sanity tests', () => {
+  describe.skip('Sanity tests', () => {
     it('should properly create instance of sdk with correct params', () => {
       const mirrorworld = new MirrorWorld({
         apiKey,
@@ -84,9 +85,13 @@ describe('Core SDK tests', () => {
     it('should initialize api client instance correctly', () => {
       const mw = createInstance();
       expect(mw._api.client).toBeDefined();
+      expect(mw._api.sso).toBeDefined();
       expect(mw._api.client instanceof MirrorWorldAPIClient);
-      expect(mw._api.client instanceof Axios);
-      expect(mw._api.client.defaults.baseURL).toEqual(apiServer);
+      expect(mw._api.client instanceof MirrorWorldAPIClient);
+      expect(mw._api.sso instanceof Axios);
+      expect(mw._api.sso instanceof Axios);
+      expect(mw._api.client.defaults.baseURL).toEqual(apiServiceServer);
+      expect(mw._api.sso.defaults.baseURL).toEqual(apiServer);
     });
   });
   describe('Authentication tests', () => {
@@ -119,32 +124,39 @@ describe('Core SDK tests', () => {
     });
 
     it('should securely request bind credentials after user login', async () => {
-      const mw = createInstance();
-      const credentials = createLoginCredentials();
-      await mw.loginWithEmail(credentials);
-      const user = await mw.fetchUser();
-      expect(user).toBeDefined();
-      expect(user).toMatchObject(mw.user!);
-    });
-
-    it.skip('should auto login when initialized with `autoLoginCredentials`', () =>
-      new Promise<void>(async (resolve) => {
+      try {
         const mw = createInstance();
         const credentials = createLoginCredentials();
         await mw.loginWithEmail(credentials);
-        const authRefreshToken = mw.userRefreshToken;
+        const user = await mw.fetchUser();
+        expect(user).toBeDefined();
+        expect(user).toMatchObject(mw.user!);
+      } catch (e) {
+        console.error(e);
+        expect(e).not.toBeDefined();
+      }
+    });
 
-        expect(authRefreshToken).toBeDefined();
+    const sleep = (delay = 3000) =>
+      new Promise((resolve) => setTimeout(resolve, delay));
 
-        const mw2 = createInstance({
-          autoLoginCredentials: authRefreshToken,
-        });
-        const refreshTokenCallback = jest.fn(() => {
-          expect(refreshTokenCallback).toBeCalled();
-          resolve();
-        });
-        mw2.on('auth:refreshToken', refreshTokenCallback);
-      }));
+    it.skip('should auto login when initialized with `autoLoginCredentials`', async () => {
+      const mw = createInstance();
+      const credentials = createLoginCredentials();
+      await mw.loginWithEmail(credentials);
+      const authRefreshToken = mw.userRefreshToken;
+
+      expect(authRefreshToken).toBeDefined();
+
+      const mw2 = createInstance({
+        autoLoginCredentials: authRefreshToken,
+      });
+
+      // At this time, the user's refresh token should be used
+      // to get their user object.
+      await sleep(1000);
+      expect(mw2.user).toBeDefined();
+    });
     it.todo(
       'should successfully sign up with email and password -> executed on UI'
     );
@@ -183,7 +195,10 @@ describe('Core SDK tests', () => {
         symbol: `TST${collectionSymbol}`,
         metadataUri,
       };
-      const collection = await _mw.createVerifiedCollection(collectionPayload);
+      const collection = await _mw.createVerifiedCollection(
+        collectionPayload,
+        SolanaCommitment.finalized
+      );
       expect(collection).toBeTruthy();
       expect(collectionSchema.validate(collection).error).toBeFalsy();
       expect(collection.name).toEqual(collectionPayload.name);
@@ -191,7 +206,7 @@ describe('Core SDK tests', () => {
       expect(collection.symbol).toEqual(collectionPayload.symbol);
       globalRootCollection = collection;
     });
-    it.skip('should successfully create sub-collection', async () => {
+    it('should successfully create sub-collection', async () => {
       try {
         await waitFor(5000);
         const subCollectionSymbol = `${Math.round(Math.random() * 1000)}`;
@@ -206,22 +221,24 @@ describe('Core SDK tests', () => {
         };
 
         const subCollection = await _mw.createVerifiedSubCollection(
-          subCollectionPayload
+          subCollectionPayload,
+          SolanaCommitment.finalized
         );
+        console.log('subCollection', subCollection);
         expect(subCollection).toBeTruthy();
         expect(collectionSchema.validate(subCollection).error).toBeFalsy();
         expect(subCollection.name).toEqual(subCollectionPayload.name);
         expect(subCollection.url).toEqual(subCollectionPayload.metadataUri);
         expect(subCollection.symbol).toEqual(subCollectionPayload.symbol);
         expect(subCollection.collection).toEqual(
-          globalRootCollection.collection
+          globalRootCollection.mint_address
         );
         globalSubCollection = subCollection;
       } catch (e: any) {
         console.error(e);
       }
     });
-    it.skip('should successfully mint into NFT root collection', async () => {
+    it('should successfully mint into NFT root collection', async () => {
       await waitFor(5000);
       const mintNFTPayload = {
         name: `TEST_NFT_${random()}`,
@@ -235,7 +252,7 @@ describe('Core SDK tests', () => {
       expect(mintNFT).toBeTruthy();
     });
 
-    it.skip('should successfully mint into NFT sub collection', async () => {
+    it('should successfully mint into NFT sub collection', async () => {
       await waitFor(5000);
       const mintNFTPayload = {
         name: `TEST_NFT_${random()}`,
@@ -250,6 +267,7 @@ describe('Core SDK tests', () => {
     });
     it.todo('should successfully list NFT');
     it.todo('should successfully transfer NFT');
+    it.todo('should successfully buy NFT');
     it.todo('should successfully cancel listing of NFT');
     it.todo('should successfully transfer NFT');
     it.todo('should successfully get user NFTs');

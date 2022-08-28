@@ -32,7 +32,7 @@ export const clientOptionsSchema = joi.object<MirrorWorldOptions>({
         'INVALID_OPTIONS',
         toErrorMessage(
           'INVALID_OPTIONS',
-          '`autoLoginCredentials` should be a string'
+          '`autoLoginCredentials` should be a string.'
         )
       )
     ),

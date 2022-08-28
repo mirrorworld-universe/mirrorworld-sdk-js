@@ -37,6 +37,19 @@ export const createVerifiedCollectionSchema =
           )
         )
       ),
+    confirmation: joi
+      .string()
+      .valid('confirmed', 'finalized')
+      .optional()
+      .error(
+        MirrorWorldSDKError.new(
+          'INVALID_CREATE_VERIFIED_COLLECTION_PAYLOAD',
+          toErrorMessage(
+            'INVALID_CREATE_VERIFIED_COLLECTION_PAYLOAD',
+            '`commitment` should be one of "confirmed" or "finalized"'
+          )
+        )
+      ),
     url: joi
       .string()
       .uri()
@@ -100,6 +113,19 @@ export const createVerifiedSubCollectionSchema =
           toErrorMessage(
             'INVALID_CREATE_VERIFIED_SUB_COLLECTION_PAYLOAD',
             '`metadataUri` should be a valid url'
+          )
+        )
+      ),
+    confirmation: joi
+      .string()
+      .valid('confirmed', 'finalized')
+      .optional()
+      .error(
+        MirrorWorldSDKError.new(
+          'INVALID_CREATE_VERIFIED_COLLECTION_PAYLOAD',
+          toErrorMessage(
+            'INVALID_CREATE_VERIFIED_COLLECTION_PAYLOAD',
+            '`commitment` should be one of "confirmed" or "finalized"'
           )
         )
       ),

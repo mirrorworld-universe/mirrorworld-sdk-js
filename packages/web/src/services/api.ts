@@ -39,7 +39,8 @@ const isValidAPIKey = (key: string) => key.startsWith('mw_');
 const isValidTestAPIKey = (key: string) => key.startsWith('mw_test');
 export const mapServiceKeyToEnvironment = (
   apiKey: string,
-  environment: ClusterEnvironment
+  environment: ClusterEnvironment,
+  sso = false
 ) => {
   if (!isValidAPIKey(apiKey)) throwAppError('INVALID_API_KEY');
   if (isValidTestAPIKey(apiKey)) {
@@ -49,13 +50,17 @@ export const mapServiceKeyToEnvironment = (
     else
       return {
         environment: 'devnet',
-        baseURL: 'https://api-staging.mirrorworld.fun/v1/devnet',
+        baseURL: sso
+          ? 'https://api-staging.mirrorworld.fun'
+          : 'https://api-staging.mirrorworld.fun/v1/devnet',
       };
   } else {
     //  Production API Key
     return {
       environment: 'mainnet',
-      baseURL: 'https://api.mirrorworld.fun/v1/mainnet',
+      baseURL: sso
+        ? 'https://api.mirrorworld.fun'
+        : 'https://api.mirrorworld.fun/v1/mainnet',
     };
   }
 };
@@ -88,19 +93,13 @@ export class MirrorWorldAPIClient {
     env = ClusterEnvironment.mainnet,
     apiKey,
   }: MirrorWorldAPIClientOptions) {
+    const serviceParams = mapServiceKeyToEnvironment(apiKey, env, false)!;
     this.client = axios.create({
       withCredentials: true,
-      baseURL:
-        env === ClusterEnvironment.testnet
-          ? 'https://api-staging.mirrorworld.fun'
-          : env === ClusterEnvironment.mainnet
-          ? 'https://api.mirrorworld.fun'
-          : env === ClusterEnvironment.local
-          ? 'http://localhost:4000'
-          : 'http://localhost:4000',
+      baseURL: serviceParams.baseURL,
     });
 
-    const params = mapServiceKeyToEnvironment(apiKey, env)!;
+    const params = mapServiceKeyToEnvironment(apiKey, env, true)!;
     this.sso = axios.create({
       withCredentials: true,
       baseURL: params.baseURL,
