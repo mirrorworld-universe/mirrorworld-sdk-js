@@ -1,5 +1,11 @@
 # @mirrorworld/web3.js
 
+## 1.0.0-alpha.7
+
+### Patch Changes
+
+- 9a1aa7d: Map AP Key to HTTP Environemtn and Cluster Environemnt
+
 ## 1.0.0-alpha.6
 
 ### Patch Changes
