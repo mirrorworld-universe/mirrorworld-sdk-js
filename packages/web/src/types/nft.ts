@@ -32,6 +32,7 @@ export interface CreateVerifiedCollectionPayload {
 export interface ICreateVerifiedCollectionPayload
   extends Omit<CreateVerifiedCollectionPayload, 'metadataUri'> {
   url: string;
+  confirmation: SolanaCommitment;
 }
 
 export interface CreateVerifiedSubCollectionPayload
@@ -41,6 +42,7 @@ export interface CreateVerifiedSubCollectionPayload
 export interface ICreateVerifiedSubCollectionPayload
   extends ICreateVerifiedCollectionPayload {
   collection_mint: string;
+  confirmation: SolanaCommitment;
 }
 
 export interface IMintNFTPayload {
@@ -267,4 +269,9 @@ export interface ISolanaNFTMintResult {
   collection: string;
   signature: string;
   status: string;
+}
+
+export enum SolanaCommitment {
+  confirmed = 'confirmed',
+  finalized = 'finalized',
 }

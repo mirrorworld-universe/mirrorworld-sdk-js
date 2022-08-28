@@ -29,6 +29,7 @@ import {
   QueryNFTsByMintAddressesPayload,
   QueryNFTsByOwnersPayload,
   QueryNFTsByUpdateAuthoritiesPayload,
+  SolanaCommitment,
   SolanaNFTAuctionActivitiesPayload,
   SolanaNFTExtended,
   TransferNFTPayload,
@@ -101,11 +102,14 @@ export class MirrorWorld {
     );
     this.on('ready', async () => {
       if (autoLoginCredentials) {
+        console.debug({
+          autoLoginCredentials,
+        });
         await this.refreshAccessToken(autoLoginCredentials);
-        await this.defineInternalListeners();
+        this.defineInternalListeners();
       }
     });
-    MirrorWorld.emit('ready', undefined);
+    this.emit('ready', undefined);
     return this;
   }
 
@@ -144,7 +148,7 @@ export class MirrorWorld {
   }
 
   private set user(value: UserWithWallet) {
-    MirrorWorld.emit('update:user', undefined);
+    this.emit('update:user', undefined);
     this._user = value;
   }
 
@@ -200,6 +204,13 @@ export class MirrorWorld {
     return emitter.on(event, handler);
   }
 
+  emit<T extends MirrorWorldEventKey>(
+    event: T,
+    payload: MirrorWorldEvents[T]
+  ): void {
+    return emitter.emit(event, payload);
+  }
+
   private defineInternalListeners() {
     this.on('update:user', async () => {
       console.debug('user updated');
@@ -219,12 +230,16 @@ export class MirrorWorld {
         };
       };
 
-    const credentialsInterceptorId = this.api.interceptors.request.use(
+    const serviceCredentialsInterceptorId = this.api.interceptors.request.use(
+      createAccessTokenInterceptor(accessToken)
+    );
+    const ssoCredentialsInterceptorId = this.sso.interceptors.request.use(
       createAccessTokenInterceptor(accessToken)
     );
 
     this.on('logout', () => {
-      this.api.interceptors.request.eject(credentialsInterceptorId);
+      this.api.interceptors.request.eject(serviceCredentialsInterceptorId);
+      this.api.interceptors.request.eject(ssoCredentialsInterceptorId);
     });
   }
 
@@ -244,8 +259,8 @@ export class MirrorWorld {
     this.useCredentials({
       accessToken,
     });
-    MirrorWorld.emit('login:email', this.user);
-    MirrorWorld.emit('login', this.user);
+    this.emit('login:email', this.user);
+    this.emit('login', this.user);
     return this;
   }
 
@@ -269,7 +284,7 @@ export class MirrorWorld {
     this.useCredentials({
       accessToken,
     });
-    MirrorWorld.emit('auth:refreshToken', this.userRefreshToken);
+    this.emit('auth:refreshToken', this.userRefreshToken);
     return user;
   }
 
@@ -482,12 +497,14 @@ export class MirrorWorld {
    * Create Verified Collection
    */
   async createVerifiedCollection(
-    payload: CreateVerifiedCollectionPayload
+    payload: CreateVerifiedCollectionPayload,
+    commitment: SolanaCommitment = SolanaCommitment.confirmed
   ): Promise<IVerifiedCollection> {
     const result = createVerifiedCollectionSchema.validate({
       name: payload.name,
       symbol: payload.symbol,
       url: payload.metadataUri,
+      confirmation: commitment,
     });
     if (result.error) {
       throw result.error;
@@ -504,13 +521,15 @@ export class MirrorWorld {
    * Create Verified SubCollection
    */
   async createVerifiedSubCollection(
-    payload: CreateVerifiedSubCollectionPayload
+    payload: CreateVerifiedSubCollectionPayload,
+    commitment: SolanaCommitment = SolanaCommitment.confirmed
   ): Promise<IVerifiedCollection> {
     const result = createVerifiedSubCollectionSchema.validate({
       name: payload.name,
       symbol: payload.symbol,
       url: payload.metadataUri,
       collection_mint: payload.parentCollection,
+      confirmation: commitment,
     });
     if (result.error) {
       throw result.error;
