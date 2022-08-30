@@ -390,7 +390,7 @@ export class MirrorWorld {
    */
   async getTokens(): Promise<ISolanaToken[]> {
     const response = await this.api.get<IResponse<ISolanaToken[]>>(
-      `/v1/wallet/tokens`
+      `/wallet/tokens`
     );
     const tokens = response.data.data;
     this.tokens = tokens;
@@ -402,7 +402,7 @@ export class MirrorWorld {
    */
   async getTransactions(): Promise<ISolanaTransaction[]> {
     const response = await this.api.get<IResponse<ISolanaTransactionsPayload>>(
-      `/v1/wallet/transactions`
+      `/wallet/transactions`
     );
     const transactions = response.data.data.transactions;
     this.transactions = transactions;
@@ -465,7 +465,7 @@ export class MirrorWorld {
       throw result.error;
     }
     const response = await this.api.post<IResponse<ITransferSPLTokenResponse>>(
-      `/v1/wallet/transfer-token`,
+      `/wallet/transfer-token`,
       result.value
     );
     return response.data.data;
@@ -486,7 +486,7 @@ export class MirrorWorld {
       throw result.error;
     }
     const response = await this.api.post<IResponse<ITransferSPLTokenResponse>>(
-      `/v1/wallet/transfer-sol`,
+      `/wallet/transfer-sol`,
       result.value
     );
     return response.data.data;
