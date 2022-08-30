@@ -239,7 +239,7 @@ describe('Core SDK tests', () => {
         expect(e).toBeFalsy();
       }
     });
-    it('should successfully mint into NFT root collection', async () => {
+    it.skip('should successfully mint into NFT root collection', async () => {
       try {
         await waitFor(5000);
         const mintNFTPayload = {
@@ -258,7 +258,7 @@ describe('Core SDK tests', () => {
       }
     });
 
-    it('should successfully mint into NFT sub collection', async () => {
+    it.skip('should successfully mint into NFT sub collection', async () => {
       try {
         await waitFor(5000);
         const mintNFTPayload = {
