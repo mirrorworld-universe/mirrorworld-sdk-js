@@ -23,7 +23,7 @@
     "pkgs:check": "manypkg check",
     "pkgs:fix": "manypkg fix",
     "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
-    "test": "API_KEY=mw_apikey NODE_ENV=development jest --ci --coverage --maxWorkers=2",
+    "test": "API_KEY=mw_testSV9c7wSdZQ3EPYmWSEASrUYIQ6q5XS3klij NODE_ENV=development jest --ci --coverage --maxWorkers=2",
     "test:watch": "NODE_ENV=development jest --verbose --watch --maxWorkers=2"
   },
   "husky": {
