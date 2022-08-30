@@ -236,34 +236,45 @@ describe('Core SDK tests', () => {
         globalSubCollection = subCollection;
       } catch (e: any) {
         console.error(e);
+        expect(e).toBeFalsy();
       }
     });
     it('should successfully mint into NFT root collection', async () => {
-      await waitFor(5000);
-      const mintNFTPayload = {
-        name: `TEST_NFT_${random()}`,
-        symbol: `SYM${random()}`,
-        metadataUri:
-          'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json',
-        collection: globalRootCollection.mint_address!,
-      };
+      try {
+        await waitFor(5000);
+        const mintNFTPayload = {
+          name: `TEST_NFT_${random()}`,
+          symbol: `SYM${random()}`,
+          metadataUri:
+            'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json',
+          collection: globalRootCollection.mint_address!,
+        };
 
-      const mintNFT = await _mw.mintNFT(mintNFTPayload);
-      expect(mintNFT).toBeTruthy();
+        const mintNFT = await _mw.mintNFT(mintNFTPayload);
+        expect(mintNFT).toBeTruthy();
+      } catch (e: any) {
+        console.error(e);
+        expect(e).toBeFalsy();
+      }
     });
 
     it('should successfully mint into NFT sub collection', async () => {
-      await waitFor(5000);
-      const mintNFTPayload = {
-        name: `TEST_NFT_${random()}`,
-        symbol: `SYM${random()}`,
-        metadataUri:
-          'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json',
-        collection: globalSubCollection.mint_address!,
-      };
+      try {
+        await waitFor(5000);
+        const mintNFTPayload = {
+          name: `TEST_NFT_${random()}`,
+          symbol: `SYM${random()}`,
+          metadataUri:
+            'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json',
+          collection: globalSubCollection.mint_address!,
+        };
 
-      const mintNFT = await _mw.mintNFT(mintNFTPayload);
-      expect(mintNFT).toBeTruthy();
+        const mintNFT = await _mw.mintNFT(mintNFTPayload);
+        expect(mintNFT).toBeTruthy();
+      } catch (e: any) {
+        console.error(e);
+        expect(e).toBeFalsy();
+      }
     });
     it.todo('should successfully list NFT');
     it.todo('should successfully transfer NFT');

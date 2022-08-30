@@ -8,6 +8,6 @@ export const collectionSchema = joi.object({
   name: joi.string().required(),
   symbol: joi.string().required(),
   collection: joi.string().optional().allow(null),
-  signature: joi.string().required(),
+  signature: joi.string().optional().allow('').required(),
   status: joi.string().required(),
 });
