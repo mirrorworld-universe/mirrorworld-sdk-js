@@ -1,5 +1,11 @@
 # @mirrorworld/web3.js
 
+## 1.0.1
+
+### Patch Changes
+
+- 26754d5: fix: wallet API base URL
+
 ## 1.0.0
 
 ### Major Changes
