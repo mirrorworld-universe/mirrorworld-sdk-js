@@ -56,12 +56,27 @@ export const mapServiceKeyToEnvironment = (
       };
   } else {
     //  Production API Key
-    return {
-      environment: 'mainnet',
-      baseURL: sso
-        ? 'https://api.mirrorworld.fun'
-        : 'https://api.mirrorworld.fun/v1/mainnet',
-    };
+    if (environment === ClusterEnvironment.mainnet)
+      return {
+        environment: 'mainnet',
+        baseURL: sso
+          ? 'https://api.mirrorworld.fun'
+          : 'https://api.mirrorworld.fun/v1/mainnet',
+      };
+    else if (environment === ClusterEnvironment.testnet)
+      return {
+        environment: 'devnet',
+        baseURL: sso
+          ? 'https://api.mirrorworld.fun'
+          : 'https://api.mirrorworld.fun/v1/devnet',
+      };
+    else
+      return {
+        environment: 'mainnet',
+        baseURL: sso
+          ? 'https://api.mirrorworld.fun'
+          : 'https://api.mirrorworld.fun/v1/mainnet',
+      };
   }
 };
 
