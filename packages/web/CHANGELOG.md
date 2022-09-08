@@ -1,5 +1,11 @@
 # @mirrorworld/web3.js
 
+## 1.0.2
+
+### Patch Changes
+
+- 43ccddc: Fix: avail testnet on production
+
 ## 1.0.1
 
 ### Patch Changes
