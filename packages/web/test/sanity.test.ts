@@ -7,6 +7,7 @@ import { IVerifiedCollection, SolanaCommitment } from '../src/types/nft';
 import { random, waitFor } from './utils/timers';
 
 const apiServer = process.env.MIRRORWORLD_API_SERVER;
+const staging = process.env.MIRRORWORLD_API_SERVER_ENV === 'staging';
 const apiServiceServer = `${apiServer}/v1/devnet`;
 const apiKey = process.env.API_KEY!;
 const clientId = process.env.CLIENT_ID!;
@@ -47,6 +48,7 @@ export const createInstance = (options?: Partial<MirrorWorldOptions>) =>
   new MirrorWorld({
     apiKey,
     env: ClusterEnvironment.testnet,
+    staging,
   });
 
 describe('Core SDK tests', () => {
@@ -55,6 +57,7 @@ describe('Core SDK tests', () => {
       const mirrorworld = new MirrorWorld({
         apiKey,
         env: ClusterEnvironment.local,
+        staging,
       });
       expect(mirrorworld instanceof MirrorWorld).toBe(true);
     });
@@ -64,6 +67,7 @@ describe('Core SDK tests', () => {
         // @ts-expect-error Missing params
         return new MirrorWorld({
           env: ClusterEnvironment.local,
+          staging,
         });
       }).toThrow();
       expect(
@@ -71,6 +75,7 @@ describe('Core SDK tests', () => {
           // @ts-expect-error Missing params
           new MirrorWorld({
             apiKey,
+            staging,
           })
       ).toThrow();
       expect(

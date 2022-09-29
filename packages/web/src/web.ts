@@ -91,12 +91,14 @@ export class MirrorWorld {
       apiKey,
       env = ClusterEnvironment.mainnet,
       autoLoginCredentials,
+      staging = false,
     } = result.value;
     this._apiKey = apiKey;
     this._env = env;
     this._api = createAPIClient(
       {
         apiKey,
+        staging,
       },
       env
     );

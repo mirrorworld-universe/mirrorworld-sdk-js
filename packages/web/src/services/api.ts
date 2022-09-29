@@ -1,11 +1,11 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { throwError as throwAppError } from '../errors/errors.interface';
 import { ClusterEnvironment } from './cluster';
 
 export interface MirrorWorldAPIClientOptions {
   env?: ClusterEnvironment;
   apiKey: string;
   clientId?: string;
+  staging?: boolean;
 }
 
 export interface ErrorAPIResponse {
@@ -36,65 +36,58 @@ export function handleAPIError(response: ErrorAPIResponse): void {
 }
 
 const isValidAPIKey = (key: string) => key.startsWith('mw_');
-const isValidTestAPIKey = (key: string) => key.startsWith('mw_test');
 export const mapServiceKeyToEnvironment = (
   apiKey: string,
   environment: ClusterEnvironment,
-  sso = false
+  sso = false,
+  staging = false
 ) => {
-  if (!isValidAPIKey(apiKey)) throwAppError('INVALID_API_KEY');
-  if (isValidTestAPIKey(apiKey)) {
-    //  Staging API Key
-    if (environment !== ClusterEnvironment.testnet)
-      throwAppError('INVALID_API_ENVIRONMENT');
-    else
+  if (isValidAPIKey(apiKey)) {
+    if (environment === ClusterEnvironment.testnet)
       return {
         environment: 'devnet',
         baseURL: sso
-          ? 'https://api-staging.mirrorworld.fun'
-          : 'https://api-staging.mirrorworld.fun/v1/devnet',
+          ? `https://api${staging ? '-staging' : ''}.mirrorworld.fun`
+          : `https://api${staging ? '-staging' : ''}.mirrorworld.fun/v1/devnet`,
       };
-  } else {
-    //  Production API Key
-    if (environment === ClusterEnvironment.mainnet)
+    else if (environment === ClusterEnvironment.mainnet)
       return {
         environment: 'mainnet',
         baseURL: sso
-          ? 'https://api.mirrorworld.fun'
-          : 'https://api.mirrorworld.fun/v1/mainnet',
+          ? `https://api${staging ? '-staging' : ''}.mirrorworld.fun`
+          : `https://api${
+              staging ? '-staging' : ''
+            }.mirrorworld.fun/v1/mainnet`,
       };
-    else if (environment === ClusterEnvironment.testnet)
+    else if (environment === ClusterEnvironment.local)
       return {
         environment: 'devnet',
         baseURL: sso
-          ? 'https://api.mirrorworld.fun'
-          : 'https://api.mirrorworld.fun/v1/devnet',
+          ? 'http://localhost:4000'
+          : 'http://localhost:4000/v1/devnet',
       };
     else
       return {
         environment: 'mainnet',
         baseURL: sso
-          ? 'https://api.mirrorworld.fun'
-          : 'https://api.mirrorworld.fun/v1/mainnet',
+          ? `https://api${staging ? '-staging' : ''}.mirrorworld.fun`
+          : `https://api${
+              staging ? '-staging' : ''
+            }.mirrorworld.fun/v1/mainnet`,
       };
   }
 };
 
 export const mapServiceKeyToAuthView = (
   apiKey: string,
-  environment: ClusterEnvironment
+  environment: ClusterEnvironment,
+  staging = false
 ) => {
-  if (!isValidAPIKey(apiKey)) throwAppError('INVALID_API_KEY');
-  if (isValidTestAPIKey(apiKey)) {
-    //  Staging API Key
-    if (environment !== ClusterEnvironment.testnet)
-      throwAppError('INVALID_API_ENVIRONMENT');
-    else
-      return {
-        baseURL: 'https://auth-staging.mirrorworld.fun',
-      };
+  if (staging) {
+    return {
+      baseURL: 'https://auth-staging.mirrorworld.fun',
+    };
   } else {
-    //  Production API Key
     return {
       baseURL: 'https://auth.mirrorworld.fun',
     };
@@ -107,14 +100,20 @@ export class MirrorWorldAPIClient {
   constructor({
     env = ClusterEnvironment.mainnet,
     apiKey,
+    staging = false,
   }: MirrorWorldAPIClientOptions) {
-    const serviceParams = mapServiceKeyToEnvironment(apiKey, env, false)!;
+    const serviceParams = mapServiceKeyToEnvironment(
+      apiKey,
+      env,
+      false,
+      staging
+    )!;
     this.client = axios.create({
       withCredentials: true,
       baseURL: serviceParams.baseURL,
     });
 
-    const params = mapServiceKeyToEnvironment(apiKey, env, true)!;
+    const params = mapServiceKeyToEnvironment(apiKey, env, true, staging)!;
     this.sso = axios.create({
       withCredentials: true,
       baseURL: params.baseURL,
@@ -157,14 +156,16 @@ export class MirrorWorldAPIClient {
 
 export interface ClientOptions {
   apiKey: string;
+  staging?: boolean;
 }
 
 export function createAPIClient(
-  { apiKey }: ClientOptions,
+  { apiKey, staging }: ClientOptions,
   environment = ClusterEnvironment.mainnet
 ): MirrorWorldAPIClient {
   return new MirrorWorldAPIClient({
     env: environment,
     apiKey,
+    staging,
   });
 }

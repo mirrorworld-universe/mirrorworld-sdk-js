@@ -36,4 +36,13 @@ export const clientOptionsSchema = joi.object<MirrorWorldOptions>({
         )
       )
     ),
+  staging: joi
+    .boolean()
+    .optional()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_OPTIONS',
+        toErrorMessage('INVALID_OPTIONS', '`staging` should be a boolean.')
+      )
+    ),
 });
