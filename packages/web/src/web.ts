@@ -264,6 +264,14 @@ export class MirrorWorld {
     return this;
   }
 
+  async logout(): Promise<void> {
+    try {
+      await this.sso.post('/v1/auth/logout');
+      this._user = undefined;
+      this.emit('logout', null);
+    } catch (e) {}
+  }
+
   private async refreshAccessToken(refreshToken: string) {
     const response = await this.sso.get<
       IResponse<{
