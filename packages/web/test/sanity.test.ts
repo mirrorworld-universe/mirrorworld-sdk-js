@@ -260,7 +260,7 @@ describe('Core SDK tests', () => {
 
     it.skip('should successfully mint into NFT sub collection', async () => {
       try {
-        await waitFor(5000);
+        await waitFor(10000);
         const mintNFTPayload = {
           name: `TEST_NFT_${random()}`,
           symbol: `SYM${random()}`,
