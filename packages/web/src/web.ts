@@ -71,6 +71,7 @@ export class MirrorWorld {
   // System variables
   _apiKey: MirrorWorldOptions['apiKey'];
   _env: MirrorWorldOptions['env'];
+  _staging: MirrorWorldOptions['staging'];
   _api: MirrorWorldAPIClient;
   _tokens: ISolanaToken[] = [];
   _transactions: ISolanaTransaction[] = [];
@@ -93,6 +94,7 @@ export class MirrorWorld {
       autoLoginCredentials,
       staging = false,
     } = result.value;
+    this._staging = staging;
     this._apiKey = apiKey;
     this._env = env;
     this._api = createAPIClient(
@@ -308,7 +310,11 @@ export class MirrorWorld {
   }
 
   private get authView() {
-    const result = mapServiceKeyToAuthView(this.apiKey, this._env)!;
+    const result = mapServiceKeyToAuthView(
+      this.apiKey,
+      this._env,
+      this._staging
+    )!;
     return `${result.baseURL}/${this.apiKey}`;
   }
 
