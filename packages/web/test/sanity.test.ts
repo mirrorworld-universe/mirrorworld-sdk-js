@@ -58,7 +58,7 @@ export const createInstance = (options?: Partial<MirrorWorldOptions>) =>
   });
 
 describe('Core SDK tests', () => {
-  describe.only('Sanity tests', () => {
+  describe('Sanity tests', () => {
     it('should properly create instance of sdk with correct params', () => {
       const mirrorworld = new MirrorWorld({
         apiKey,
@@ -105,195 +105,143 @@ describe('Core SDK tests', () => {
       expect(mw._api.sso.defaults.baseURL).toEqual(apiServer);
     });
   });
-  // describe('Authentication tests', () => {
-  //   it('should successfully login with email and password', async () => {
-  //     const mw = createInstance();
-  //     const credentials = createLoginCredentials();
-  //     const user = await mw.loginWithEmail(credentials);
-  //     expect(user).toBeDefined();
-  //   });
-  //
-  //   it('should email login event on successful login', async () => {
-  //     const mw = createInstance();
-  //     const credentials = createLoginCredentials();
-  //     const user = await mw.loginWithEmail(credentials);
-  //     expect(user).toBeDefined();
-  //   });
-  //
-  //   it('should emit `login:email` and `login` events on login event on successful login', async () => {
-  //     const mw = createInstance();
-  //     const credentials = createLoginCredentials();
-  //     const loginEmailCallBack = jest.fn();
-  //     const loginCallBack = jest.fn();
-  //
-  //     mw.on('login:email', loginEmailCallBack);
-  //     mw.on('login', loginCallBack);
-  //     await mw.loginWithEmail(credentials);
-  //
-  //     expect(loginEmailCallBack).toHaveBeenCalledWith(mw.user);
-  //     expect(loginCallBack).toHaveBeenCalledWith(mw.user);
-  //   });
-  //
-  //   it('should securely request bind credentials after user login', async () => {
-  //     try {
-  //       const mw = createInstance();
-  //       const credentials = createLoginCredentials();
-  //       await mw.loginWithEmail(credentials);
-  //       const user = await mw.fetchUser();
-  //       expect(user).toBeDefined();
-  //       expect(user).toMatchObject(mw.user!);
-  //     } catch (e) {
-  //       console.error(e);
-  //       expect(e).not.toBeDefined();
-  //     }
-  //   });
-  //
-  //   const sleep = (delay = 3000) =>
-  //     new Promise((resolve) => setTimeout(resolve, delay));
-  //
-  //   it.skip('should auto login when initialized with `autoLoginCredentials`', async () => {
-  //     const mw = createInstance();
-  //     const credentials = createLoginCredentials();
-  //     await mw.loginWithEmail(credentials);
-  //     const authRefreshToken = mw.userRefreshToken;
-  //
-  //     expect(authRefreshToken).toBeDefined();
-  //
-  //     const mw2 = createInstance({
-  //       autoLoginCredentials: authRefreshToken,
-  //     });
-  //
-  //     // At this time, the user's refresh token should be used
-  //     // to get their user object.
-  //     await sleep(1000);
-  //     expect(mw2.user).toBeDefined();
-  //   });
-  //   it.todo(
-  //     'should successfully sign up with email and password -> executed on UI'
-  //   );
-  //   it('should fail with bad email and password credentials', async () => {
-  //     expect.assertions(1);
-  //     const mw = createInstance();
-  //     const credentials = createLoginCredentials();
-  //     credentials.password = 'noinoi2131@@!3 dome bad password';
-  //     // expect(async () => await mw.loginWithEmail(credentials)).toThrow();
-  //     await mw
-  //       .loginWithEmail(credentials)
-  //       .catch((e) => expect(e).toBeDefined());
-  //   });
-  //   it('should successfully get user object', async () => {
-  //     const mw = createInstance();
-  //     const credentials = createLoginCredentials();
-  //     await mw.loginWithEmail(credentials);
-  //     const user = await mw.fetchUser();
-  //     const wallet = user.wallet;
-  //     expect(user).toBeDefined();
-  //     expect(user).toMatchObject(mw.user!);
-  //     expect(wallet).toMatchObject(mw.wallet!);
-  //   });
-  // });
-  // describe('Marketplace tests', () => {
-  //   let globalRootCollection: IVerifiedCollection;
-  //   let globalSubCollection: IVerifiedCollection;
-  //
-  //   it('should successfully create NFT collection', async () => {
-  //     const collectionSymbol = `${Math.round(Math.random() * 1000)}`;
-  //     const metadataUri =
-  //       'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json';
-  //
-  //     const collectionPayload = {
-  //       name: `TEST_NFT_${collectionSymbol}`,
-  //       symbol: `TST${collectionSymbol}`,
-  //       metadataUri,
-  //     };
-  //     const collection = await _mw.createVerifiedCollection(
-  //       collectionPayload,
-  //       SolanaCommitment.finalized
-  //     );
-  //     expect(collection).toBeTruthy();
-  //     expect(collectionSchema.validate(collection).error).toBeFalsy();
-  //     expect(collection.name).toEqual(collectionPayload.name);
-  //     expect(collection.url).toEqual(collectionPayload.metadataUri);
-  //     expect(collection.symbol).toEqual(collectionPayload.symbol);
-  //     globalRootCollection = collection;
-  //   });
-  //   it('should successfully create sub-collection', async () => {
-  //     try {
-  //       await waitFor(5000);
-  //       const subCollectionSymbol = `${Math.round(Math.random() * 1000)}`;
-  //       const metadataUri =
-  //         'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json';
-  //
-  //       const subCollectionPayload = {
-  //         name: `TEST_SUB_NFT_${subCollectionSymbol}`,
-  //         symbol: `SUBC${subCollectionSymbol}`,
-  //         metadataUri,
-  //         parentCollection: globalRootCollection.mint_address,
-  //       };
-  //
-  //       const subCollection = await _mw.createVerifiedSubCollection(
-  //         subCollectionPayload,
-  //         SolanaCommitment.finalized
-  //       );
-  //       console.log('subCollection', subCollection);
-  //       expect(subCollection).toBeTruthy();
-  //       expect(collectionSchema.validate(subCollection).error).toBeFalsy();
-  //       expect(subCollection.name).toEqual(subCollectionPayload.name);
-  //       expect(subCollection.url).toEqual(subCollectionPayload.metadataUri);
-  //       expect(subCollection.symbol).toEqual(subCollectionPayload.symbol);
-  //       expect(subCollection.collection).toEqual(
-  //         globalRootCollection.mint_address
-  //       );
-  //       globalSubCollection = subCollection;
-  //     } catch (e: any) {
-  //       console.error(e);
-  //       expect(e).toBeFalsy();
-  //     }
-  //   });
-  //   it.skip('should successfully mint into NFT root collection', async () => {
-  //     try {
-  //       await waitFor(5000);
-  //       const mintNFTPayload = {
-  //         name: `TEST_NFT_${random()}`,
-  //         symbol: `SYM${random()}`,
-  //         metadataUri:
-  //           'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json',
-  //         collection: globalRootCollection.mint_address!,
-  //       };
-  //
-  //       const mintNFT = await _mw.mintNFT(mintNFTPayload);
-  //       expect(mintNFT).toBeTruthy();
-  //     } catch (e: any) {
-  //       console.error(e);
-  //       expect(e).toBeFalsy();
-  //     }
-  //   });
-  //
-  //   it.skip('should successfully mint into NFT sub collection', async () => {
-  //     try {
-  //       await waitFor(5000);
-  //       const mintNFTPayload = {
-  //         name: `TEST_NFT_${random()}`,
-  //         symbol: `SYM${random()}`,
-  //         metadataUri:
-  //           'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json',
-  //         collection: globalSubCollection.mint_address!,
-  //       };
-  //
-  //       const mintNFT = await _mw.mintNFT(mintNFTPayload);
-  //       expect(mintNFT).toBeTruthy();
-  //     } catch (e: any) {
-  //       console.error(e);
-  //       expect(e).toBeFalsy();
-  //     }
-  //   });
-  //   it.todo('should successfully list NFT');
-  //   it.todo('should successfully transfer NFT');
-  //   it.todo('should successfully buy NFT');
-  //   it.todo('should successfully cancel listing of NFT');
-  //   it.todo('should successfully transfer NFT');
-  //   it.todo('should successfully get user NFTs');
-  //   it.todo('should successfully get query NFT transaction history');
-  //   it.todo('should successfully get query NFT transaction history');
-  // });
+  describe('Authentication tests', () => {
+    it('should successfully login with email and password', async () => {
+      const mw = createInstance();
+      const credentials = createLoginCredentials();
+      const user = await mw.loginWithEmail(credentials);
+      expect(user).toBeDefined();
+    });
+
+    it('should email login event on successful login', async () => {
+      const mw = createInstance();
+      const credentials = createLoginCredentials();
+      const user = await mw.loginWithEmail(credentials);
+      expect(user).toBeDefined();
+    });
+
+    it('should emit `login:email` and `login` events on login event on successful login', async () => {
+      const mw = createInstance();
+      const credentials = createLoginCredentials();
+      const loginEmailCallBack = jest.fn();
+      const loginCallBack = jest.fn();
+
+      mw.on('login:email', loginEmailCallBack);
+      mw.on('login', loginCallBack);
+      await mw.loginWithEmail(credentials);
+
+      expect(loginEmailCallBack).toHaveBeenCalledWith(mw.user);
+      expect(loginCallBack).toHaveBeenCalledWith(mw.user);
+    });
+
+    it('should securely request bind credentials after user login', async () => {
+      try {
+        const mw = createInstance();
+        const credentials = createLoginCredentials();
+        await mw.loginWithEmail(credentials);
+        const user = await mw.fetchUser();
+        expect(user).toBeDefined();
+        expect(user).toMatchObject(mw.user!);
+      } catch (e) {
+        console.error(e);
+        expect(e).not.toBeDefined();
+      }
+    });
+
+    const sleep = (delay = 3000) =>
+      new Promise((resolve) => setTimeout(resolve, delay));
+
+    it.skip('should auto login when initialized with `autoLoginCredentials`', async () => {
+      const mw = createInstance();
+      const credentials = createLoginCredentials();
+      await mw.loginWithEmail(credentials);
+      const authRefreshToken = mw.userRefreshToken;
+
+      expect(authRefreshToken).toBeDefined();
+
+      const mw2 = createInstance({
+        autoLoginCredentials: authRefreshToken,
+      });
+
+      // At this time, the user's refresh token should be used
+      // to get their user object.
+      await sleep(1000);
+      expect(mw2.user).toBeDefined();
+    });
+    it.todo(
+      'should successfully sign up with email and password -> executed on UI'
+    );
+    it('should fail with bad email and password credentials', async () => {
+      expect.assertions(1);
+      const mw = createInstance();
+      const credentials = createLoginCredentials();
+      credentials.password = 'noinoi2131@@!3 dome bad password';
+      // expect(async () => await mw.loginWithEmail(credentials)).toThrow();
+      await mw
+        .loginWithEmail(credentials)
+        .catch((e) => expect(e).toBeDefined());
+    });
+    it('should successfully get user object', async () => {
+      const mw = createInstance();
+      const credentials = createLoginCredentials();
+      await mw.loginWithEmail(credentials);
+      const user = await mw.fetchUser();
+      const wallet = user.wallet;
+      expect(user).toBeDefined();
+      expect(user).toMatchObject(mw.user!);
+      expect(wallet).toMatchObject(mw.wallet!);
+    });
+  });
+  describe('Marketplace tests', () => {
+    let globalRootCollection: IVerifiedCollection;
+    let globalSubCollection: IVerifiedCollection;
+
+    it('should successfully create NFT collection', async () => {
+      const collectionSymbol = `${Math.round(Math.random() * 1000)}`;
+      const metadataUri =
+        'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json';
+
+      const collectionPayload = {
+        name: `TEST_NFT_${collectionSymbol}`,
+        symbol: `TST${collectionSymbol}`,
+        metadataUri,
+      };
+      const collection = await _mw.createVerifiedCollection(
+        collectionPayload,
+        SolanaCommitment.finalized
+      );
+      expect(collection).toBeTruthy();
+      expect(collectionSchema.validate(collection).error).toBeFalsy();
+      expect(collection.name).toEqual(collectionPayload.name);
+      expect(collection.url).toEqual(collectionPayload.metadataUri);
+      expect(collection.symbol).toEqual(collectionPayload.symbol);
+      globalRootCollection = collection;
+    });
+    it.skip('should successfully mint into NFT collection', async () => {
+      try {
+        await waitFor(5000);
+        const mintNFTPayload = {
+          name: `TEST_NFT_${random()}`,
+          symbol: `SYM${random()}`,
+          metadataUri:
+            'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json',
+          collection: globalRootCollection.mint_address!,
+        };
+
+        const mintNFT = await _mw.mintNFT(mintNFTPayload);
+        expect(mintNFT).toBeTruthy();
+      } catch (e: any) {
+        console.error(e);
+        expect(e).toBeFalsy();
+      }
+    });
+    it.todo('should successfully list NFT');
+    it.todo('should successfully transfer NFT');
+    it.todo('should successfully buy NFT');
+    it.todo('should successfully cancel listing of NFT');
+    it.todo('should successfully transfer NFT');
+    it.todo('should successfully get user NFTs');
+    it.todo('should successfully get query NFT transaction history');
+    it.todo('should successfully get query NFT transaction history');
+  });
 });
