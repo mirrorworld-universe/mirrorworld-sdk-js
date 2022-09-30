@@ -83,7 +83,7 @@ describe('Core SDK tests', () => {
             apiKey,
             staging,
           })
-      ).toThrow();
+      ).not.toThrow();
       expect(
         () =>
           // @ts-expect-error Missing params
