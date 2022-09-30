@@ -71,6 +71,7 @@ export class MirrorWorld {
   // System variables
   _apiKey: MirrorWorldOptions['apiKey'];
   _env: MirrorWorldOptions['env'];
+  _staging: MirrorWorldOptions['staging'];
   _api: MirrorWorldAPIClient;
   _tokens: ISolanaToken[] = [];
   _transactions: ISolanaTransaction[] = [];
@@ -91,12 +92,15 @@ export class MirrorWorld {
       apiKey,
       env = ClusterEnvironment.mainnet,
       autoLoginCredentials,
+      staging = false,
     } = result.value;
+    this._staging = staging;
     this._apiKey = apiKey;
     this._env = env;
     this._api = createAPIClient(
       {
         apiKey,
+        staging,
       },
       env
     );
@@ -264,6 +268,14 @@ export class MirrorWorld {
     return this;
   }
 
+  async logout(): Promise<void> {
+    try {
+      await this.sso.post('/v1/auth/logout');
+      this._user = undefined;
+      this.emit('logout', null);
+    } catch (e) {}
+  }
+
   private async refreshAccessToken(refreshToken: string) {
     const response = await this.sso.get<
       IResponse<{
@@ -298,7 +310,11 @@ export class MirrorWorld {
   }
 
   private get authView() {
-    const result = mapServiceKeyToAuthView(this.apiKey, this._env)!;
+    const result = mapServiceKeyToAuthView(
+      this.apiKey,
+      this._env,
+      this._staging
+    )!;
     return `${result.baseURL}/${this.apiKey}`;
   }
 
@@ -535,7 +551,7 @@ export class MirrorWorld {
       throw result.error;
     }
     const response = await this.api.post<IResponse<IVerifiedCollection>>(
-      `/solana/mint/sub-collection`,
+      `/solana/mint/collection`,
       result.value
     );
     return response.data.data;
