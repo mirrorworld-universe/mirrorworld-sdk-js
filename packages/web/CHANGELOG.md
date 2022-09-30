@@ -1,5 +1,11 @@
 # @mirrorworld/web3.js
 
+## 1.1.0
+
+### Minor Changes
+
+- d1aed0d: Adds mainnet and devnet API key support for production
+
 ## 1.0.2
 
 ### Patch Changes
