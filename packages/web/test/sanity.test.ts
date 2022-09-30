@@ -46,6 +46,7 @@ beforeAll(async () => {
     await _mw.loginWithEmail(createLoginCredentials());
   } catch (e: any) {
     console.error('[beforeAll]: Error', e);
+    throw e;
   }
 });
 
