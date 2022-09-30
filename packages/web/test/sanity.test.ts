@@ -80,14 +80,6 @@ describe('Core SDK tests', () => {
         () =>
           // @ts-expect-error Missing params
           new MirrorWorld({
-            apiKey,
-            staging,
-          })
-      ).not.toThrow();
-      expect(
-        () =>
-          // @ts-expect-error Missing params
-          new MirrorWorld({
             env: ClusterEnvironment.local,
           })
       ).toThrow();
