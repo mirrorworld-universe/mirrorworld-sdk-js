@@ -68,7 +68,7 @@ describe('Core SDK tests', () => {
       expect(mirrorworld instanceof MirrorWorld).toBe(true);
     });
     it('should fail when instance is created with incorrect parameters', () => {
-      expect.assertions(3);
+      expect.assertions(2);
       expect(() => {
         // @ts-expect-error Missing params
         return new MirrorWorld({
