@@ -535,7 +535,7 @@ export class MirrorWorld {
       throw result.error;
     }
     const response = await this.api.post<IResponse<IVerifiedCollection>>(
-      `/solana/mint/sub-collection`,
+      `/solana/mint/collection`,
       result.value
     );
     return response.data.data;
