@@ -188,7 +188,7 @@ describe('Core SDK tests', () => {
     let globalRootCollection: IVerifiedCollection;
     let globalSubCollection: IVerifiedCollection;
 
-    it('should successfully create NFT collection', async () => {
+    it.skip('should successfully create NFT collection', async () => {
       const collectionSymbol = `${Math.round(Math.random() * 1000)}`;
       const metadataUri =
         'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json';
