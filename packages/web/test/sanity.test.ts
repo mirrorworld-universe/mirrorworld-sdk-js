@@ -7,6 +7,7 @@ import { IVerifiedCollection, SolanaCommitment } from '../src/types/nft';
 import { random, waitFor } from './utils/timers';
 
 const apiServer = process.env.MIRRORWORLD_API_SERVER;
+const staging = process.env.MIRRORWORLD_API_SERVER_ENV === 'staging';
 const apiServiceServer = `${apiServer}/v1/devnet`;
 const apiKey = process.env.API_KEY!;
 const clientId = process.env.CLIENT_ID!;
@@ -39,40 +40,42 @@ async function requestSolAirdrop(address: string) {
 
 let _mw: MirrorWorld;
 beforeAll(async () => {
-  _mw = createInstance();
-  await _mw.loginWithEmail(createLoginCredentials());
+  try {
+    _mw = createInstance();
+    console.log('_mw', _mw);
+    await _mw.loginWithEmail(createLoginCredentials());
+  } catch (e: any) {
+    console.error('[beforeAll]: Error', e);
+    throw e;
+  }
 });
 
 export const createInstance = (options?: Partial<MirrorWorldOptions>) =>
   new MirrorWorld({
     apiKey,
     env: ClusterEnvironment.testnet,
+    staging,
   });
 
 describe('Core SDK tests', () => {
-  describe.skip('Sanity tests', () => {
+  describe('Sanity tests', () => {
     it('should properly create instance of sdk with correct params', () => {
       const mirrorworld = new MirrorWorld({
         apiKey,
         env: ClusterEnvironment.local,
+        staging,
       });
       expect(mirrorworld instanceof MirrorWorld).toBe(true);
     });
     it('should fail when instance is created with incorrect parameters', () => {
-      expect.assertions(3);
+      expect.assertions(2);
       expect(() => {
         // @ts-expect-error Missing params
         return new MirrorWorld({
           env: ClusterEnvironment.local,
+          staging,
         });
       }).toThrow();
-      expect(
-        () =>
-          // @ts-expect-error Missing params
-          new MirrorWorld({
-            apiKey,
-          })
-      ).toThrow();
       expect(
         () =>
           // @ts-expect-error Missing params
@@ -185,7 +188,7 @@ describe('Core SDK tests', () => {
     let globalRootCollection: IVerifiedCollection;
     let globalSubCollection: IVerifiedCollection;
 
-    it('should successfully create NFT collection', async () => {
+    it.skip('should successfully create NFT collection', async () => {
       const collectionSymbol = `${Math.round(Math.random() * 1000)}`;
       const metadataUri =
         'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json';
@@ -206,40 +209,7 @@ describe('Core SDK tests', () => {
       expect(collection.symbol).toEqual(collectionPayload.symbol);
       globalRootCollection = collection;
     });
-    it('should successfully create sub-collection', async () => {
-      try {
-        await waitFor(5000);
-        const subCollectionSymbol = `${Math.round(Math.random() * 1000)}`;
-        const metadataUri =
-          'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json';
-
-        const subCollectionPayload = {
-          name: `TEST_SUB_NFT_${subCollectionSymbol}`,
-          symbol: `SUBC${subCollectionSymbol}`,
-          metadataUri,
-          parentCollection: globalRootCollection.mint_address,
-        };
-
-        const subCollection = await _mw.createVerifiedSubCollection(
-          subCollectionPayload,
-          SolanaCommitment.finalized
-        );
-        console.log('subCollection', subCollection);
-        expect(subCollection).toBeTruthy();
-        expect(collectionSchema.validate(subCollection).error).toBeFalsy();
-        expect(subCollection.name).toEqual(subCollectionPayload.name);
-        expect(subCollection.url).toEqual(subCollectionPayload.metadataUri);
-        expect(subCollection.symbol).toEqual(subCollectionPayload.symbol);
-        expect(subCollection.collection).toEqual(
-          globalRootCollection.mint_address
-        );
-        globalSubCollection = subCollection;
-      } catch (e: any) {
-        console.error(e);
-        expect(e).toBeFalsy();
-      }
-    });
-    it.skip('should successfully mint into NFT root collection', async () => {
+    it.skip('should successfully mint into NFT collection', async () => {
       try {
         await waitFor(5000);
         const mintNFTPayload = {
@@ -248,25 +218,6 @@ describe('Core SDK tests', () => {
           metadataUri:
             'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json',
           collection: globalRootCollection.mint_address!,
-        };
-
-        const mintNFT = await _mw.mintNFT(mintNFTPayload);
-        expect(mintNFT).toBeTruthy();
-      } catch (e: any) {
-        console.error(e);
-        expect(e).toBeFalsy();
-      }
-    });
-
-    it.skip('should successfully mint into NFT sub collection', async () => {
-      try {
-        await waitFor(10000);
-        const mintNFTPayload = {
-          name: `TEST_NFT_${random()}`,
-          symbol: `SYM${random()}`,
-          metadataUri:
-            'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json',
-          collection: globalSubCollection.mint_address!,
         };
 
         const mintNFT = await _mw.mintNFT(mintNFTPayload);

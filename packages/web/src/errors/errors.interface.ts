@@ -99,6 +99,11 @@ const __ErrorCodes__ = {
     code: '000119',
     message: `The API Key you provided cannot be used in the staging environment. Only \`ClusterEnvironment.testnet\` is available on staging.`,
   },
+  INVALID_CREATE_ACTION_PAYLOAD: {
+    error: 'INVALID_CREATE_ACTION_PAYLOAD',
+    code: '000120',
+    message: `Validation failed for requesting approval for action`,
+  },
 };
 
 export type MirrorWorldSDKErrorCodes = typeof __ErrorCodes__;

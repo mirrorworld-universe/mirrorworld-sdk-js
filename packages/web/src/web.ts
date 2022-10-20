@@ -66,11 +66,14 @@ import {
 } from './validators/marketplace.validators';
 import { INFTListing } from './types/marketplace';
 import { throwError } from './errors/errors.interface';
+import { ActionType, IAction, ICreateActionPayload } from './types/actions';
+import { createActionSchema } from './validators/action.validator';
 
 export class MirrorWorld {
   // System variables
   _apiKey: MirrorWorldOptions['apiKey'];
   _env: MirrorWorldOptions['env'];
+  _staging: MirrorWorldOptions['staging'];
   _api: MirrorWorldAPIClient;
   _tokens: ISolanaToken[] = [];
   _transactions: ISolanaTransaction[] = [];
@@ -91,12 +94,15 @@ export class MirrorWorld {
       apiKey,
       env = ClusterEnvironment.mainnet,
       autoLoginCredentials,
+      staging = false,
     } = result.value;
+    this._staging = staging;
     this._apiKey = apiKey;
     this._env = env;
     this._api = createAPIClient(
       {
         apiKey,
+        staging,
       },
       env
     );
@@ -264,6 +270,14 @@ export class MirrorWorld {
     return this;
   }
 
+  async logout(): Promise<void> {
+    try {
+      await this.sso.post('/v1/auth/logout');
+      this._user = undefined;
+      this.emit('logout', null);
+    } catch (e) {}
+  }
+
   private async refreshAccessToken(refreshToken: string) {
     const response = await this.sso.get<
       IResponse<{
@@ -298,56 +312,70 @@ export class MirrorWorld {
   }
 
   private get authView() {
-    const result = mapServiceKeyToAuthView(this.apiKey, this._env)!;
-    return `${result.baseURL}/${this.apiKey}`;
+    const result = mapServiceKeyToAuthView(
+      this.apiKey,
+      this._env,
+      this._staging
+    )!;
+    return `${result.baseURL}`;
   }
 
-  login() {
-    return new Promise<{ user: IUser; refreshToken: string }>(
-      async (resolve, reject) => {
-        try {
-          console.log('Login');
-          if (!canUseDom) {
-            console.warn(`Auth Window Login is only available in the Browser.`);
-          }
+  /**
+   * Opens wallet window
+   * @param path
+   * @private
+   */
+  private async openWallet(path?: string): Promise<Window | null> {
+    if (!canUseDom) {
+      console.warn(`Auth Window Login is only available in the Browser.`);
+    }
 
-          const w = 380;
-          const h = 720;
+    const w = 380;
+    const h = 720;
 
-          // Check if user has multiple screens first.
-          const dualScreenLeft =
-            window.screenLeft !== undefined
-              ? window.screenLeft
-              : window.screenX;
-          const dualScreenTop =
-            window.screenTop !== undefined ? window.screenTop : window.screenY;
+    // Check if user has multiple screens first.
+    const dualScreenLeft =
+      window.screenLeft !== undefined ? window.screenLeft : window.screenX;
+    const dualScreenTop =
+      window.screenTop !== undefined ? window.screenTop : window.screenY;
 
-          const width = window.innerWidth
-            ? window.innerWidth
-            : document.documentElement.clientWidth
-            ? document.documentElement.clientWidth
-            : screen.width;
-          const height = window.innerHeight
-            ? window.innerHeight
-            : document.documentElement.clientHeight
-            ? document.documentElement.clientHeight
-            : screen.height;
+    const width = window.innerWidth
+      ? window.innerWidth
+      : document.documentElement.clientWidth
+      ? document.documentElement.clientWidth
+      : screen.width;
+    const height = window.innerHeight
+      ? window.innerHeight
+      : document.documentElement.clientHeight
+      ? document.documentElement.clientHeight
+      : screen.height;
 
-          const systemZoom = width / window.screen.availWidth;
-          const left = (width - w) / 2 / systemZoom + dualScreenLeft;
-          const top = (height - h) / 2 / systemZoom + dualScreenTop;
-          const authWindow = window.open(
-            this.authView,
-            '_blank',
-            `
+    const systemZoom = width / window.screen.availWidth;
+    const left = (width - w) / 2 / systemZoom + dualScreenLeft;
+    const top = (height - h) / 2 / systemZoom + dualScreenTop;
+    const authWindow = await window.open(
+      `${this.authView}${path}`,
+      '_blank',
+      `
             popup=true
             width=${w},
             height=${h},
             top=${top},
             left=${left}`
-          );
-          if (!!window.focus && !!authWindow?.focus) authWindow.focus();
+    );
+    if (!!window.focus && !!authWindow?.focus) authWindow.focus();
 
+    return authWindow;
+  }
+
+  /***
+   * Logs in a user. Opens a popup window for the login operation
+   */
+  login() {
+    return new Promise<{ user: IUser; refreshToken: string }>(
+      async (resolve, reject) => {
+        try {
+          const authWindow = await this.openWallet('');
           window.addEventListener('message', async (event) => {
             const { deserialize } = await import('bson');
             if (event.data?.name === 'mw:auth:login') {
@@ -374,6 +402,47 @@ export class MirrorWorld {
     );
   }
 
+  private getApprovalToken = (payload: ICreateActionPayload) =>
+    new Promise<{ action: IAction; authorization_token: string }>(
+      async (resolve, reject) => {
+        try {
+          const result = createActionSchema.validate(payload);
+          if (result.error) {
+            throw result.error;
+          }
+
+          const response = await this.sso.post<IResponse<IAction>>(
+            `/v1/auth/actions/request`,
+            payload
+          );
+
+          const action = response.data.data;
+
+          console.debug('action_created', action);
+          console.debug('action:requesting_approval for', action.uuid);
+          const approvalPath = `/approve/${action.uuid}`;
+          const authWindow = await this.openWallet(approvalPath);
+          window.addEventListener('message', async (event) => {
+            const { deserialize } = await import('bson');
+            if (event.data?.name === 'mw:action:approve') {
+              const payload = deserialize(event.data.payload);
+              console.debug('auth:approved_action', payload);
+              if (payload.action && payload.action.uuid === action.uuid) {
+                authWindow && authWindow.close();
+                resolve({
+                  authorization_token: payload.authorization_token,
+                  action: payload.action,
+                });
+              } else if (event.data?.name === 'mw:action:cancel') {
+                reject(`User denied approval for action:${action.uuid}.`);
+              }
+            }
+          });
+        } catch (e: any) {
+          reject(e.message);
+        }
+      }
+    );
   /**
    * Fetches an NFT's mint address on Solana
    * @param mintAddress
@@ -464,9 +533,19 @@ export class MirrorWorld {
     if (result.error) {
       throw result.error;
     }
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'transfer_spl_token',
+      value: payload.amount,
+      params: payload,
+    });
     const response = await this.api.post<IResponse<ITransferSPLTokenResponse>>(
       `/wallet/transfer-token`,
-      result.value
+      result.value,
+      {
+        headers: {
+          'x-authorization-token': authorization_token,
+        },
+      }
     );
     return response.data.data;
   }
@@ -485,9 +564,21 @@ export class MirrorWorld {
     if (result.error) {
       throw result.error;
     }
+
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'transfer_sol',
+      value: payload.amount,
+      params: payload,
+    });
+
     const response = await this.api.post<IResponse<ITransferSPLTokenResponse>>(
       `/wallet/transfer-sol`,
-      result.value
+      result.value,
+      {
+        headers: {
+          'x-authorization-token': authorization_token,
+        },
+      }
     );
     return response.data.data;
   }
@@ -509,34 +600,21 @@ export class MirrorWorld {
     if (result.error) {
       throw result.error;
     }
-    const response = await this.api.post<IResponse<IVerifiedCollection>>(
-      `/solana/mint/collection`,
-      result.value
-    );
-    return response.data.data;
-  }
 
-  /**
-   * @service Marketplace
-   * Create Verified SubCollection
-   */
-  async createVerifiedSubCollection(
-    payload: CreateVerifiedSubCollectionPayload,
-    commitment: SolanaCommitment = SolanaCommitment.confirmed
-  ): Promise<IVerifiedCollection> {
-    const result = createVerifiedSubCollectionSchema.validate({
-      name: payload.name,
-      symbol: payload.symbol,
-      url: payload.metadataUri,
-      collection_mint: payload.parentCollection,
-      confirmation: commitment,
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'create_collection',
+      value: 0,
+      params: payload,
     });
-    if (result.error) {
-      throw result.error;
-    }
+
     const response = await this.api.post<IResponse<IVerifiedCollection>>(
       `/solana/mint/collection`,
-      result.value
+      result.value,
+      {
+        headers: {
+          'x-authorization-token': authorization_token,
+        },
+      }
     );
     return response.data.data;
   }
@@ -555,9 +633,21 @@ export class MirrorWorld {
     if (result.error) {
       throw result.error;
     }
+
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'mint_nft',
+      value: 0,
+      params: payload,
+    });
+
     const response = await this.api.post<IResponse<ISolanaNFTMintResult>>(
       `/solana/mint/nft`,
-      result.value
+      result.value,
+      {
+        headers: {
+          'x-authorization-token': authorization_token,
+        },
+      }
     );
     return response.data.data;
   }
@@ -574,9 +664,20 @@ export class MirrorWorld {
     if (result.error) {
       throw result.error;
     }
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'list_nft',
+      value: payload.price,
+      params: payload,
+    });
+
     const response = await this.api.post<IResponse<INFTListing>>(
       `/solana/marketplace/list`,
-      result.value
+      result.value,
+      {
+        headers: {
+          'x-authorization-token': authorization_token,
+        },
+      }
     );
     return response.data.data;
   }
@@ -593,9 +694,19 @@ export class MirrorWorld {
     if (result.error) {
       throw result.error;
     }
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'buy_nft',
+      value: payload.price,
+      params: payload,
+    });
     const response = await this.api.post<IResponse<INFTListing>>(
       `/solana/marketplace/buy`,
-      result.value
+      result.value,
+      {
+        headers: {
+          'x-authorization-token': authorization_token,
+        },
+      }
     );
     return response.data.data;
   }
@@ -612,9 +723,19 @@ export class MirrorWorld {
     if (result.error) {
       throw result.error;
     }
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'update_listing',
+      value: payload.price,
+      params: payload,
+    });
     const response = await this.api.post<IResponse<INFTListing>>(
       `/solana/marketplace/update`,
-      result.value
+      result.value,
+      {
+        headers: {
+          'x-authorization-token': authorization_token,
+        },
+      }
     );
     return response.data.data;
   }
@@ -631,9 +752,19 @@ export class MirrorWorld {
     if (result.error) {
       throw result.error;
     }
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'cancel_listing',
+      value: payload.price,
+      params: payload,
+    });
     const response = await this.api.post<IResponse<INFTListing>>(
       `/solana/marketplace/cancel`,
-      result.value
+      result.value,
+      {
+        headers: {
+          'x-authorization-token': authorization_token,
+        },
+      }
     );
     return response.data.data;
   }
@@ -650,9 +781,19 @@ export class MirrorWorld {
     if (result.error) {
       throw result.error;
     }
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'transfer_nft',
+      value: 0,
+      params: payload,
+    });
     const response = await this.api.post<IResponse<INFTListing>>(
       `/solana/marketplace/transfer`,
-      result.value
+      result.value,
+      {
+        headers: {
+          'x-authorization-token': authorization_token,
+        },
+      }
     );
     return response.data.data;
   }

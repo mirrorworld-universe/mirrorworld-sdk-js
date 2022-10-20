@@ -27,6 +27,10 @@ export interface MirrorWorldOptions {
    * any potential malicious applications.
    */
   autoLoginCredentials?: string;
+  /**
+   * Is staging environment
+   */
+  staging?: boolean;
 }
 
 export type MirrorWorldEvents = {
