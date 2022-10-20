@@ -42,6 +42,7 @@
     "@types/bson": "^4.2.0",
     "axios": "^0.27.2",
     "bson": "^4.6.5",
+    "device-detector-js": "^3.0.3",
     "joi": "^17.6.0",
     "mitt": "^3.0.0"
   }
