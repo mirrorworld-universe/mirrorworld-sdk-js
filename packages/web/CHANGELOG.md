@@ -1,5 +1,11 @@
 # @mirrorworld/web3.js
 
+## 1.2.0
+
+### Minor Changes
+
+- 06ca3ea: Implements Action Approva
+
 ## 1.1.0
 
 ### Minor Changes
