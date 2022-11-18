@@ -64,7 +64,11 @@ import {
   cancelNFTListingSchema,
   listNFTSchema,
 } from './validators/marketplace.validators';
-import { INFTListing } from './types/marketplace';
+import {
+  CreateMarketplacePayload,
+  ICreateMarketplacePayload,
+  INFTListing,
+} from './types/marketplace';
 import { throwError } from './errors/errors.interface';
 import { IAction, ICreateActionPayload } from './types/actions';
 import { createActionSchema } from './validators/action.validator';
@@ -945,4 +949,6 @@ export class MirrorWorld {
     >(`/solana/activity/${mintAddress}`);
     return response.data?.data;
   }
+
+  async createMarketplace(payload: CreateMarketplacePayload) {}
 }

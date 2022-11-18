@@ -109,6 +109,11 @@ const __ErrorCodes__ = {
     code: '000121',
     message: `Validation failed for update NFT mint`,
   },
+  INVALID_CREATE_MARKETPLACE_PAYLOAD: {
+    error: 'INVALID_CREATE_MARKETPLACE_PAYLOAD',
+    code: '000122',
+    message: `Validation failed for create marketplace`,
+  },
 };
 
 export type MirrorWorldSDKErrorCodes = typeof __ErrorCodes__;
