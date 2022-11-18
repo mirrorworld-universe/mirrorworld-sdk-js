@@ -62,12 +62,16 @@ import {
 import {
   buyNFTSchema,
   cancelNFTListingSchema,
+  createMarketplaceSchema,
   listNFTSchema,
+  updateMarketplaceSchema,
 } from './validators/marketplace.validators';
 import {
   CreateMarketplacePayload,
   ICreateMarketplacePayload,
+  IMarketplaceResponse,
   INFTListing,
+  UpdateMarketplacePayload,
 } from './types/marketplace';
 import { throwError } from './errors/errors.interface';
 import { IAction, ICreateActionPayload } from './types/actions';
@@ -950,5 +954,72 @@ export class MirrorWorld {
     return response.data?.data;
   }
 
-  async createMarketplace(payload: CreateMarketplacePayload) {}
+  /**
+   * Creates a new marketplace instance.
+   * @param payload
+   */
+  async createMarketplace(payload: CreateMarketplacePayload) {
+    const result = createMarketplaceSchema.validate({
+      treasury_mint: payload.treasureMint,
+      collections: payload.collections,
+      seller_fee_basis_points: payload.sellerFeeBasisPoints,
+      storefront: payload.storefront,
+    });
+    if (result.error) {
+      throw result.error;
+    }
+
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'create_marketplace',
+      value: 0,
+      params: payload,
+    });
+
+    const response = await this.api.post<IResponse<IMarketplaceResponse>>(
+      `/solana/marketplaces/create`,
+      result.value,
+      {
+        headers: {
+          'x-authorization-token': authorization_token,
+        },
+      }
+    );
+
+    return response.data?.data?.marketplace;
+  }
+
+  /**
+   * Updates a marketplace instance.
+   * @param payload
+   */
+  async updateMarketplace(payload: UpdateMarketplacePayload) {
+    const result = updateMarketplaceSchema.validate({
+      treasury_mint: payload.treasureMint,
+      collections: payload.collections,
+      seller_fee_basis_points: payload.sellerFeeBasisPoints,
+      storefront: payload.storefront,
+      new_authority: payload.newAuthority,
+    });
+    if (result.error) {
+      throw result.error;
+    }
+
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'update_marketplace',
+      value: 0,
+      params: payload,
+    });
+
+    const response = await this.api.post<IResponse<IMarketplaceResponse>>(
+      `/solana/marketplaces/update`,
+      result.value,
+      {
+        headers: {
+          'x-authorization-token': authorization_token,
+        },
+      }
+    );
+
+    return response.data?.data?.marketplace;
+  }
 }

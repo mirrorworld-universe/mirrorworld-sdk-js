@@ -74,3 +74,30 @@ export interface UpdateMarketplacePayload
    */
   newAuthority?: string;
 }
+
+export interface IMarketplaceResponse {
+  marketplace: Marketplace;
+  transactionStatus: string;
+  signature: string;
+}
+
+export interface Marketplace {
+  name: string;
+  id: number;
+  client_id: string;
+  user_id: number;
+  auction_house: string;
+  authority: string;
+  auction_house_treasury: string;
+  auction_house_fee_account: string;
+  fee_withdrawal_destination: string;
+  requires_sign_off: boolean;
+  can_change_sale_price: boolean;
+  treasury_mint: string;
+  treasury_withdrawal_destination: string;
+  seller_fee_basis_points: number;
+  storefront_url?: null;
+  signature: string;
+  updatedAt: string;
+  createdAt: string;
+}
