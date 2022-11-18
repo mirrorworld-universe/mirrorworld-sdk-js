@@ -104,6 +104,11 @@ const __ErrorCodes__ = {
     code: '000120',
     message: `Validation failed for requesting approval for action`,
   },
+  INVALID_UPDATE_NFT_PAYLOAD: {
+    error: 'INVALID_UPDATE_NFT_PAYLOAD',
+    code: '000121',
+    message: `Validation failed for update NFT mint`,
+  },
 };
 
 export type MirrorWorldSDKErrorCodes = typeof __ErrorCodes__;

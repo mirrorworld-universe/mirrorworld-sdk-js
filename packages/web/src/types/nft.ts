@@ -58,6 +58,31 @@ export interface MintNFTPayload
   collection: string;
 }
 
+export interface IUpdateNFTPayload {
+  name?: string;
+  symbol?: string;
+  url?: string;
+  mint_address: string;
+  update_authority?: string;
+  seller_fee_basis_points?: number;
+  confirmation: SolanaCommitment;
+}
+
+export interface UpdateNFTPayload
+  extends Omit<
+    IUpdateNFTPayload,
+    | 'url'
+    | 'seller_fee_basis_points'
+    | 'confirmation'
+    | 'mint_address'
+    | 'update_authority'
+  > {
+  metadataUri: string;
+  sellerFeeBasisPoints?: number;
+  mintAddress: string;
+  updateAuthority?: string;
+}
+
 export interface IListNFTPayload {
   mint_address: string;
   /**

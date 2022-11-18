@@ -19,7 +19,6 @@ import { canUseDom } from './utils';
 import {
   CancelListingPayload,
   CreateVerifiedCollectionPayload,
-  CreateVerifiedSubCollectionPayload,
   ISolanaNFT,
   ISolanaNFTMintResult,
   IVerifiedCollection,
@@ -34,6 +33,7 @@ import {
   SolanaNFTExtended,
   TransferNFTPayload,
   UpdateListingPayload,
+  UpdateNFTPayload,
 } from './types/nft';
 import {
   ISolanaToken,
@@ -51,13 +51,13 @@ import {
 } from './validators/token.validators';
 import {
   createVerifiedCollectionSchema,
-  createVerifiedSubCollectionSchema,
   fetchNFTsByCreatorAddressesSchema,
   fetchNFTsByMintAddressesSchema,
   fetchNFTsByOwnerAddressesSchema,
   fetchNFTsByUpdateAuthoritiesSchema,
   mintNFTSchema,
   transferNFTSchema,
+  updateNFTSchema,
 } from './validators/nft.validators';
 import {
   buyNFTSchema,
@@ -66,7 +66,7 @@ import {
 } from './validators/marketplace.validators';
 import { INFTListing } from './types/marketplace';
 import { throwError } from './errors/errors.interface';
-import { ActionType, IAction, ICreateActionPayload } from './types/actions';
+import { IAction, ICreateActionPayload } from './types/actions';
 import { createActionSchema } from './validators/action.validator';
 
 export class MirrorWorld {
@@ -642,6 +642,45 @@ export class MirrorWorld {
 
     const response = await this.api.post<IResponse<ISolanaNFTMintResult>>(
       `/solana/mint/nft`,
+      result.value,
+      {
+        headers: {
+          'x-authorization-token': authorization_token,
+        },
+      }
+    );
+    return response.data.data;
+  }
+
+  /**
+   * @service Marketplace
+   * Update NFT metadata
+   */
+  async updateNFT(
+    payload: UpdateNFTPayload,
+    commitment: SolanaCommitment = SolanaCommitment.confirmed
+  ): Promise<ISolanaNFTMintResult> {
+    const result = updateNFTSchema.validate({
+      mint_address: payload.mintAddress,
+      name: payload.name,
+      symbol: payload.symbol,
+      url: payload.metadataUri,
+      update_authority: payload.updateAuthority,
+      seller_fee_basis_points: payload.sellerFeeBasisPoints,
+      confirmation: commitment,
+    });
+    if (result.error) {
+      throw result.error;
+    }
+
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'update_nft',
+      value: 0,
+      params: payload,
+    });
+
+    const response = await this.api.post<IResponse<ISolanaNFTMintResult>>(
+      `/solana/mint/update`,
       result.value,
       {
         headers: {
