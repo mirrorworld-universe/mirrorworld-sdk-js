@@ -114,6 +114,11 @@ const __ErrorCodes__ = {
     code: '000122',
     message: `Validation failed for create marketplace`,
   },
+  INVALID_UPDATE_MARKETPLACE_PAYLOAD: {
+    error: 'INVALID_UPDATE_MARKETPLACE_PAYLOAD',
+    code: '000123',
+    message: `Validation failed for update marketplace`,
+  },
 };
 
 export type MirrorWorldSDKErrorCodes = typeof __ErrorCodes__;
