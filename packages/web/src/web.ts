@@ -72,6 +72,7 @@ import {
   ICreateMarketplacePayload,
   IMarketplaceResponse,
   INFTListing,
+  Marketplace,
   UpdateMarketplacePayload,
 } from './types/marketplace';
 import { throwError } from './errors/errors.interface';
@@ -963,9 +964,11 @@ export class MirrorWorld {
    * Creates a new marketplace instance.
    * @param payload
    */
-  async createMarketplace(payload: CreateMarketplacePayload) {
+  async createMarketplace(
+    payload: CreateMarketplacePayload
+  ): Promise<Marketplace> {
     const result = createMarketplaceSchema.validate({
-      treasury_mint: payload.treasureMint,
+      treasury_mint: payload.treasuryMint,
       collections: payload.collections,
       seller_fee_basis_points: payload.sellerFeeBasisPoints,
       storefront: payload.storefront,
@@ -999,7 +1002,7 @@ export class MirrorWorld {
    */
   async updateMarketplace(payload: UpdateMarketplacePayload) {
     const result = updateMarketplaceSchema.validate({
-      treasury_mint: payload.treasureMint,
+      treasury_mint: payload.treasuryMint,
       collections: payload.collections,
       seller_fee_basis_points: payload.sellerFeeBasisPoints,
       storefront: payload.storefront,

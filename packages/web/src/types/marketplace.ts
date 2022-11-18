@@ -38,7 +38,7 @@ export interface CreateMarketplacePayload
   /**
    * The token in which transactions on the marketplace will occur
    */
-  treasureMint?: string;
+  treasuryMint?: string;
   /**
    * The marketplace trading commission
    */
@@ -61,7 +61,7 @@ export interface UpdateMarketplacePayload
   /**
    * The token in which transactions on the marketplace will occur
    */
-  treasureMint?: string;
+  treasuryMint?: string;
   /**
    * The marketplace trading commission
    */
