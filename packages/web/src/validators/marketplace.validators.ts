@@ -41,6 +41,18 @@ export const listNFTSchema = joi.object<IListNFTPayload>({
         )
       )
     ),
+  auction_house: joi
+    .string()
+    .optional()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_LIST_NFT_PAYLOAD',
+        toErrorMessage(
+          'INVALID_LIST_NFT_PAYLOAD',
+          '`auction_house` should be a valid auction_house address'
+        )
+      )
+    ),
 });
 
 export const buyNFTSchema = joi.object<IBuyNFTPayload>({
@@ -65,6 +77,18 @@ export const buyNFTSchema = joi.object<IBuyNFTPayload>({
         toErrorMessage(
           'INVALID_PURCHASE_NFT_PAYLOAD',
           '`price` should be a valid number'
+        )
+      )
+    ),
+  auction_house: joi
+    .string()
+    .optional()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_PURCHASE_NFT_PAYLOAD',
+        toErrorMessage(
+          'INVALID_PURCHASE_NFT_PAYLOAD',
+          '`auction_house` should be a valid auction_house address'
         )
       )
     ),
@@ -95,6 +119,18 @@ export const updateNFTListingSchema = joi.object<IUpdateListingPayload>({
         )
       )
     ),
+  auction_house: joi
+    .string()
+    .optional()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_UPDATE_LISTING_NFT_PAYLOAD',
+        toErrorMessage(
+          'INVALID_UPDATE_LISTING_NFT_PAYLOAD',
+          '`auction_house` should be a valid auction_house address'
+        )
+      )
+    ),
 });
 
 export const cancelNFTListingSchema = joi.object<ICancelNFTPayload>({
@@ -119,6 +155,18 @@ export const cancelNFTListingSchema = joi.object<ICancelNFTPayload>({
         toErrorMessage(
           'INVALID_CANCEL_LISTING_NFT_PAYLOAD',
           '`price` should be a valid number'
+        )
+      )
+    ),
+  auction_house: joi
+    .string()
+    .optional()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_CANCEL_LISTING_NFT_PAYLOAD',
+        toErrorMessage(
+          'INVALID_CANCEL_LISTING_NFT_PAYLOAD',
+          '`auction_house` should be a valid auction_house address'
         )
       )
     ),

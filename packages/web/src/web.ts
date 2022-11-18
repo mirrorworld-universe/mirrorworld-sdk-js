@@ -17,6 +17,7 @@ import { IUser, UserWithWallet, Wallet } from './types/user.type';
 import { AxiosRequestConfig } from 'axios';
 import { canUseDom } from './utils';
 import {
+  BuyNFTPayload,
   CancelListingPayload,
   CreateVerifiedCollectionPayload,
   ISolanaNFT,
@@ -707,6 +708,7 @@ export class MirrorWorld {
     const result = listNFTSchema.validate({
       mint_address: payload.mintAddress,
       price: payload.price,
+      auction_house: payload.auctionHouse,
     });
     if (result.error) {
       throw result.error;
@@ -733,10 +735,11 @@ export class MirrorWorld {
    * @service Marketplace
    * Purchase NFT on Mirror World Marketplace
    */
-  async buyNFT(payload: ListNFTPayload): Promise<INFTListing> {
+  async buyNFT(payload: BuyNFTPayload): Promise<INFTListing> {
     const result = buyNFTSchema.validate({
       mint_address: payload.mintAddress,
       price: payload.price,
+      auction_house: payload.auctionHouse,
     });
     if (result.error) {
       throw result.error;
@@ -766,6 +769,7 @@ export class MirrorWorld {
     const result = buyNFTSchema.validate({
       mint_address: payload.mintAddress,
       price: payload.price,
+      auction_house: payload.auctionHouse,
     });
     if (result.error) {
       throw result.error;
@@ -795,6 +799,7 @@ export class MirrorWorld {
     const result = cancelNFTListingSchema.validate({
       mint_address: payload.mintAddress,
       price: payload.price,
+      auction_house: payload.auctionHouse,
     });
     if (result.error) {
       throw result.error;
