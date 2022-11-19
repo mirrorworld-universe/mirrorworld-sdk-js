@@ -1,5 +1,12 @@
 # @mirrorworld/web3.js
 
+## 1.3.0
+
+### Minor Changes
+
+- 421e032: Add query marketplaces method
+- 292935c: Update create marketplace methods
+
 ## 1.2.0
 
 ### Minor Changes
