@@ -1,3 +1,5 @@
+import { AxiosRequestConfig } from 'axios';
+import qs from 'query-string';
 import {
   MirrorWorldEventKey,
   MirrorWorldEvents,
@@ -12,14 +14,13 @@ import { ClusterEnvironment } from './services/cluster';
 import { emitter } from './events/emitter';
 import { clientOptionsSchema } from './validators';
 import { LoginEmailCredentials } from './types/auth';
-import { IResponse } from './types/response.type';
+import { IPaginatedResponse, IResponse } from './types/response.type';
 import { IUser, UserWithWallet, Wallet } from './types/user.type';
-import { AxiosRequestConfig } from 'axios';
 import { canUseDom } from './utils';
 import {
+  BuyNFTPayload,
   CancelListingPayload,
   CreateVerifiedCollectionPayload,
-  CreateVerifiedSubCollectionPayload,
   ISolanaNFT,
   ISolanaNFTMintResult,
   IVerifiedCollection,
@@ -34,6 +35,7 @@ import {
   SolanaNFTExtended,
   TransferNFTPayload,
   UpdateListingPayload,
+  UpdateNFTPayload,
 } from './types/nft';
 import {
   ISolanaToken,
@@ -51,22 +53,32 @@ import {
 } from './validators/token.validators';
 import {
   createVerifiedCollectionSchema,
-  createVerifiedSubCollectionSchema,
   fetchNFTsByCreatorAddressesSchema,
   fetchNFTsByMintAddressesSchema,
   fetchNFTsByOwnerAddressesSchema,
   fetchNFTsByUpdateAuthoritiesSchema,
   mintNFTSchema,
   transferNFTSchema,
+  updateNFTSchema,
 } from './validators/nft.validators';
 import {
   buyNFTSchema,
   cancelNFTListingSchema,
+  createMarketplaceSchema,
   listNFTSchema,
+  updateMarketplaceSchema,
 } from './validators/marketplace.validators';
-import { INFTListing } from './types/marketplace';
+import {
+  CreateMarketplacePayload,
+  IMarketplaceQueryResult,
+  IMarketplaceResponse,
+  INFTListing,
+  Marketplace,
+  MarketplaceQueryOptions,
+  UpdateMarketplacePayload,
+} from './types/marketplace';
 import { throwError } from './errors/errors.interface';
-import { ActionType, IAction, ICreateActionPayload } from './types/actions';
+import { IAction, ICreateActionPayload } from './types/actions';
 import { createActionSchema } from './validators/action.validator';
 
 export class MirrorWorld {
@@ -654,12 +666,52 @@ export class MirrorWorld {
 
   /**
    * @service Marketplace
+   * Update NFT metadata
+   */
+  async updateNFT(
+    payload: UpdateNFTPayload,
+    commitment: SolanaCommitment = SolanaCommitment.confirmed
+  ): Promise<ISolanaNFTMintResult> {
+    const result = updateNFTSchema.validate({
+      mint_address: payload.mintAddress,
+      name: payload.name,
+      symbol: payload.symbol,
+      url: payload.metadataUri,
+      update_authority: payload.updateAuthority,
+      seller_fee_basis_points: payload.sellerFeeBasisPoints,
+      confirmation: commitment,
+    });
+    if (result.error) {
+      throw result.error;
+    }
+
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'update_nft',
+      value: 0,
+      params: payload,
+    });
+
+    const response = await this.api.post<IResponse<ISolanaNFTMintResult>>(
+      `/solana/mint/update`,
+      result.value,
+      {
+        headers: {
+          'x-authorization-token': authorization_token,
+        },
+      }
+    );
+    return response.data.data;
+  }
+
+  /**
+   * @service Marketplace
    * List NFT ion Mirror World Marketplace
    */
   async listNFT(payload: ListNFTPayload): Promise<INFTListing> {
     const result = listNFTSchema.validate({
       mint_address: payload.mintAddress,
       price: payload.price,
+      auction_house: payload.auctionHouse,
     });
     if (result.error) {
       throw result.error;
@@ -686,10 +738,11 @@ export class MirrorWorld {
    * @service Marketplace
    * Purchase NFT on Mirror World Marketplace
    */
-  async buyNFT(payload: ListNFTPayload): Promise<INFTListing> {
+  async buyNFT(payload: BuyNFTPayload): Promise<INFTListing> {
     const result = buyNFTSchema.validate({
       mint_address: payload.mintAddress,
       price: payload.price,
+      auction_house: payload.auctionHouse,
     });
     if (result.error) {
       throw result.error;
@@ -719,6 +772,7 @@ export class MirrorWorld {
     const result = buyNFTSchema.validate({
       mint_address: payload.mintAddress,
       price: payload.price,
+      auction_house: payload.auctionHouse,
     });
     if (result.error) {
       throw result.error;
@@ -748,6 +802,7 @@ export class MirrorWorld {
     const result = cancelNFTListingSchema.validate({
       mint_address: payload.mintAddress,
       price: payload.price,
+      auction_house: payload.auctionHouse,
     });
     if (result.error) {
       throw result.error;
@@ -905,5 +960,111 @@ export class MirrorWorld {
       IResponse<SolanaNFTAuctionActivitiesPayload>
     >(`/solana/activity/${mintAddress}`);
     return response.data?.data;
+  }
+
+  /**
+   * Creates a new marketplace instance.
+   * @param payload
+   */
+  async createMarketplace(
+    payload: CreateMarketplacePayload
+  ): Promise<Marketplace> {
+    const result = createMarketplaceSchema.validate({
+      treasury_mint: payload.treasuryMint,
+      collections: payload.collections,
+      seller_fee_basis_points: payload.sellerFeeBasisPoints,
+      storefront: payload.storefront,
+    });
+    if (result.error) {
+      throw result.error;
+    }
+
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'create_marketplace',
+      value: 0,
+      params: payload,
+    });
+
+    const response = await this.api.post<IResponse<IMarketplaceResponse>>(
+      `/solana/marketplaces/create`,
+      result.value,
+      {
+        headers: {
+          'x-authorization-token': authorization_token,
+        },
+      }
+    );
+
+    return response.data?.data?.marketplace;
+  }
+
+  /**
+   * Updates a marketplace instance.
+   * @param payload
+   */
+  async updateMarketplace(payload: UpdateMarketplacePayload) {
+    const result = updateMarketplaceSchema.validate({
+      treasury_mint: payload.treasuryMint,
+      collections: payload.collections,
+      seller_fee_basis_points: payload.sellerFeeBasisPoints,
+      storefront: payload.storefront,
+      new_authority: payload.newAuthority,
+    });
+    if (result.error) {
+      throw result.error;
+    }
+
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'update_marketplace',
+      value: 0,
+      params: payload,
+    });
+
+    const response = await this.api.post<IResponse<IMarketplaceResponse>>(
+      `/solana/marketplaces/update`,
+      result.value,
+      {
+        headers: {
+          'x-authorization-token': authorization_token,
+        },
+      }
+    );
+
+    return response.data?.data?.marketplace;
+  }
+
+  /**
+   * Queries marketplaces by the following properties
+   * | 'name'
+   * | 'client_id'
+   * | 'authority'
+   * | 'treasury_mint'
+   * | 'auction_house_fee_account'
+   * | 'auction_house_treasury'
+   * | 'treasury_withdrawal_destination'
+   * | 'fee_withdrawal_destination'
+   * | 'seller_fee_basis_points'
+   * | 'requires_sign_off'
+   * | 'can_change_sale_price'
+   * @param query
+   * @param pagination
+   */
+  async queryMarketplaces(
+    query: MarketplaceQueryOptions,
+    pagination: {
+      page?: number;
+      count?: number;
+    } = {
+      page: 1,
+      count: 24,
+    }
+  ): Promise<IMarketplaceQueryResult[]> {
+    const params = qs.stringify({ ...query, ...pagination });
+
+    const response = await this.api.get<
+      IPaginatedResponse<IMarketplaceQueryResult[]>
+    >(`/solana/marketplaces?${params}`);
+
+    return response.data.data.data;
   }
 }

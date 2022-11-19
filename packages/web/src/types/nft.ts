@@ -58,16 +58,49 @@ export interface MintNFTPayload
   collection: string;
 }
 
+export interface IUpdateNFTPayload {
+  name?: string;
+  symbol?: string;
+  url?: string;
+  mint_address: string;
+  update_authority?: string;
+  seller_fee_basis_points?: number;
+  confirmation: SolanaCommitment;
+}
+
+export interface UpdateNFTPayload
+  extends Omit<
+    IUpdateNFTPayload,
+    | 'url'
+    | 'seller_fee_basis_points'
+    | 'confirmation'
+    | 'mint_address'
+    | 'update_authority'
+  > {
+  metadataUri: string;
+  sellerFeeBasisPoints?: number;
+  mintAddress: string;
+  updateAuthority?: string;
+}
+
 export interface IListNFTPayload {
   mint_address: string;
   /**
    * Listing Price of the NFT
    */
   price: number;
+  auction_house?: string;
 }
 
-export interface ListNFTPayload extends Omit<IListNFTPayload, 'mint_address'> {
+export interface ListNFTPayload
+  extends Omit<IListNFTPayload, 'mint_address' | 'auction_house'> {
   mintAddress: string;
+  /**
+   * Auction House address of the marketplace
+   * you are canceling the listing for. Be default, it falls back to the
+   * Official Mirror World Marketplace Instance
+   */
+  auctionHouse?: string;
 }
 
 export interface IUpdateListingPayload {
@@ -76,14 +109,21 @@ export interface IUpdateListingPayload {
    * Listing Price of the NFT
    */
   price: number;
+  auction_house?: string;
 }
 
 export interface UpdateListingPayload
-  extends Omit<IUpdateListingPayload, 'mint_address'> {
+  extends Omit<IUpdateListingPayload, 'mint_address' | 'auction_house'> {
   /**
    * Mint Address of the NFT listing being updated
    */
   mintAddress: string;
+  /**
+   * Auction House address of the marketplace
+   * you are canceling the listing for. Be default, it falls back to the
+   * Official Mirror World Marketplace Instance
+   */
+  auctionHouse?: string;
 }
 
 export interface IBuyNFTPayload {
@@ -92,13 +132,21 @@ export interface IBuyNFTPayload {
    * Listing Price of the NFT
    */
   price: number;
+  auction_house?: string;
 }
 
-export interface BuyNFTPayload extends Omit<IBuyNFTPayload, 'mint_address'> {
+export interface BuyNFTPayload
+  extends Omit<IBuyNFTPayload, 'mint_address' | 'auction_house'> {
   /**
    * Mint Address of the NFT being purchased
    */
   mintAddress: string;
+  /**
+   * Auction House address of the marketplace
+   * you are canceling the listing for. Be default, it falls back to the
+   * Official Mirror World Marketplace Instance
+   */
+  auctionHouse?: string;
 }
 
 export interface ICancelNFTPayload {
@@ -107,14 +155,21 @@ export interface ICancelNFTPayload {
    * Listing Price of the NFT
    */
   price: number;
+  auction_house?: string;
 }
 
 export interface CancelListingPayload
-  extends Omit<ICancelNFTPayload, 'mint_address'> {
+  extends Omit<ICancelNFTPayload, 'mint_address' | 'auction_house'> {
   /**
    * Mint Address of the NFT listing being cancelled
    */
   mintAddress: string;
+  /**
+   * Auction House address of the marketplace
+   * you are canceling the listing for. Be default, it falls back to the
+   * Official Mirror World Marketplace Instance
+   */
+  auctionHouse?: string;
 }
 
 export interface ITransferNFTPayload {

@@ -104,6 +104,21 @@ const __ErrorCodes__ = {
     code: '000120',
     message: `Validation failed for requesting approval for action`,
   },
+  INVALID_UPDATE_NFT_PAYLOAD: {
+    error: 'INVALID_UPDATE_NFT_PAYLOAD',
+    code: '000121',
+    message: `Validation failed for update NFT mint`,
+  },
+  INVALID_CREATE_MARKETPLACE_PAYLOAD: {
+    error: 'INVALID_CREATE_MARKETPLACE_PAYLOAD',
+    code: '000122',
+    message: `Validation failed for create marketplace`,
+  },
+  INVALID_UPDATE_MARKETPLACE_PAYLOAD: {
+    error: 'INVALID_UPDATE_MARKETPLACE_PAYLOAD',
+    code: '000123',
+    message: `Validation failed for update marketplace`,
+  },
 };
 
 export type MirrorWorldSDKErrorCodes = typeof __ErrorCodes__;

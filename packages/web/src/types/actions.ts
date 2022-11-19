@@ -28,6 +28,7 @@ export interface ICreateActionPayload {
 }
 export type ActionType =
   | 'mint_nft'
+  | 'update_nft'
   | 'transfer_sol'
   | 'transfer_spl_token'
   | 'create_collection'
@@ -45,6 +46,7 @@ export type Device = DeviceDetector.DeviceDetectorResult;
 
 export const validActions = [
   'mint_nft',
+  'update_nft',
   'transfer_spl_token',
   'transfer_sol',
   'create_collection',
