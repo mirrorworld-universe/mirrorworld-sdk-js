@@ -1,6 +1,6 @@
 {
   "name": "@mirrorworld/web3.js",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Mirror World Web SDK",
   "keywords": [
     "mirrorworld",
@@ -44,6 +44,7 @@
     "bson": "^4.6.5",
     "device-detector-js": "^3.0.3",
     "joi": "^17.6.0",
-    "mitt": "^3.0.0"
+    "mitt": "^3.0.0",
+    "query-string": "^7.1.1"
   }
 }

@@ -18,6 +18,7 @@ export const createActionSchema = joi.object<ICreateActionPayload>({
           '`type` should be a one of: ' +
             [
               'mint_nft',
+              'update_nft',
               'transfer_sol',
               'transfer_spl_token',
               'create_collection',

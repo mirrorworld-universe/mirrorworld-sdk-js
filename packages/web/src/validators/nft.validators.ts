@@ -4,6 +4,7 @@ import {
   ICreateVerifiedSubCollectionPayload,
   IMintNFTPayload,
   ITransferNFTPayload,
+  IUpdateNFTPayload,
 } from '../types/nft';
 import joi from 'joi';
 import {
@@ -178,6 +179,97 @@ export const mintNFTSchema = joi.object<IMintNFTPayload>({
         toErrorMessage(
           'INVALID_MINT_NFT_PAYLOAD',
           '`metadataUri` should be a valid url'
+        )
+      )
+    ),
+});
+
+export const updateNFTSchema = joi.object<IUpdateNFTPayload>({
+  mint_address: joi
+    .string()
+    .required()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_UPDATE_NFT_PAYLOAD',
+        toErrorMessage(
+          'INVALID_UPDATE_NFT_PAYLOAD',
+          '`mint_address` should be a valid mint address'
+        )
+      )
+    ),
+  name: joi
+    .string()
+    .optional()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_UPDATE_NFT_PAYLOAD',
+        toErrorMessage(
+          'INVALID_UPDATE_NFT_PAYLOAD',
+          '`name` should be a valid string'
+        )
+      )
+    ),
+  symbol: joi
+    .string()
+    .optional()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_UPDATE_NFT_PAYLOAD',
+        toErrorMessage(
+          'INVALID_UPDATE_NFT_PAYLOAD',
+          '`symbol` should be a valid string of less than 10 characters'
+        )
+      )
+    ),
+  update_authority: joi
+    .string()
+    .optional()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_UPDATE_NFT_PAYLOAD',
+        toErrorMessage(
+          'INVALID_UPDATE_NFT_PAYLOAD',
+          '`update_authority` should be a valid publick key string'
+        )
+      )
+    ),
+  seller_fee_basis_points: joi
+    .number()
+    .min(0)
+    .max(10000)
+    .optional()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_UPDATE_NFT_PAYLOAD',
+        toErrorMessage(
+          'INVALID_UPDATE_NFT_PAYLOAD',
+          '`seller_fee_basis_points` should be a valid number between 0 and 10000'
+        )
+      )
+    ),
+  url: joi
+    .string()
+    .uri()
+    .optional()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_UPDATE_NFT_PAYLOAD',
+        toErrorMessage(
+          'INVALID_UPDATE_NFT_PAYLOAD',
+          '`metadataUri` should be a valid url'
+        )
+      )
+    ),
+  confirmation: joi
+    .string()
+    .valid('confirmed', 'finalized')
+    .optional()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_UPDATE_NFT_PAYLOAD',
+        toErrorMessage(
+          'INVALID_UPDATE_NFT_PAYLOAD',
+          '`commitment` should be one of "confirmed" or "finalized"'
         )
       )
     ),

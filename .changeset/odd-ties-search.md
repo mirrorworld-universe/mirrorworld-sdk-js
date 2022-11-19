@@ -2,4 +2,4 @@
 '@mirrorworld/web3.js': minor
 ---
 
-Implements Action Approva
+Add query marketplaces method
