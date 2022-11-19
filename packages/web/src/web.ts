@@ -1,3 +1,5 @@
+import { AxiosRequestConfig } from 'axios';
+import qs from 'query-string';
 import {
   MirrorWorldEventKey,
   MirrorWorldEvents,
@@ -12,9 +14,8 @@ import { ClusterEnvironment } from './services/cluster';
 import { emitter } from './events/emitter';
 import { clientOptionsSchema } from './validators';
 import { LoginEmailCredentials } from './types/auth';
-import { IResponse } from './types/response.type';
+import { IPaginatedResponse, IResponse } from './types/response.type';
 import { IUser, UserWithWallet, Wallet } from './types/user.type';
-import { AxiosRequestConfig } from 'axios';
 import { canUseDom } from './utils';
 import {
   BuyNFTPayload,
@@ -69,10 +70,11 @@ import {
 } from './validators/marketplace.validators';
 import {
   CreateMarketplacePayload,
-  ICreateMarketplacePayload,
+  IMarketplaceQueryResult,
   IMarketplaceResponse,
   INFTListing,
   Marketplace,
+  MarketplaceQueryOptions,
   UpdateMarketplacePayload,
 } from './types/marketplace';
 import { throwError } from './errors/errors.interface';
@@ -1029,5 +1031,40 @@ export class MirrorWorld {
     );
 
     return response.data?.data?.marketplace;
+  }
+
+  /**
+   * Queries marketplaces by the following properties
+   * | 'name'
+   * | 'client_id'
+   * | 'authority'
+   * | 'treasury_mint'
+   * | 'auction_house_fee_account'
+   * | 'auction_house_treasury'
+   * | 'treasury_withdrawal_destination'
+   * | 'fee_withdrawal_destination'
+   * | 'seller_fee_basis_points'
+   * | 'requires_sign_off'
+   * | 'can_change_sale_price'
+   * @param query
+   * @param pagination
+   */
+  async queryMarketplaces(
+    query: MarketplaceQueryOptions,
+    pagination: {
+      page?: number;
+      count?: number;
+    } = {
+      page: 1,
+      count: 24,
+    }
+  ): Promise<IMarketplaceQueryResult[]> {
+    const params = qs.stringify({ ...query, ...pagination });
+
+    const response = await this.api.get<
+      IPaginatedResponse<IMarketplaceQueryResult[]>
+    >(`/solana/marketplaces?${params}`);
+
+    return response.data.data.data;
   }
 }

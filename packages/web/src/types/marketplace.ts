@@ -82,8 +82,8 @@ export interface IMarketplaceResponse {
 }
 
 export interface Marketplace {
-  name: string;
   id: number;
+  name: string;
   client_id: string;
   user_id: number;
   auction_house: string;
@@ -100,4 +100,36 @@ export interface Marketplace {
   signature: string;
   updatedAt: string;
   createdAt: string;
+}
+
+export type MarketplaceQueryOptions = Partial<
+  Pick<
+    Marketplace,
+    | 'name'
+    | 'client_id'
+    | 'authority'
+    | 'treasury_mint'
+    | 'auction_house_fee_account'
+    | 'auction_house_treasury'
+    | 'treasury_withdrawal_destination'
+    | 'fee_withdrawal_destination'
+    | 'seller_fee_basis_points'
+    | 'requires_sign_off'
+    | 'can_change_sale_price'
+  >
+>;
+
+export interface IMarketplaceQueryResult {
+  id: number;
+  name: string;
+  client_id: string;
+  authority: string;
+  auction_house_fee_account: string;
+  auction_house_treasury: string;
+  treasury_withdrawal_destination: string;
+  fee_withdrawal_destination: string;
+  treasury_mint: string;
+  seller_fee_basis_points: number;
+  requires_sign_off: boolean;
+  can_change_sale_price: boolean;
 }
