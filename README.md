@@ -7,7 +7,10 @@
 2. Install SDK in your project
 
 ```bash
-yarn install @mirrorworld/web3.js
+yarn add @mirrorworld/web3.js
+
+#or with npm
+npm install @mirrorworld/web3.js
 ```
 
 ## Usage
