@@ -139,6 +139,11 @@ export class MirrorWorld {
         this.defineInternalListeners();
       }
     });
+    if (options.auth?.authToken) {
+      this.useCredentials({
+        accessToken: options.auth.authToken,
+      });
+    }
     this.emit('ready', undefined);
     return this;
   }
