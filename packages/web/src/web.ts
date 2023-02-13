@@ -367,7 +367,7 @@ export class MirrorWorld {
     const top = (height - h) / 2 / systemZoom + dualScreenTop;
     const authWindow = await window.open(
       `${this.authView}${path}`,
-      '_blank',
+      '_self',
       `
             popup=true
             width=${w},
@@ -407,7 +407,7 @@ export class MirrorWorld {
               }
             }
           });
-        } catch (e) {
+        } catch (e: any) {
           reject(e.message);
         }
       }
