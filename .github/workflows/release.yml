@@ -9,6 +9,7 @@ on:
       - 'packages/**'
     branches:
       - main
+      - develop
 
 jobs:
   release:
