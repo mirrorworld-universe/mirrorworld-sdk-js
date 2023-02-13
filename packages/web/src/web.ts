@@ -369,11 +369,11 @@ export class MirrorWorld {
       `${this.authView}${path}`,
       '_self',
       `
-            popup=true
-            width=${w},
-            height=${h},
-            top=${top},
-            left=${left}`
+        popup=true
+        width=${w},
+        height=${h},
+        top=${top},
+        left=${left}`
     );
     if (!!window.focus && !!authWindow?.focus) authWindow.focus();
 
