@@ -275,9 +275,6 @@ export class MirrorWorld {
         scale: [0.9, 1],
       }).finished,
     ];
-
-    await Promise.all(mountAnimationPromises);
-
     async function unmountIframes() {
       unhideOthers();
       enableBodyScroll(portalContent);
@@ -296,6 +293,9 @@ export class MirrorWorld {
       document.body.removeChild?.(portal);
     }
 
+    windowEmitter.on('close', unmountIframes);
+    await Promise.all(mountAnimationPromises);
+
     portalContent.addEventListener('click', unmountIframes);
     portalBackdrop.addEventListener('click', unmountIframes);
 
@@ -303,8 +303,6 @@ export class MirrorWorld {
       portalContent.removeEventListener('click', unmountIframes);
       portalBackdrop.removeEventListener('click', unmountIframes);
     });
-
-    windowEmitter.on('close', unmountIframes);
 
     async function close() {
       unmountIframes();
@@ -601,6 +599,9 @@ export class MirrorWorld {
                   refreshToken: this.userRefreshToken!,
                 });
               }
+            }
+            if (event.data.name === 'mw:auth:close') {
+              windowEmitter.emit('close');
             }
           };
           if (this._uxMode === 'embedded') {
