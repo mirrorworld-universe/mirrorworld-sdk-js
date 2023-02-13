@@ -31,6 +31,19 @@ export interface MirrorWorldOptions {
    * Is staging environment
    */
   staging?: boolean;
+  /**
+   * Wallet UI configuration options
+   */
+  walletUIConfig?: {
+    uxMode: 'popup' | 'embedded';
+  };
+  /**
+   * Authentication options
+   */
+  auth?: {
+    // Authentication token
+    authToken?: string;
+  };
 }
 
 export type MirrorWorldEvents = {
@@ -43,3 +56,9 @@ export type MirrorWorldEvents = {
 };
 
 export type MirrorWorldEventKey = keyof MirrorWorldEvents;
+
+export type WalletUIEvents = {
+  close?: never;
+  message: MessageEvent;
+};
+export type WalletUIEventKey = keyof WalletUIEvents;

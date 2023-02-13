@@ -1,9 +1,11 @@
 import { AxiosRequestConfig } from 'axios';
 import qs from 'query-string';
+import type * as CSS from 'csstype';
 import {
   MirrorWorldEventKey,
   MirrorWorldEvents,
   MirrorWorldOptions,
+  WalletUIEvents,
 } from './types/instance';
 import {
   createAPIClient,
@@ -11,12 +13,16 @@ import {
   MirrorWorldAPIClient,
 } from './services/api';
 import { ClusterEnvironment } from './services/cluster';
-import { emitter } from './events/emitter';
+import { emitter, windowEmitter } from './events/emitter';
 import { clientOptionsSchema } from './validators';
 import { LoginEmailCredentials } from './types/auth';
 import { IPaginatedResponse, IResponse } from './types/response.type';
 import { IUser, UserWithWallet, Wallet } from './types/user.type';
 import { canUseDom } from './utils';
+import { animate } from 'motion';
+import { disableBodyScroll, enableBodyScroll } from 'body-scroll-lock';
+import { hideOthers } from 'aria-hidden';
+
 import {
   BuyNFTPayload,
   CancelListingPayload,
@@ -80,6 +86,7 @@ import {
 import { throwError } from './errors/errors.interface';
 import { IAction, ICreateActionPayload } from './types/actions';
 import { createActionSchema } from './validators/action.validator';
+import { Emitter } from 'mitt';
 
 export class MirrorWorld {
   // System variables
@@ -93,12 +100,16 @@ export class MirrorWorld {
 
   // User variables
   _user?: UserWithWallet;
+  _uxMode: 'embedded' | 'popup' = 'embedded';
+
+  windowEmitter: Emitter<WalletUIEvents> = windowEmitter;
 
   // private values
   public userRefreshToken?: string;
 
   constructor(options: MirrorWorldOptions) {
     const result = clientOptionsSchema.validate(options);
+    console.debug('config options', result.value);
     if (result.error) {
       throw result.error;
     }
@@ -118,6 +129,7 @@ export class MirrorWorld {
       },
       env
     );
+    this._uxMode = options.walletUIConfig?.uxMode || 'embedded';
     this.on('ready', async () => {
       if (autoLoginCredentials) {
         console.debug({
@@ -129,6 +141,176 @@ export class MirrorWorld {
     });
     this.emit('ready', undefined);
     return this;
+  }
+
+  async openEmbeddedWallet(path = '/'): Promise<Window | undefined> {
+    const isMobile = window.innerWidth < 768;
+    const iframeMobileStyles: CSS.Properties = {
+      width: '100vw',
+      height: '95vh',
+    };
+
+    const iframeStyles: CSS.Properties = {
+      border: 'none',
+      width: '375px',
+      height: '80vh',
+      ...(isMobile && iframeMobileStyles),
+    };
+
+    const portalStyles: CSS.Properties = {
+      width: '0px',
+      height: '0px',
+      position: 'absolute',
+      zIndex: 999999999,
+      top: 0,
+      left: 0,
+    };
+
+    // Iframe portal
+    if (document.getElementById('mirrorworld-wallet-ui-portal')) return;
+    const portal = document.createElement('div');
+    portal.id = 'mirrorworld-wallet-ui-portal';
+    portal.dataset.mirrorworld = 'wallet-ui-portal';
+    Object.assign(portal.style, portalStyles);
+
+    // Create window backdrop
+    const portalBackdropStyles: CSS.Properties = {
+      width: '100vw',
+      height: '100vh',
+      inset: '0px',
+      position: 'absolute',
+      background: 'rgba(0, 0, 0, 0.5)',
+      backdropFilter: 'blur(5px)',
+      opacity: 0,
+    };
+
+    const portalBackdrop = document.createElement('div');
+    portalBackdrop.dataset.mirrorworld = 'wallet-ui-backdrop';
+    Object.assign(portalBackdrop.style, portalBackdropStyles);
+    portal.appendChild(portalBackdrop);
+
+    // Create portal content
+    const portalContentStyles: CSS.Properties = {
+      width: '100vw',
+      height: '100vh',
+      inset: '0px',
+      position: 'fixed',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      opacity: 0,
+      transform: `scale(0.9)`,
+    };
+
+    const portalContent = document.createElement('div');
+    portalContent.dataset.mirrorworld = 'wallet-ui-content';
+    Object.assign(portalContent.style, portalContentStyles);
+    portal.appendChild(portalContent);
+
+    // Create portal body
+    const portalBodyStyles: CSS.Properties = {
+      // borderRadius: '20px',
+      overflow: 'hidden',
+    };
+    const portalBody = document.createElement('div');
+    portalBody.dataset.mirrorworld = 'wallet-ui-body';
+    Object.assign(portalBody.style, portalBodyStyles);
+    portalContent.appendChild(portalBody);
+
+    // Check if iframe is already mounted. If not bail
+    if (document.getElementById('mirrorworld-wallet-ui')) return;
+
+    console.debug('mounting iframe');
+    const iframe = document.createElement('iframe');
+    Object.assign(iframe.style, iframeStyles);
+    iframe.src = `${this.authView}${path}`;
+    iframe.id = 'mirrorworld-wallet-ui';
+    portalBody.appendChild(iframe);
+
+    // Append portal to body
+    document.body.appendChild(portal);
+
+    const childWindow = (
+      document.getElementById('mirrorworld-wallet-ui') as HTMLIFrameElement
+    )?.contentWindow;
+
+    if (!childWindow) {
+      console.debug('could not find iframe. bailing');
+      return;
+    }
+
+    function iframeLoaded() {
+      return new Promise((resolve) => {
+        iframe.addEventListener('load', () => {
+          resolve(true);
+        });
+      });
+    }
+
+    console.debug(
+      'found wallet ui iframe. adding event listener...',
+      childWindow
+    );
+
+    window.addEventListener('message', (message) => {
+      // Ignore messages not from iframe
+      if (message.source !== childWindow) {
+        return;
+      }
+      windowEmitter.emit('message', message);
+    });
+
+    await iframeLoaded();
+
+    const unhideOthers = hideOthers(portalContent);
+    disableBodyScroll(portalContent);
+    // Animate
+    const mountAnimationPromises = [
+      animate(portalBackdrop, {
+        opacity: [0, 1],
+      }).finished,
+
+      animate(portalContent, {
+        opacity: [0, 1],
+        scale: [0.9, 1],
+      }).finished,
+    ];
+
+    await Promise.all(mountAnimationPromises);
+
+    async function unmountIframes() {
+      unhideOthers();
+      enableBodyScroll(portalContent);
+
+      const unmountAnimationPromises = [
+        animate(portalBackdrop, {
+          opacity: [1, 0],
+        }).finished,
+        animate(portalContent, {
+          opacity: [1, 0],
+          scale: [1, 0.9],
+        }).finished,
+      ];
+
+      await Promise.all(unmountAnimationPromises);
+      document.body.removeChild?.(portal);
+    }
+
+    portalContent.addEventListener('click', unmountIframes);
+    portalBackdrop.addEventListener('click', unmountIframes);
+
+    window.addEventListener('beforeunload', () => {
+      portalContent.removeEventListener('click', unmountIframes);
+      portalBackdrop.removeEventListener('click', unmountIframes);
+    });
+
+    windowEmitter.on('close', unmountIframes);
+
+    async function close() {
+      unmountIframes();
+    }
+    childWindow.close = close;
+    return childWindow;
   }
 
   /* Get sdk's api client instance */
@@ -337,7 +519,7 @@ export class MirrorWorld {
    * @param path
    * @private
    */
-  private async openWallet(path?: string): Promise<Window | null> {
+  private async openPopupWallet(path?: string): Promise<Window | undefined> {
     if (!canUseDom) {
       console.warn(`Auth Window Login is only available in the Browser.`);
     }
@@ -365,19 +547,28 @@ export class MirrorWorld {
     const systemZoom = width / window.screen.availWidth;
     const left = (width - w) / 2 / systemZoom + dualScreenLeft;
     const top = (height - h) / 2 / systemZoom + dualScreenTop;
-    const authWindow = await window.open(
-      `${this.authView}${path}`,
-      '_self',
-      `
+    const authWindow =
+      (await window.open(
+        `${this.authView}${path}`,
+        '_blank',
+        `
         popup=true
         width=${w},
         height=${h},
         top=${top},
         left=${left}`
-    );
+      )) || undefined;
     if (!!window.focus && !!authWindow?.focus) authWindow.focus();
 
     return authWindow;
+  }
+
+  public async openWallet(path?: string): Promise<Window | undefined> {
+    if (this._uxMode === 'popup') {
+      return this.openPopupWallet(path);
+    } else if (this._uxMode === 'embedded') {
+      return this.openEmbeddedWallet(path);
+    }
   }
 
   /***
@@ -387,26 +578,37 @@ export class MirrorWorld {
     return new Promise<{ user: IUser; refreshToken: string }>(
       async (resolve, reject) => {
         try {
-          const authWindow = await this.openWallet('');
-          window.addEventListener('message', async (event) => {
+          let authWindow: Window | undefined = undefined;
+          const handleWalletUIMessage = async (event: MessageEvent) => {
             const { deserialize } = await import('bson');
             if (event.data?.name === 'mw:auth:login') {
               const payload = deserialize(event.data.payload);
-              console.debug('auth:payload', payload);
+              console.debug('auth:payload ===>', payload);
               if (payload.access_token && payload.refresh_token) {
                 this.userRefreshToken = payload.refresh_token;
                 this.useCredentials({
                   accessToken: payload.access_token,
                 });
                 await this.fetchUser();
-                authWindow && authWindow.close();
+                console.debug('authWindow', authWindow);
+                if (authWindow) {
+                  authWindow && authWindow.close();
+                } else {
+                  windowEmitter.emit('close');
+                }
                 resolve({
                   user: this.user,
                   refreshToken: this.userRefreshToken!,
                 });
               }
             }
-          });
+          };
+          if (this._uxMode === 'embedded') {
+            windowEmitter.on('message', handleWalletUIMessage);
+          } else {
+            window.addEventListener('message', handleWalletUIMessage);
+          }
+          authWindow = await this.openWallet('');
         } catch (e: any) {
           reject(e.message);
         }
@@ -433,9 +635,10 @@ export class MirrorWorld {
           console.debug('action_created', action);
           console.debug('action:requesting_approval for', action.uuid);
           const approvalPath = `/approve/${action.uuid}`;
-          const authWindow = await this.openWallet(approvalPath);
+          const authWindow = await this.openPopupWallet(approvalPath);
           window.addEventListener('message', async (event) => {
             const { deserialize } = await import('bson');
+
             if (event.data?.name === 'mw:action:approve') {
               const payload = deserialize(event.data.payload);
               console.debug('auth:approved_action', payload);
