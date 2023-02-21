@@ -1,0 +1,10 @@
+{
+  "mode": "pre",
+  "tag": "v2",
+  "initialVersions": {
+    "@mirrorworld/utils": "1.0.0",
+    "@mirrorworld/web3.js": "0.0.0-dev-20230213133952",
+    "@mirrorworld/websocket": "1.0.0"
+  },
+  "changesets": []
+}
