@@ -1,5 +1,17 @@
 # @mirrorworld/web3.js
 
+## 0.0.0-dev-20230213133952
+
+### Minor Changes
+
+- Support new ux mode
+
+## 0.0.0-dev-20230213100155
+
+### Patch Changes
+
+- dffc68e: Use \_self instead of \_blank on windw.open method
+
 ## 1.3.0
 
 ### Minor Changes

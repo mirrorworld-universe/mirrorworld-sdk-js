@@ -5,6 +5,7 @@ import {
   toErrorMessage,
 } from '../errors/errors.interface';
 import { ClusterEnvironment } from '../services/cluster';
+import { chainConfigurationSchema } from './chain-config.validator';
 
 export const clientOptionsSchema = joi.object<MirrorWorldOptions>({
   env: joi
@@ -45,4 +46,19 @@ export const clientOptionsSchema = joi.object<MirrorWorldOptions>({
         toErrorMessage('INVALID_OPTIONS', '`staging` should be a boolean.')
       )
     ),
+  walletUIConfig: joi
+    .object<MirrorWorldOptions['walletUIConfig']>({
+      uxMode: joi.allow('popup', 'embedded').required(),
+    })
+    .optional()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_OPTIONS',
+        toErrorMessage(
+          'INVALID_OPTIONS',
+          '`walletUIConfig` should declare uxMode.'
+        )
+      )
+    ),
+  chainConfig: chainConfigurationSchema,
 });

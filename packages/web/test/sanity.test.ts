@@ -1,5 +1,5 @@
 import axios, { Axios } from 'axios';
-import { MirrorWorld, MirrorWorldOptions } from '../src';
+import { MirrorWorld, MirrorWorldOptions, Solana } from '../src';
 import { ClusterEnvironment } from '../src/services/cluster';
 import { MirrorWorldAPIClient } from '../src/services/api';
 import { collectionSchema } from './utils/schemas';
@@ -55,6 +55,7 @@ export const createInstance = (options?: Partial<MirrorWorldOptions>) =>
     apiKey,
     env: ClusterEnvironment.testnet,
     staging,
+    chainConfig: Solana('devnet'),
   });
 
 describe('Core SDK tests', () => {
@@ -64,6 +65,7 @@ describe('Core SDK tests', () => {
         apiKey,
         env: ClusterEnvironment.local,
         staging,
+        chainConfig: Solana('devnet'),
       });
       expect(mirrorworld instanceof MirrorWorld).toBe(true);
     });
