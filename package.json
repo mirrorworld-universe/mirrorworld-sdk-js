@@ -25,7 +25,8 @@
     "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
     "test": "NODE_ENV=development jest --ci --coverage --maxWorkers=2",
     "test:watch": "NODE_ENV=development jest --verbose --watch --maxWorkers=2",
-    "release:dev": "changeset version --snapshot dev && changeset publish --tag dev"
+    "version:dev": "changeset version --snapshot dev",
+    "release:dev": "changeset pre exit && changeset version --snapshot dev && changeset publish --tag dev"
   },
   "husky": {
     "hooks": {
