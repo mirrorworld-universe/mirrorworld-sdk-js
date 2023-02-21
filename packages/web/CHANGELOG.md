@@ -1,5 +1,11 @@
 # @mirrorworld/web3.js
 
+## 0.0.0-dev-20230213133952
+
+### Minor Changes
+
+- Support new ux mode
+
 ## 0.0.0-dev-20230213100155
 
 ### Patch Changes

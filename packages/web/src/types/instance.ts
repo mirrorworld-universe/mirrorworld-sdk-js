@@ -1,3 +1,4 @@
+import { ChainConfig, ChainTypes } from '../configuration';
 import { ClusterEnvironment } from '../services/cluster';
 import { IUser } from './user.type';
 
@@ -44,15 +45,21 @@ export interface MirrorWorldOptions {
     // Authentication token
     authToken?: string;
   };
+
+  /**
+   * Chain configuration for Mirror World SDK
+   */
+  chainConfig: ChainConfig<ChainTypes>;
 }
 
 export type MirrorWorldEvents = {
   'login:email': IUser;
   login: unknown;
-  logout: unknown;
-  ready: undefined;
+  logout?: never;
+  ready?: never;
   'auth:refreshToken'?: string;
-  'update:user'?: undefined;
+  'update:user'?: never;
+  'chain:change': ChainConfig<ChainTypes>;
 };
 
 export type MirrorWorldEventKey = keyof MirrorWorldEvents;

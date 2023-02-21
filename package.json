@@ -90,5 +90,8 @@
     "packages": [
       "packages/*"
     ]
+  },
+  "devDependencies": {
+    "jiti": "^1.17.1"
   }
 }

@@ -87,6 +87,7 @@ import { throwError } from './errors/errors.interface';
 import { IAction, ICreateActionPayload } from './types/actions';
 import { createActionSchema } from './validators/action.validator';
 import { Emitter } from 'mitt';
+import { ChainConfig, ChainTypes } from './configuration';
 
 export class MirrorWorld {
   // System variables
@@ -97,6 +98,7 @@ export class MirrorWorld {
   _tokens: ISolanaToken[] = [];
   _transactions: ISolanaTransaction[] = [];
   _nfts: SolanaNFTExtended[] = [];
+  _chainConfig?: ChainConfig<ChainTypes>;
 
   // User variables
   _user?: UserWithWallet;
@@ -106,6 +108,9 @@ export class MirrorWorld {
 
   // private values
   public userRefreshToken?: string;
+
+  // Wallet UI State
+  private _userOpenedWallet = false;
 
   constructor(options: MirrorWorldOptions) {
     const result = clientOptionsSchema.validate(options);
@@ -148,7 +153,10 @@ export class MirrorWorld {
     return this;
   }
 
-  async openEmbeddedWallet(path = '/'): Promise<Window | undefined> {
+  async openEmbeddedWallet(
+    path = '/',
+    shouldAutoClose = false
+  ): Promise<Window | undefined> {
     const isMobile = window.innerWidth < 768;
     const iframeMobileStyles: CSS.Properties = {
       width: '100vw',
@@ -183,7 +191,7 @@ export class MirrorWorld {
       width: '100vw',
       height: '100vh',
       inset: '0px',
-      position: 'absolute',
+      position: 'fixed',
       background: 'rgba(0, 0, 0, 0.5)',
       backdropFilter: 'blur(5px)',
       opacity: 0,
@@ -295,10 +303,15 @@ export class MirrorWorld {
       ];
 
       await Promise.all(unmountAnimationPromises);
-      document.body.removeChild?.(portal);
+      if (document.body.contains(portal)) {
+        document.body.removeChild?.(portal);
+      }
     }
 
-    windowEmitter.on('close', unmountIframes);
+    if (shouldAutoClose) {
+      windowEmitter.on('close', unmountIframes);
+    }
+
     await Promise.all(mountAnimationPromises);
 
     portalContent.addEventListener('click', unmountIframes);
@@ -309,10 +322,6 @@ export class MirrorWorld {
       portalBackdrop.removeEventListener('click', unmountIframes);
     });
 
-    async function close() {
-      unmountIframes();
-    }
-    childWindow.close = close;
     return childWindow;
   }
 
@@ -471,7 +480,7 @@ export class MirrorWorld {
     try {
       await this.sso.post('/v1/auth/logout');
       this._user = undefined;
-      this.emit('logout', null);
+      this.emit('logout', undefined);
     } catch (e) {}
   }
 
@@ -566,11 +575,14 @@ export class MirrorWorld {
     return authWindow;
   }
 
-  public async openWallet(path?: string): Promise<Window | undefined> {
+  public async openWallet(
+    path?: string,
+    shouldAutoClose = false
+  ): Promise<Window | undefined> {
     if (this._uxMode === 'popup') {
       return this.openPopupWallet(path);
     } else if (this._uxMode === 'embedded') {
-      return this.openEmbeddedWallet(path);
+      return this.openEmbeddedWallet(path, shouldAutoClose);
     }
   }
 
@@ -594,7 +606,7 @@ export class MirrorWorld {
                 });
                 await this.fetchUser();
                 console.debug('authWindow', authWindow);
-                if (authWindow) {
+                if (this._uxMode === 'popup') {
                   authWindow && authWindow.close();
                 } else {
                   windowEmitter.emit('close');
@@ -614,7 +626,8 @@ export class MirrorWorld {
           } else {
             window.addEventListener('message', handleWalletUIMessage);
           }
-          authWindow = await this.openWallet('');
+          const shouldAutoCloseAfterLogin = true;
+          authWindow = await this.openWallet('', shouldAutoCloseAfterLogin);
         } catch (e: any) {
           reject(e.message);
         }
@@ -641,15 +654,18 @@ export class MirrorWorld {
           console.debug('action_created', action);
           console.debug('action:requesting_approval for', action.uuid);
           const approvalPath = `/approve/${action.uuid}`;
-          const authWindow = await this.openPopupWallet(approvalPath);
-          window.addEventListener('message', async (event) => {
-            const { deserialize } = await import('bson');
-
+          let approvalWindow: Window | undefined = undefined;
+          const { deserialize } = await import('bson');
+          const handleApprovalEvent = (event: MessageEvent) => {
             if (event.data?.name === 'mw:action:approve') {
               const payload = deserialize(event.data.payload);
-              console.debug('auth:approved_action', payload);
               if (payload.action && payload.action.uuid === action.uuid) {
-                authWindow && authWindow.close();
+                console.debug('auth:approved_action', payload);
+                if (this._uxMode === 'popup') {
+                  approvalWindow && approvalWindow.close();
+                } else {
+                  windowEmitter.emit('close');
+                }
                 resolve({
                   authorization_token: payload.authorization_token,
                   action: payload.action,
@@ -658,7 +674,19 @@ export class MirrorWorld {
                 reject(`User denied approval for action:${action.uuid}.`);
               }
             }
-          });
+
+            if (event.data.name === 'mw:auth:close') {
+              windowEmitter.emit('close');
+            }
+          };
+
+          if (this._uxMode === 'embedded') {
+            windowEmitter.on('message', handleApprovalEvent);
+          } else {
+            window.addEventListener('message', handleApprovalEvent);
+          }
+
+          approvalWindow = await this.openWallet(approvalPath);
         } catch (e: any) {
           reject(e.message);
         }
@@ -1211,7 +1239,9 @@ export class MirrorWorld {
    * Updates a marketplace instance.
    * @param payload
    */
-  async updateMarketplace(payload: UpdateMarketplacePayload) {
+  async updateMarketplace(
+    payload: UpdateMarketplacePayload
+  ): Promise<Marketplace> {
     const result = updateMarketplaceSchema.validate({
       treasury_mint: payload.treasuryMint,
       collections: payload.collections,

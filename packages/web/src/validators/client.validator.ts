@@ -5,6 +5,7 @@ import {
   toErrorMessage,
 } from '../errors/errors.interface';
 import { ClusterEnvironment } from '../services/cluster';
+import { chainConfigurationSchema } from './chain-config.validator';
 
 export const clientOptionsSchema = joi.object<MirrorWorldOptions>({
   env: joi
@@ -59,4 +60,5 @@ export const clientOptionsSchema = joi.object<MirrorWorldOptions>({
         )
       )
     ),
+  chainConfig: chainConfigurationSchema,
 });

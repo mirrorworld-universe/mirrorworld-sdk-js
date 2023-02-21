@@ -119,6 +119,11 @@ const __ErrorCodes__ = {
     code: '000123',
     message: `Validation failed for update marketplace`,
   },
+  INVALID_CHAIN_CONFIGURAITON_OPTIONS: {
+    error: 'INVALID_CHAIN_CONFIGURAITON_OPTIONS',
+    code: '000124',
+    message: `You passed an invalid chain configuration option. Please check the documentation for which chain configuration options are available. https://mirrorworld.fun/docs/overview/introduction/multi-chain-solutions`,
+  },
 };
 
 export type MirrorWorldSDKErrorCodes = typeof __ErrorCodes__;
@@ -166,7 +171,7 @@ export class MirrorWorldSDKError extends Error {
     return error;
   }
 
-  // @ts-expect-error Here we invoke the initializer at
+  // Here we invoke the initializer at
   // `super` after determining the error message
   constructor(error: ErrorBody) {
     let message: string;
@@ -188,14 +193,14 @@ export class MirrorWorldSDKError extends Error {
 export function throwError(
   error: MirrorWorldSDKErrorKey,
   customMessage?: ErrorBody['message']
-) {
+): MirrorWorldSDKError {
   throw MirrorWorldSDKError.new(error, customMessage);
 }
 
 export function toErrorMessage(
   error: MirrorWorldSDKErrorKey,
   customMessage?: ErrorBody['message']
-) {
+): string {
   const e = MirrorWorldSDKError.new(error, customMessage);
   return `E:${e.code}: ${e.error}: ${e.message}`;
 }
