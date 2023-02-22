@@ -98,7 +98,7 @@ export class MirrorWorld {
   _tokens: ISolanaToken[] = [];
   _transactions: ISolanaTransaction[] = [];
   _nfts: SolanaNFTExtended[] = [];
-  _chainConfig?: ChainConfig<ChainTypes>;
+  _chainConfig: ChainConfig<ChainTypes>;
 
   // User variables
   _user?: UserWithWallet;
@@ -123,10 +123,12 @@ export class MirrorWorld {
       env = ClusterEnvironment.mainnet,
       autoLoginCredentials,
       staging = false,
+      chainConfig,
     } = result.value;
     this._staging = staging;
     this._apiKey = apiKey;
     this._env = env;
+    this._chainConfig = chainConfig;
     this._api = createAPIClient(
       {
         apiKey,
@@ -352,6 +354,14 @@ export class MirrorWorld {
       : this._env === ClusterEnvironment.testnet
       ? 'devnet'
       : 'devnet';
+  }
+
+  get chainConfig(): ChainConfig<ChainTypes> {
+    return this._chainConfig;
+  }
+
+  set chainConfig(value: ChainConfig<ChainTypes>) {
+    this._chainConfig = value;
   }
 
   /** Get current user */
