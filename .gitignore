@@ -5,3 +5,4 @@ dist
 coverage
 /.idea/
 .test.ts
+.env.local
