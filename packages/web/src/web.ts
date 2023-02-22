@@ -7,11 +7,7 @@ import {
   MirrorWorldOptions,
   WalletUIEvents,
 } from './types/instance';
-import {
-  createAPIClient,
-  mapServiceKeyToAuthView,
-  MirrorWorldAPIClient,
-} from './services/api';
+import { createAPIClient, MirrorWorldAPIClient } from './services/api';
 import { ClusterEnvironment } from './services/cluster';
 import { emitter, windowEmitter } from './events/emitter';
 import { clientOptionsSchema } from './validators';
@@ -88,6 +84,11 @@ import { IAction, ICreateActionPayload } from './types/actions';
 import { createActionSchema } from './validators/action.validator';
 import { Emitter } from 'mitt';
 import { ChainConfig, ChainTypes } from './configuration';
+import {
+  cp,
+  createAPIClientV2,
+  MirrorWorldAPIClientV2,
+} from './services/api.v2';
 
 export class MirrorWorld {
   // System variables
@@ -95,6 +96,7 @@ export class MirrorWorld {
   _env: MirrorWorldOptions['env'];
   _staging: MirrorWorldOptions['staging'];
   _api: MirrorWorldAPIClient;
+  v2: MirrorWorldAPIClientV2;
   _tokens: ISolanaToken[] = [];
   _transactions: ISolanaTransaction[] = [];
   _nfts: SolanaNFTExtended[] = [];
@@ -135,6 +137,12 @@ export class MirrorWorld {
         staging,
       },
       env
+    );
+    this.v2 = createAPIClientV2(
+      {
+        apiKey,
+      },
+      staging
     );
     this._uxMode = options.walletUIConfig?.uxMode || 'embedded';
     this.on('ready', async () => {
@@ -465,6 +473,10 @@ export class MirrorWorld {
     });
   }
 
+  private get base() {
+    return cp(this.chainConfig);
+  }
+
   async loginWithEmail(
     credentials: LoginEmailCredentials
   ): Promise<MirrorWorld> {
@@ -474,7 +486,7 @@ export class MirrorWorld {
         refresh_token: string;
         user: UserWithWallet;
       }>
-    >('/v1/auth/login', credentials);
+    >(`/v1/auth/login`, credentials);
     const accessToken = response.data.data.access_token;
     this.userRefreshToken = response.data.data.refresh_token;
     this.user = response.data.data.user;
@@ -528,12 +540,7 @@ export class MirrorWorld {
   }
 
   private get authView() {
-    const result = mapServiceKeyToAuthView(
-      this.apiKey,
-      this._env,
-      this._staging
-    )!;
-    return `${result.baseURL}`;
+    return `https://auth${this._staging ? '-staging' : ''}.mirrorworld.fun`;
   }
 
   /**
@@ -616,15 +623,15 @@ export class MirrorWorld {
                 });
                 await this.fetchUser();
                 console.debug('authWindow', authWindow);
+                resolve({
+                  user: this.user,
+                  refreshToken: this.userRefreshToken!,
+                });
                 if (this._uxMode === 'popup') {
                   authWindow && authWindow.close();
                 } else {
                   windowEmitter.emit('close');
                 }
-                resolve({
-                  user: this.user,
-                  refreshToken: this.userRefreshToken!,
-                });
               }
             }
             if (event.data.name === 'mw:auth:close') {
