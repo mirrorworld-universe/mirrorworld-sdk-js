@@ -7,7 +7,7 @@ export interface IUser {
   username: string;
   createdAt: string;
   updatedAt: string;
-  wallet?: Wallet;
+  wallet: Wallet;
 }
 
 export interface Wallet {

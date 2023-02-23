@@ -124,6 +124,33 @@ const __ErrorCodes__ = {
     code: '000124',
     message: `You passed an invalid chain configuration option. Please check the documentation for which chain configuration options are available. https://mirrorworld.fun/docs/overview/introduction/multi-chain-solutions`,
   },
+  METHOD_UNAVAILABLE_ON_CURRENT_CHAIN_CONFIG: {
+    error: 'METHOD_UNAVAILABLE_ON_CURRENT_CHAIN_CONFIG',
+    code: '000125',
+    message: `The method you tried to invoke is not available on current chain configuration.
+To see methods available your this chain configration on the API Reference Docs: 
+https://mirrorworld.fun/docs/api-reference/js/`,
+  },
+  INVALID_FETCH_EVM_NFT_ACTIVITY: {
+    error: 'INVALID_FETCH_EVM_NFT_ACTIVITY',
+    code: '000126',
+    message: `Validation failed for fetch EVM NFT activity`,
+  },
+  INVALID_FETCH_SOLANA_NFT_ACTIVITY: {
+    error: 'INVALID_FETCH_SOLANA_NFT_ACTIVITY',
+    code: '000127',
+    message: `Validation failed for fetch Solana NFT activity`,
+  },
+  INVALID_FETCH_SOLANA_NFT_INFO: {
+    error: 'INVALID_FETCH_SOLANA_NFT_INFO',
+    code: '000128',
+    message: `Validation failed for fetch Solana NFT info`,
+  },
+  INVALID_FETCH_EVM_NFT_INFO: {
+    error: 'INVALID_FETCH_EVM_NFT_INFO',
+    code: '000129',
+    message: `Validation failed for fetch EVM NFT info`,
+  },
 };
 
 export type MirrorWorldSDKErrorCodes = typeof __ErrorCodes__;

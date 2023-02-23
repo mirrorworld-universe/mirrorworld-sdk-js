@@ -93,6 +93,7 @@
     ]
   },
   "devDependencies": {
-    "jiti": "^1.17.1"
+    "jiti": "^1.17.1",
+    "nanoid": "^4.0.1"
   }
 }

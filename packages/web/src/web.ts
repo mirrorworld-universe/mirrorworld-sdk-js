@@ -83,12 +83,46 @@ import { throwError } from './errors/errors.interface';
 import { IAction, ICreateActionPayload } from './types/actions';
 import { createActionSchema } from './validators/action.validator';
 import { Emitter } from 'mitt';
-import { ChainConfig, ChainTypes } from './configuration';
+import {
+  ChainConfig,
+  ChainTypes,
+  Ethereum,
+  isEVM,
+  isSolana,
+  Polygon,
+  Solana,
+} from './configuration';
 import {
   cp,
   createAPIClientV2,
   MirrorWorldAPIClientV2,
+  MirrorWorldAPIService,
 } from './services/api.v2';
+import { fetchEVMNFTsByOwnerAddressSchema } from './validators/evm.asset.validators';
+import {
+  EVMNFTActivity,
+  EVMNFTExtended,
+  EVMNFTInfo,
+  NftJsonMetadata,
+  QueryEVMNFTActivityPayload,
+  QueryEVMNFTActivityResult,
+  QueryEVMNFTInfoPayload,
+  QueryEVMNFTResultBody,
+  QueryEVMNFTResultRaw,
+  QuerySolanaNFTActivityPayload,
+  QuerySolanaNFTActivityResult,
+  QuerySolanaNFTInfoPayload,
+  SolanaNFTActivity,
+  SolanaNFTInfo,
+} from './types/nft.v2';
+import { digest } from './utils/encrypt';
+import {
+  fetchEVMNFTInfoSchema,
+  fetchEVMNFTsActivitySchema,
+  fetchSolanaNFTInfoSchema,
+  fetchSolanaNFTsActivitySchema,
+} from './validators/metadata.validators';
+import { assertAvailableFor } from './utils/chain.invariance';
 
 export class MirrorWorld {
   // System variables
@@ -99,9 +133,10 @@ export class MirrorWorld {
   v2: MirrorWorldAPIClientV2;
   _tokens: ISolanaToken[] = [];
   _transactions: ISolanaTransaction[] = [];
-  _nfts: SolanaNFTExtended[] = [];
+  _nfts: SolanaNFTExtended[] | EVMNFTExtended[] = [];
   _chainConfig: ChainConfig<ChainTypes>;
 
+  private _storageKey?: string;
   // User variables
   _user?: UserWithWallet;
   _uxMode: 'embedded' | 'popup' = 'embedded';
@@ -110,9 +145,6 @@ export class MirrorWorld {
 
   // private values
   public userRefreshToken?: string;
-
-  // Wallet UI State
-  private _userOpenedWallet = false;
 
   constructor(options: MirrorWorldOptions) {
     const result = clientOptionsSchema.validate(options);
@@ -159,7 +191,37 @@ export class MirrorWorld {
         accessToken: options.auth.authToken,
       });
     }
+    this.on('auth:refreshToken', (refreshToken) => {
+      if (this._storageKey && canUseDom && refreshToken) {
+        const internalRefreshTokenKey = `${this._storageKey}:refresh`;
+        localStorage.setItem(internalRefreshTokenKey, refreshToken);
+      }
+    });
     this.emit('ready', undefined);
+
+    if (canUseDom) {
+      document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+          // Create local cache key for secure data
+          const salt = `${this._apiKey}:key`;
+          digest(salt).then(async (storageKey) => {
+            this._storageKey = storageKey;
+            // Try to check if the browser
+            // has stored the tokens
+            if (this._storageKey) {
+              const internalRefreshTokenKey = `${this._storageKey}:refresh`;
+              const storedRefreshTokens = localStorage.getItem(
+                internalRefreshTokenKey
+              );
+              if (storedRefreshTokens) {
+                await this.refreshAccessToken(storedRefreshTokens);
+                this.defineInternalListeners();
+              }
+            }
+          });
+        }, 1000);
+      });
+    }
     return this;
   }
 
@@ -270,10 +332,7 @@ export class MirrorWorld {
       });
     }
 
-    console.debug(
-      'found wallet ui iframe. adding event listener...',
-      childWindow
-    );
+    console.debug('found wallet ui iframe. adding event listener...');
 
     window.addEventListener('message', (message) => {
       // Ignore messages not from iframe
@@ -345,6 +404,23 @@ export class MirrorWorld {
     return this._api.sso;
   }
 
+  /* Auth Service  */
+  private get auth() {
+    return this.v2.api.get('auth')!;
+  }
+  /* Asset Service  */
+  private get asset() {
+    return this.v2.api.get('asset')!;
+  }
+  /* Wallet Service  */
+  private get _wallet() {
+    return this.v2.api.get('wallet')!;
+  }
+  /* Metadata Service  */
+  private get metadata() {
+    return this.v2.api.get('metadata')!;
+  }
+
   /** Get application's apiKey instance */
   private get apiKey(): string {
     return this._apiKey;
@@ -370,6 +446,13 @@ export class MirrorWorld {
 
   set chainConfig(value: ChainConfig<ChainTypes>) {
     this._chainConfig = value;
+    if (this._chainConfig.network === 'mainnet') {
+      this._env = ClusterEnvironment.mainnet;
+    } else if (this._chainConfig.network.includes('devnet')) {
+      this._env = ClusterEnvironment.testnet;
+    } else if (this._chainConfig.network.includes('testnet')) {
+      this._env = ClusterEnvironment.testnet;
+    }
   }
 
   /** Get current user */
@@ -378,7 +461,7 @@ export class MirrorWorld {
   }
 
   private set user(value: UserWithWallet) {
-    this.emit('update:user', undefined);
+    this.emit('update:user', value);
     this._user = value;
   }
 
@@ -407,11 +490,11 @@ export class MirrorWorld {
     this._transactions = value;
   }
 
-  get nfts(): SolanaNFTExtended[] {
+  get nfts(): SolanaNFTExtended[] | EVMNFTExtended[] {
     return this._nfts;
   }
 
-  set nfts(value: SolanaNFTExtended[]) {
+  set nfts(value: SolanaNFTExtended[] | EVMNFTExtended[]) {
     this._nfts = value;
   }
 
@@ -442,8 +525,8 @@ export class MirrorWorld {
   }
 
   private defineInternalListeners() {
-    this.on('update:user', async () => {
-      console.debug('user updated');
+    this.on('update:user', async (user) => {
+      console.debug('user updated', user);
     });
   }
 
@@ -473,26 +556,30 @@ export class MirrorWorld {
     });
   }
 
-  private get base() {
-    return cp(this.chainConfig);
+  private base(service: MirrorWorldAPIService) {
+    return cp(this.chainConfig, service);
   }
 
   async loginWithEmail(
     credentials: LoginEmailCredentials
   ): Promise<MirrorWorld> {
-    const response = await this.sso.post<
+    const response = await this.auth.post<
       IResponse<{
         access_token: string;
         refresh_token: string;
         user: UserWithWallet;
       }>
-    >(`/v1/auth/login`, credentials);
+    >(`/auth/login`, credentials);
     const accessToken = response.data.data.access_token;
     this.userRefreshToken = response.data.data.refresh_token;
     this.user = response.data.data.user;
     this.useCredentials({
       accessToken,
     });
+    if (this._storageKey && canUseDom && this.userRefreshToken) {
+      const internalRefreshTokenKey = `${this._storageKey}:refresh`;
+      localStorage.setItem(internalRefreshTokenKey, this.userRefreshToken);
+    }
     this.emit('login:email', this.user);
     this.emit('login', this.user);
     return this;
@@ -500,20 +587,20 @@ export class MirrorWorld {
 
   async logout(): Promise<void> {
     try {
-      await this.sso.post('/v1/auth/logout');
+      await this.auth.post('/auth/logout');
       this._user = undefined;
       this.emit('logout', undefined);
     } catch (e) {}
   }
 
   private async refreshAccessToken(refreshToken: string) {
-    const response = await this.sso.get<
+    const response = await this.auth.get<
       IResponse<{
         access_token: string;
         refresh_token: string;
         user: UserWithWallet;
       }>
-    >('/v1/auth/refresh-token', {
+    >('/refresh-token', {
       headers: {
         'x-refresh-token': refreshToken,
       },
@@ -527,12 +614,13 @@ export class MirrorWorld {
       accessToken,
     });
     this.emit('auth:refreshToken', this.userRefreshToken);
+    this.emit('login', this.user);
     return user;
   }
 
   async fetchUser(): Promise<IUser> {
-    const response = await this.sso
-      .get<IResponse<UserWithWallet>>('/v1/auth/me')
+    const response = await this.auth
+      .get<IResponse<UserWithWallet>>('/me')
       .then();
     const user = response.data.data;
     this.user = user;
@@ -606,7 +694,10 @@ export class MirrorWorld {
   /***
    * Logs in a user. Opens a popup window for the login operation
    */
-  login() {
+  login(): Promise<{
+    user: IUser;
+    refreshToken: string;
+  }> {
     return new Promise<{ user: IUser; refreshToken: string }>(
       async (resolve, reject) => {
         try {
@@ -622,7 +713,13 @@ export class MirrorWorld {
                   accessToken: payload.access_token,
                 });
                 await this.fetchUser();
-                console.debug('authWindow', authWindow);
+                if (this._storageKey && canUseDom && this.userRefreshToken) {
+                  const internalRefreshTokenKey = `${this._storageKey}:refresh`;
+                  localStorage.setItem(
+                    internalRefreshTokenKey,
+                    this.userRefreshToken
+                  );
+                }
                 resolve({
                   user: this.user,
                   refreshToken: this.userRefreshToken!,
@@ -661,8 +758,8 @@ export class MirrorWorld {
             throw result.error;
           }
 
-          const response = await this.sso.post<IResponse<IAction>>(
-            `/v1/auth/actions/request`,
+          const response = await this.auth.post<IResponse<IAction>>(
+            `/actions/request`,
             payload
           );
 
@@ -750,7 +847,7 @@ export class MirrorWorld {
   async getNFTs(payload: {
     limit: number;
     offset: number;
-  }): Promise<SolanaNFTExtended[]> {
+  }): Promise<SolanaNFTExtended[] | QueryEVMNFTResultBody> {
     if (!this.user && !this.isLoggedIn) {
       throwError('ERROR_USER_NOT_AUTHENTICATED');
     }
@@ -758,7 +855,13 @@ export class MirrorWorld {
       owners: [this.user.wallet.sol_address],
       ...payload,
     });
-    this.nfts = nfts;
+    // Solana NFTS return an array
+    if (Array.isArray(nfts)) {
+      this.nfts = nfts;
+    } else {
+      // EVM NFTS return an object
+      this.nfts = nfts.result;
+    }
     return nfts;
   }
 
@@ -771,7 +874,7 @@ export class MirrorWorld {
       limit: number;
       offset: number;
     }
-  ): Promise<SolanaNFTExtended[]> {
+  ): Promise<SolanaNFTExtended[] | QueryEVMNFTResultBody> {
     if (!this.user && !this.isLoggedIn) {
       throwError('ERROR_USER_NOT_AUTHENTICATED');
     }
@@ -1186,7 +1289,35 @@ export class MirrorWorld {
    */
   async fetchNFTsByOwnerAddresses(
     payload: QueryNFTsByOwnersPayload
-  ): Promise<SolanaNFTExtended[]> {
+  ): Promise<SolanaNFTExtended[] | QueryEVMNFTResultBody> {
+    if (isEVM(this.chainConfig)) {
+      const result = fetchEVMNFTsByOwnerAddressSchema.validate({
+        owner_address: payload.owners[0],
+        limit: payload.limit,
+        cursor: payload.cursor,
+      });
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      const response = await this.asset.post<IResponse<QueryEVMNFTResultRaw>>(
+        `/${this.base('asset')}/nft/owner`,
+        result.value
+      );
+      console.log(response.data.data);
+      const parsedResult = response.data.data.result.map((nft) => ({
+        ...nft,
+        metadata: JSON.parse(nft.metadata) as NftJsonMetadata,
+      }));
+
+      return {
+        ...response.data.data,
+        result: parsedResult,
+      };
+    }
+
+    // Otherwise assume Solana
     const result = fetchNFTsByOwnerAddressesSchema.validate({
       owners: payload.owners,
       limit: payload.limit,
@@ -1322,5 +1453,116 @@ export class MirrorWorld {
     >(`/solana/marketplaces?${params}`);
 
     return response.data.data.data;
+  }
+
+  /**
+   * @service Metadata service
+   * Fetch EVM NFT Activity
+   */
+  async fetchEVMNFTEvents(
+    payload: QueryEVMNFTActivityPayload
+  ): Promise<EVMNFTActivity[]> {
+    assertAvailableFor('fetchEVMNFTEvents', this.chainConfig, [
+      Ethereum('mainnet'),
+      Ethereum('goerli'),
+      Polygon('mumbai-mainnet'),
+      Polygon('mumbai-testnet'),
+    ]);
+    const result = fetchEVMNFTsActivitySchema.validate({
+      contract: payload.contract,
+      token_id: payload.token_id,
+      page: payload.page,
+      page_size: payload.page_size,
+    });
+    if (result.error) {
+      throw result.error;
+    }
+    const response = await this.metadata.post<
+      IResponse<QueryEVMNFTActivityResult>
+    >(`/${this.base('metadata')}/nft/events`, result.value);
+
+    return response.data.data.events;
+  }
+
+  /**
+   * @service Metadata service
+   * Fetch Solana NFT Activity
+   */
+  async fetchSolanaNFTEvents(
+    payload: QuerySolanaNFTActivityPayload
+  ): Promise<SolanaNFTActivity[]> {
+    assertAvailableFor('fetchSolanaNFTEvents', this.chainConfig, [
+      Solana('mainnet-beta'),
+      Solana('devnet'),
+    ]);
+    const result = fetchSolanaNFTsActivitySchema.validate({
+      mint_address: payload.mint_address,
+      page: payload.page,
+      page_size: payload.page_size,
+    });
+    if (result.error) {
+      throw result.error;
+    }
+
+    const response = await this.metadata.post<
+      IResponse<QuerySolanaNFTActivityResult>
+    >(`/${this.base('metadata')}/nft/events`, result.value);
+
+    return response.data.data.events;
+  }
+
+  /**
+   * @service Metadata
+   * Fetch Solana NFT Info
+   */
+  async fetchSolanaNFTInfo(
+    payload: QuerySolanaNFTInfoPayload
+  ): Promise<SolanaNFTInfo> {
+    assertAvailableFor('fetchSolanaNFTInfo', this.chainConfig, [
+      Solana('mainnet-beta'),
+      Solana('devnet'),
+    ]);
+
+    const result = fetchSolanaNFTInfoSchema.validate({
+      mint_address: payload.mint_address,
+    });
+    if (result.error) {
+      throw result.error;
+    }
+
+    const response = await this.metadata.get<IResponse<SolanaNFTInfo>>(
+      `/${this.base('asset')}/nft/${result.value.mint_address}`
+    );
+
+    return response.data.data;
+  }
+
+  /**
+   * @service Metadata
+   * Fetch EVM NFT Info
+   */
+  async fetchEVMNFTInfo(payload: QueryEVMNFTInfoPayload): Promise<EVMNFTInfo> {
+    assertAvailableFor('fetchSolanaNFTEvents', this.chainConfig, [
+      Ethereum('mainnet'),
+      Ethereum('goerli'),
+      Polygon('mumbai-mainnet'),
+      Polygon('mumbai-testnet'),
+    ]);
+
+    const result = fetchEVMNFTInfoSchema.validate({
+      contract: payload.contract,
+      token_id: payload.token_id,
+    });
+    if (result.error) {
+      throw result.error;
+    }
+
+    const response = await this.metadata.get<IResponse<EVMNFTInfo>>(
+      `/${this.base('metadata')}/nft/${result.value.contract}/${
+        result.value.token_id
+      }`
+    );
+
+    return response.data.data;
   }
 }

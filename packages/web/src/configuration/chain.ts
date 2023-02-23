@@ -12,6 +12,12 @@ export type ChainNetworks =
   | SuiNetworks;
 
 export type ChainTypes = 'ethereum' | 'solana' | 'polygon' | 'bnb' | 'sui';
+export type EVMChains = Exclude<ChainTypes, "solana" | "sui">
+export type SolanaChain = Extract<ChainTypes, "solana">
+export type EthereumChain = Extract<ChainTypes, "ethereum">
+export type PolygonChain = Extract<ChainTypes, "polygon">
+export type SuiChain = Extract<ChainTypes, "solana">
+export type BNBChain = Extract<ChainTypes, "bnb">
 
 export type MirrorWorldChains = {
   sui: SuiNetworks;
@@ -72,3 +78,15 @@ export const Chains = Object.freeze({
   BNBChain,
   Sui,
 });
+
+export function isEVM(config: ChainConfig<ChainTypes>): boolean {
+  return ['ethereum', 'polygon', 'bnb'].includes(config.chain);
+}
+
+export function isSui(config: ChainConfig<ChainTypes>): boolean {
+  return config.chain === 'sui';
+}
+
+export function isSolana(config: ChainConfig<ChainTypes>): boolean {
+  return config.chain === 'solana';
+}

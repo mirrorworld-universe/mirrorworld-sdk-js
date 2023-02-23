@@ -77,7 +77,7 @@ function createBaseURL(
     staging ? '-staging' : ''
   }.mirrorworld.fun/v2/auth`;
   const chainServiceBaseURL = (service: Omit<MirrorWorldAPIService, 'auth'>) =>
-    `https://api${staging ? '-staging' : ''}.mirrorworld.fun/v2/${service}`;
+    `https://api${staging ? '-staging' : ''}.mirrorworld.fun/v2`;
   return MIRROR_WORLD_API_SERVICES.map((service) => {
     return match<MirrorWorldAPIService, ServiceBaseURLConfig>(service, {
       auth: {
@@ -100,9 +100,10 @@ function createBaseURL(
   });
 }
 export function cp<T extends ChainConfig<ChainTypes>>(
-  chainConfig: T
+  chainConfig: T,
+  service: MirrorWorldAPIService
 ): ChainConfigString<T> {
-  return `${chainConfig.chain}/${chainConfig.network}` as ChainConfigString<T>;
+  return `${chainConfig.chain}/${chainConfig.network}/${service}` as ChainConfigString<T>;
 }
 
 type ChainConfigString<T extends ChainConfig<ChainTypes>> =
@@ -169,14 +170,3 @@ export class MirrorWorldAPIClientV2 {
     });
   }
 }
-
-const api = new MirrorWorldAPIClientV2({
-  apiKey: 'mw_testcBkFBaNnczL4yihD4AN5qYEDfJQX5dDlfJ2',
-  staging: true,
-});
-
-api.client
-  .get('auth')!
-  .get(`/me`)
-  .then(console.log)
-  .catch((e) => console.error(e.response));

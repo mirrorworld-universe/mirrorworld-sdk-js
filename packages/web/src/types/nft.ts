@@ -243,6 +243,7 @@ export interface QueryNFTsByUpdateAuthoritiesPayload
 export interface QueryNFTsByOwnersPayload
   extends Omit<ComputeNFTQueryRequestPayload<'owners'>, 'owners'> {
   owners: string[];
+  cursor?: string;
 }
 
 export type QueryUsersNFTsPayload = QueryNFTsByOwnersPayload;

@@ -58,7 +58,7 @@ export type MirrorWorldEvents = {
   logout?: never;
   ready?: never;
   'auth:refreshToken'?: string;
-  'update:user'?: never;
+  'update:user': IUser;
   'chain:change': ChainConfig<ChainTypes>;
 };
 
