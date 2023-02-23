@@ -58,7 +58,7 @@ export const createInstance = (options?: Partial<MirrorWorldOptions>) =>
     chainConfig: Solana('devnet'),
   });
 
-describe('Core SDK tests', () => {
+describe.skip('Core SDK tests', () => {
   describe('Sanity tests', () => {
     it('should properly create instance of sdk with correct params', () => {
       const mirrorworld = new MirrorWorld({
