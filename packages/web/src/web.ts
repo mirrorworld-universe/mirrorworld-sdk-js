@@ -596,6 +596,10 @@ export class MirrorWorld {
     try {
       await this.auth.post('/auth/logout');
       this._user = undefined;
+      const refreshTokenStorageKey = `${this._storageKey}:refresh`;
+      if (canUseDom) {
+        localStorage.removeItem(refreshTokenStorageKey);
+      }
       this.emit('logout', undefined);
     } catch (e) {}
   }
