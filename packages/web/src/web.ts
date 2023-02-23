@@ -357,6 +357,7 @@ export class MirrorWorld {
         scale: [0.9, 1],
       }).finished,
     ];
+
     async function unmountIframes() {
       unhideOthers();
       enableBodyScroll(portalContent);
@@ -380,6 +381,12 @@ export class MirrorWorld {
     if (shouldAutoClose) {
       windowEmitter.on('close', unmountIframes);
     }
+
+    windowEmitter.on('message', (event) => {
+      if (event.data.name === 'mw:auth:close') {
+        unmountIframes();
+      }
+    });
 
     await Promise.all(mountAnimationPromises);
 
@@ -677,11 +684,19 @@ export class MirrorWorld {
       )) || undefined;
     if (!!window.focus && !!authWindow?.focus) authWindow.focus();
 
+    if (authWindow) {
+      window.addEventListener('message', (event) => {
+        if (event.data.name === 'mw:auth:close') {
+          authWindow.close();
+        }
+      });
+    }
+
     return authWindow;
   }
 
   public async openWallet(
-    path?: string,
+    path = '',
     shouldAutoClose = false
   ): Promise<Window | undefined> {
     if (this._uxMode === 'popup') {
