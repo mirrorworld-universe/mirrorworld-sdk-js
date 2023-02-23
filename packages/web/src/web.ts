@@ -569,7 +569,7 @@ export class MirrorWorld {
         refresh_token: string;
         user: UserWithWallet;
       }>
-    >(`/auth/login`, credentials);
+    >(`/login`, credentials);
     const accessToken = response.data.data.access_token;
     this.userRefreshToken = response.data.data.refresh_token;
     this.user = response.data.data.user;
