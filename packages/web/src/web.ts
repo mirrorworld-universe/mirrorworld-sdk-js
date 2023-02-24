@@ -594,7 +594,7 @@ export class MirrorWorld {
 
   async logout(): Promise<void> {
     try {
-      await this.auth.post('/auth/logout');
+      await this.auth.post('/logout');
       this._user = undefined;
       const refreshTokenStorageKey = `${this._storageKey}:refresh`;
       if (canUseDom) {
