@@ -14,7 +14,7 @@ import { clientOptionsSchema } from './validators';
 import { LoginEmailCredentials } from './types/auth';
 import { IPaginatedResponse, IResponse } from './types/response.type';
 import { IUser, UserWithWallet, Wallet } from './types/user.type';
-import { canUseDom } from './utils';
+import { canUseDom, isSafari } from './utils';
 import { animate } from 'motion';
 import { disableBodyScroll, enableBodyScroll } from 'body-scroll-lock';
 import { hideOthers } from 'aria-hidden';
@@ -176,7 +176,20 @@ export class MirrorWorld {
       },
       staging
     );
-    this._uxMode = options.walletUIConfig?.uxMode || 'embedded';
+
+    if (isSafari()) {
+      // Safari enforces a strict
+      // iframe communication policy.
+      // To bypass this we override the
+      // user's settings to use popup mode.
+      this._uxMode = 'popup';
+      console.warn(
+        "[MirrorWorld:SDK]: Overriding UX mode to 'popup' due to Safari's strict iframe communication policy."
+      );
+    } else {
+      this._uxMode = options.walletUIConfig?.uxMode || 'embedded';
+    }
+
     this.on('ready', async () => {
       if (autoLoginCredentials) {
         console.debug({

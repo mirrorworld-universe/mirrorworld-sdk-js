@@ -7,3 +7,4 @@ coverage
 .test.ts
 .env.local
 .data
+.curl.http
