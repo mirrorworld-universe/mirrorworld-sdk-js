@@ -31,6 +31,11 @@ export interface MirrorWorldOptions {
    * Is staging environment
    */
   staging?: boolean;
+
+  auth?: {
+    authToken?: string;
+    refreshToken?: string;
+  };
 }
 
 export type MirrorWorldEvents = {

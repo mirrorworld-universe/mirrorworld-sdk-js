@@ -45,4 +45,19 @@ export const clientOptionsSchema = joi.object<MirrorWorldOptions>({
         toErrorMessage('INVALID_OPTIONS', '`staging` should be a boolean.')
       )
     ),
+  auth: joi
+    .object({
+      authToken: joi.string().optional(),
+      refreshToken: joi.string().optional(),
+    })
+    .optional()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_OPTIONS',
+        toErrorMessage(
+          'INVALID_OPTIONS',
+          '`auth` should be an object with valid `authToken` or `refreshToken` properties of type string.'
+        )
+      )
+    ),
 });
