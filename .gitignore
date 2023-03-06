@@ -4,3 +4,7 @@ node_modules
 dist
 coverage
 /.idea/
+.data
+.curl.http
+.env.local
+.test.ts

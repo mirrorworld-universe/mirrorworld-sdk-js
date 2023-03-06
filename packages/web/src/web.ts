@@ -90,6 +90,7 @@ export class MirrorWorld {
   _tokens: ISolanaToken[] = [];
   _transactions: ISolanaTransaction[] = [];
   _nfts: SolanaNFTExtended[] = [];
+  _authToken?: string;
 
   // User variables
   _user?: UserWithWallet;
@@ -261,9 +262,11 @@ export class MirrorWorld {
     });
   }
 
-  async loginWithEmail(
-    credentials: LoginEmailCredentials
-  ): Promise<MirrorWorld> {
+  async loginWithEmail(credentials: LoginEmailCredentials): Promise<{
+    user: UserWithWallet;
+    authToken: string;
+    refreshToken: string;
+  }> {
     const response = await this.sso.post<
       IResponse<{
         access_token: string;
@@ -273,13 +276,18 @@ export class MirrorWorld {
     >('/v1/auth/login', credentials);
     const accessToken = response.data.data.access_token;
     this.userRefreshToken = response.data.data.refresh_token;
+    this._authToken = accessToken;
     this.user = response.data.data.user;
     this.useCredentials({
       accessToken,
     });
     this.emit('login:email', this.user);
     this.emit('login', this.user);
-    return this;
+    return {
+      user: this.user,
+      authToken: this._authToken,
+      refreshToken: this.userRefreshToken,
+    };
   }
 
   async logout(): Promise<void> {
@@ -305,6 +313,7 @@ export class MirrorWorld {
 
     const accessToken = response.data.data.access_token;
     this.userRefreshToken = response.data.data.refresh_token;
+    this._authToken = accessToken;
     const user = response.data.data.user;
     this.user = user;
     this.useCredentials({
@@ -384,34 +393,38 @@ export class MirrorWorld {
    * Logs in a user. Opens a popup window for the login operation
    */
   login() {
-    return new Promise<{ user: IUser; refreshToken: string }>(
-      async (resolve, reject) => {
-        try {
-          const authWindow = await this.openWallet('');
-          window.addEventListener('message', async (event) => {
-            const { deserialize } = await import('bson');
-            if (event.data?.name === 'mw:auth:login') {
-              const payload = deserialize(event.data.payload);
-              console.debug('auth:payload', payload);
-              if (payload.access_token && payload.refresh_token) {
-                this.userRefreshToken = payload.refresh_token;
-                this.useCredentials({
-                  accessToken: payload.access_token,
-                });
-                await this.fetchUser();
-                authWindow && authWindow.close();
-                resolve({
-                  user: this.user,
-                  refreshToken: this.userRefreshToken!,
-                });
-              }
+    return new Promise<{
+      user: IUser;
+      refreshToken: string;
+      authToken: string;
+    }>(async (resolve, reject) => {
+      try {
+        const authWindow = await this.openWallet('');
+        window.addEventListener('message', async (event) => {
+          const { deserialize } = await import('bson');
+          if (event.data?.name === 'mw:auth:login') {
+            const payload = deserialize(event.data.payload);
+            console.debug('auth:payload', payload);
+            if (payload.access_token && payload.refresh_token) {
+              this.userRefreshToken = payload.refresh_token;
+              this._authToken = payload.access_token as string;
+              this.useCredentials({
+                accessToken: payload.access_token,
+              });
+              await this.fetchUser();
+              authWindow && authWindow.close();
+              resolve({
+                user: this.user,
+                refreshToken: this.userRefreshToken!,
+                authToken: this._authToken,
+              });
             }
-          });
-        } catch (e) {
-          reject(e.message);
-        }
+          }
+        });
+      } catch (e: any) {
+        reject(e.message);
       }
-    );
+    });
   }
 
   private getApprovalToken = (payload: ICreateActionPayload) =>
