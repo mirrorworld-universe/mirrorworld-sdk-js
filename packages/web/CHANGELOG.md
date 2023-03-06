@@ -1,5 +1,11 @@
 # @mirrorworld/web3.js
 
+## 1.3.1
+
+### Patch Changes
+
+- 2909ec4: Return auth token on login
+
 ## 1.3.0
 
 ### Minor Changes
