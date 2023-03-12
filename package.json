@@ -4,7 +4,8 @@
   "license": "MIT",
   "private": "true",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "packages/frameworks/*"
   ],
   "engines": {
     "node": ">=10"
@@ -89,7 +90,8 @@
   },
   "preconstruct": {
     "packages": [
-      "packages/*"
+      "packages/*",
+      "packages/frameworks/*"
     ]
   },
   "devDependencies": {

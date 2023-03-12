@@ -1,0 +1,47 @@
+{
+  "name": "@mirrorworld/react",
+  "version": "2.0.0",
+  "description": "Mirror World Web SDK - React",
+  "keywords": [
+    "mirrorworld",
+    "web3",
+    "sdk",
+    "solana",
+    "ethereum",
+    "polygon",
+    "aptos",
+    "sui",
+    "bnb chain",
+    "react",
+    "next"
+  ],
+  "author": "Jonathan Bakebwa <codebender828@gmail.com>",
+  "homepage": "https://github.com/mirrorworld-universe/mirrorworld.web3.js/tree/main/packages/frameworks/react",
+  "license": "MIT",
+  "main": "dist/mirrorworld-react.cjs.js",
+  "module": "dist/mirrorworld-react.esm.js",
+  "repository": "https://github.com/mirrorworld-universe/mirrorworld.web3.js/tree/main/packages/frameworks/react",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "bugs": {
+    "url": "https://github.com/mirrorworld-universe/mirrorworld.web3.js/issues"
+  },
+  "scripts": {
+    "clean": "rimraf dist"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "peerDependencies": {
+    "@types/react": "^18.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
