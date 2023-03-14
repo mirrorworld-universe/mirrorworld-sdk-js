@@ -5,7 +5,8 @@
   "private": "true",
   "workspaces": [
     "packages/*",
-    "packages/frameworks/*"
+    "packages/frameworks/*",
+    "examples/*"
   ],
   "engines": {
     "node": ">=10"
@@ -23,6 +24,8 @@
     "pkg": "manypkg run",
     "pkgs:check": "manypkg check",
     "pkgs:fix": "manypkg fix",
+    "playground:dev": "manypkg run nuxt-ts dev",
+    "playground:build": "manypkg run nuxt-ts build",
     "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
     "test": "NODE_ENV=development jest --ci --coverage --maxWorkers=2",
     "test:watch": "NODE_ENV=development jest --verbose --watch --maxWorkers=2",
@@ -86,7 +89,8 @@
     "size-limit": "^5.0.3",
     "tslib": "^2.3.1",
     "typescript": "^4.3.5",
-    "vue": "^3.2.6"
+    "vitest": "^0.29.2",
+    "vue": "^3.2.47"
   },
   "preconstruct": {
     "packages": [
@@ -95,6 +99,9 @@
     ]
   },
   "devDependencies": {
+    "@nuxt/vite-builder": "^3.2.3",
+    "@nuxtjs/eslint-config-typescript": "^12.0.0",
+    "@vue/compiler-sfc": "^3.2.47",
     "jiti": "^1.17.1",
     "nanoid": "^4.0.1"
   }
