@@ -1,6 +1,6 @@
 import joi from 'joi';
 import {
-  IBuyNFTPayload,
+  IBuySolanaNFTPayload,
   ICancelNFTPayload,
   IListNFTPayload,
   IUpdateListingPayload,
@@ -13,7 +13,7 @@ import {
 import {
   ICreateMarketplacePayload,
   IStorefrontConfig,
-  IUpdateMarketplacePayload,
+  IUpdateSolanaMarketplacePayload,
 } from '../types/marketplace';
 
 export const listNFTSchema = joi.object<IListNFTPayload>({
@@ -55,7 +55,7 @@ export const listNFTSchema = joi.object<IListNFTPayload>({
     ),
 });
 
-export const buyNFTSchema = joi.object<IBuyNFTPayload>({
+export const buyNFTSchema = joi.object<IBuySolanaNFTPayload>({
   mint_address: joi
     .string()
     .required()
@@ -288,67 +288,68 @@ export const createMarketplaceSchema = joi.object<ICreateMarketplacePayload>({
     ),
 });
 
-export const updateMarketplaceSchema = joi.object<IUpdateMarketplacePayload>({
-  treasury_mint: joi
-    .string()
-    .optional()
-    .error(
-      MirrorWorldSDKError.new(
-        'INVALID_UPDATE_MARKETPLACE_PAYLOAD',
-        toErrorMessage(
+export const updateMarketplaceSchema =
+  joi.object<IUpdateSolanaMarketplacePayload>({
+    treasury_mint: joi
+      .string()
+      .optional()
+      .error(
+        MirrorWorldSDKError.new(
           'INVALID_UPDATE_MARKETPLACE_PAYLOAD',
-          '`treasury_mint` should be a valid SPL mint address'
+          toErrorMessage(
+            'INVALID_UPDATE_MARKETPLACE_PAYLOAD',
+            '`treasury_mint` should be a valid SPL mint address'
+          )
         )
-      )
-    ),
-  seller_fee_basis_points: joi
-    .number()
-    .min(0)
-    .max(10000)
-    .required()
-    .error(
-      MirrorWorldSDKError.new(
-        'INVALID_UPDATE_MARKETPLACE_PAYLOAD',
-        toErrorMessage(
+      ),
+    seller_fee_basis_points: joi
+      .number()
+      .min(0)
+      .max(10000)
+      .required()
+      .error(
+        MirrorWorldSDKError.new(
           'INVALID_UPDATE_MARKETPLACE_PAYLOAD',
-          '`seller_fee_basis_points` should be a valid number between 0 and 10000'
+          toErrorMessage(
+            'INVALID_UPDATE_MARKETPLACE_PAYLOAD',
+            '`seller_fee_basis_points` should be a valid number between 0 and 10000'
+          )
         )
-      )
-    ),
-  collections: joi
-    .array()
-    .optional()
-    .items(joi.string())
-    .error(
-      MirrorWorldSDKError.new(
-        'INVALID_UPDATE_MARKETPLACE_PAYLOAD',
-        toErrorMessage(
+      ),
+    collections: joi
+      .array()
+      .optional()
+      .items(joi.string())
+      .error(
+        MirrorWorldSDKError.new(
           'INVALID_UPDATE_MARKETPLACE_PAYLOAD',
-          '`collections` should be a valid array of SPL mint addresses'
+          toErrorMessage(
+            'INVALID_UPDATE_MARKETPLACE_PAYLOAD',
+            '`collections` should be a valid array of SPL mint addresses'
+          )
         )
-      )
-    ),
-  storefront: strorefrontConfigValidator('INVALID_UPDATE_MARKETPLACE_PAYLOAD')
-    .optional()
-    .error(
-      MirrorWorldSDKError.new(
-        'INVALID_UPDATE_MARKETPLACE_PAYLOAD',
-        toErrorMessage(
+      ),
+    storefront: strorefrontConfigValidator('INVALID_UPDATE_MARKETPLACE_PAYLOAD')
+      .optional()
+      .error(
+        MirrorWorldSDKError.new(
           'INVALID_UPDATE_MARKETPLACE_PAYLOAD',
-          '`storefront` should be a valid Storefront configuration object.'
+          toErrorMessage(
+            'INVALID_UPDATE_MARKETPLACE_PAYLOAD',
+            '`storefront` should be a valid Storefront configuration object.'
+          )
         )
-      )
-    ),
-  new_authority: joi
-    .string()
-    .optional()
-    .error(
-      MirrorWorldSDKError.new(
-        'INVALID_UPDATE_MARKETPLACE_PAYLOAD',
-        toErrorMessage(
+      ),
+    new_authority: joi
+      .string()
+      .optional()
+      .error(
+        MirrorWorldSDKError.new(
           'INVALID_UPDATE_MARKETPLACE_PAYLOAD',
-          '`new_authority` should be a valid Solana address'
+          toErrorMessage(
+            'INVALID_UPDATE_MARKETPLACE_PAYLOAD',
+            '`new_authority` should be a valid Solana address'
+          )
         )
-      )
-    ),
-});
+      ),
+  });

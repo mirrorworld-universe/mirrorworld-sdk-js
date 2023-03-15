@@ -1,9 +1,7 @@
 <template>
   <FunctionalWell>
     <c-stack>
-      <c-heading as="h3" font-size="sm">
-        Create Verified Solana Collection
-      </c-heading>
+      <c-heading as="h3" font-size="sm"> Create EVM Collection </c-heading>
       <template v-for="key in keysIn(payload)" :key="key">
         <c-form-control
           v-if="typeof payload[key] === 'string'"
@@ -19,14 +17,28 @@
             v-model="payload[key]"
           />
         </c-form-control>
-        <c-form-control v-if="typeof payload[key] === 'boolean'">
+        <c-form-control
+          v-else-if="typeof payload[key] === 'number'"
+          :is-required="requiredKeys.has(key)"
+        >
+          <c-form-label font-size="sm" font-weight="bold">
+            {{ key }}
+          </c-form-label>
+          <c-input
+            size="xs"
+            :placeholder="key"
+            display="block"
+            v-model.number="payload[key]"
+          />
+        </c-form-control>
+        <c-form-control v-else-if="typeof payload[key] === 'boolean'">
           <c-checkbox size="sm" v-model="payload[key]">
             {{ key }}
           </c-checkbox>
         </c-form-control>
       </template>
       <c-button
-        @click="createSolanaVerifiedCollection"
+        @click="createEVMCollection"
         size="sm"
         variant="outline"
         color-scheme="gray"
@@ -42,11 +54,12 @@ import FunctionalWell from '@/components/ui/functional-well.vue';
 import { useMirrorWorld } from '~~/hooks/use-mirrorworld';
 import { isEmpty, omitBy, keysIn } from 'lodash-es';
 import { TransactionCommitment } from '~~/../../packages/core/src/types/nft';
+import { EVMContractType } from '~~/../../packages/core/src/types/asset.evm.v2';
 
 const { mirrorworld } = useMirrorWorld();
 
-type CreateSolanaVerifiedCollectionPayloadV2 = Parameters<
-  typeof mirrorworld.value.createSolanaVerifiedCollection
+type CreateEVMCollectionPayloadV2 = Parameters<
+  typeof mirrorworld.value.createEVMCollection
 >[0];
 
 const requiredKeys = new Map<any, any>([
@@ -55,26 +68,21 @@ const requiredKeys = new Map<any, any>([
   ['url', true],
 ]);
 
-const payload = reactive({
+const payload = reactive<CreateEVMCollectionPayloadV2>({
   name: '',
   symbol: '',
   url: '',
-  mint_id: '',
-  collection_mint: '',
-  seller_fee_basis_points: 100,
-  to_wallet_address: '',
-  skip_preflight: true,
+  contract_type: EVMContractType.erc721,
+  mint_start_id: undefined,
+  mint_end_id: undefined,
+  mint_amount: undefined,
   confirmation: TransactionCommitment.confirmed,
 });
 
-async function createSolanaVerifiedCollection() {
+async function createEVMCollection() {
   try {
-    const result = await mirrorworld.value.createSolanaVerifiedCollection(
-      // @ts-ignore
-      {
-        ...omitBy(payload, isEmpty),
-        skip_preflight: true,
-      }
+    const result = await mirrorworld.value.createEVMCollection(
+      omitBy(payload, isEmpty) as any as CreateEVMCollectionPayloadV2
     );
     console.log('result', result);
     alert(JSON.stringify(result, null, 2));

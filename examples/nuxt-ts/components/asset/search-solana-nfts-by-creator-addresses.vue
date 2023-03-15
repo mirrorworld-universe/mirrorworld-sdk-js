@@ -47,16 +47,14 @@
           Add mint address
         </c-button>
       </c-button-group>
-      <c-wrap-item>
-        <c-button
-          @click="searchSolanaNFTsByCreatorAddresses"
-          size="sm"
-          variant="outline"
-          color-scheme="gray"
-        >
-          Search
-        </c-button>
-      </c-wrap-item>
+      <c-button
+        @click="searchSolanaNFTsByCreatorAddresses"
+        size="sm"
+        variant="outline"
+        color-scheme="gray"
+      >
+        Search
+      </c-button>
     </c-stack>
   </FunctionalWell>
 </template>

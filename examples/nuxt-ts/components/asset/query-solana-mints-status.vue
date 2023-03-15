@@ -44,16 +44,14 @@
           Add signature
         </c-button>
       </c-button-group>
-      <c-wrap-item>
-        <c-button
-          @click="querySolanaAssetMintsStatus"
-          size="sm"
-          variant="outline"
-          color-scheme="gray"
-        >
-          Query Mints Status
-        </c-button>
-      </c-wrap-item>
+      <c-button
+        @click="querySolanaAssetMintsStatus"
+        size="sm"
+        variant="outline"
+        color-scheme="gray"
+      >
+        Query Mints Status
+      </c-button>
     </c-stack>
   </FunctionalWell>
 </template>

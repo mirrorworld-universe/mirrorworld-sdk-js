@@ -137,6 +137,11 @@ export interface QueryEVMNFTInfoPayload {
   token_id: number;
 }
 
+export interface QueryEVMNFTInfoPayloadV2 {
+  contract_address: string;
+  token_id: number;
+}
+
 export interface EVMNFTInfo {
   contract: string;
   token_id: number;

@@ -67,6 +67,9 @@
             <asset-mint-solana-nft-to-collection />
           </c-wrap-item>
           <c-wrap-item>
+            <asset-verify-solana-mint-config />
+          </c-wrap-item>
+          <c-wrap-item>
             <asset-search-solana-nfts-by-mint-addresses />
           </c-wrap-item>
           <c-wrap-item>
@@ -77,6 +80,9 @@
           </c-wrap-item>
           <c-wrap-item>
             <asset-search-solana-nfts-by-update-authority-addresses />
+          </c-wrap-item>
+          <c-wrap-item>
+            <asset-search-solana-nft-by-mint-address />
           </c-wrap-item>
         </c-wrap>
       </c-stack>
@@ -136,6 +142,7 @@ import {
   AssetSearchSolanaNftsByMintAddresses,
   AssetSearchSolanaNftsByOwnerAddresses,
   AssetSearchSolanaNftsByUpdateAuthorityAddresses,
+  AssetSearchSolanaNftByMintAddress,
 } from '#components';
 
 const { mirrorworld } = useMirrorWorld();

@@ -37,16 +37,14 @@
           >skip_preflight</c-checkbox
         >
       </c-form-control>
-      <c-wrap-item>
-        <c-button
-          @click="updateSolanaMarketplace"
-          size="sm"
-          variant="outline"
-          color-scheme="gray"
-        >
-          Update Marketplace
-        </c-button>
-      </c-wrap-item>
+      <c-button
+        @click="updateSolanaMarketplace"
+        size="sm"
+        variant="outline"
+        color-scheme="gray"
+      >
+        Update Marketplace
+      </c-button>
     </c-stack>
   </FunctionalWell>
 </template>
@@ -54,7 +52,6 @@
 <script lang="ts" setup>
 import FunctionalWell from '@/components/ui/functional-well.vue';
 import { useMirrorWorld } from '~~/hooks/use-mirrorworld';
-import { SolanaCommitment } from '~~/../../packages/core/src/types/nft';
 
 const { mirrorworld } = useMirrorWorld();
 

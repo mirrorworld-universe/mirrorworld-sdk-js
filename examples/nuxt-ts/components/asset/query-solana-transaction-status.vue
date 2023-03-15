@@ -45,16 +45,14 @@
           Add signature
         </c-button>
       </c-button-group>
-      <c-wrap-item>
-        <c-button
-          @click="querySolanaAssetTransactionStatus"
-          size="sm"
-          variant="outline"
-          color-scheme="gray"
-        >
-          Query Transaction Status
-        </c-button>
-      </c-wrap-item>
+      <c-button
+        @click="querySolanaAssetTransactionStatus"
+        size="sm"
+        variant="outline"
+        color-scheme="gray"
+      >
+        Query Transaction Status
+      </c-button>
     </c-stack>
   </FunctionalWell>
 </template>

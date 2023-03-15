@@ -1,4 +1,7 @@
-import { TransactionControlOptions } from './nft';
+import {
+  EVMTransactionControlOptions,
+  SolanaTransactionControlOptions,
+} from './nft';
 
 export interface INFTListing {
   id: number;
@@ -56,15 +59,15 @@ export interface IStorefrontConfigV2 {
   description: string;
 }
 
-export interface ICreateMarketplacePayloadV2
-  extends Pick<TransactionControlOptions, 'skip_preflight'> {
+export interface ICreateSolanaMarketplacePayloadV2
+  extends Pick<SolanaTransactionControlOptions, 'skip_preflight'> {
   treasury_mint?: string;
   collections?: string[];
   seller_fee_basis_points: number;
   storefront?: IStorefrontConfig;
 }
 
-export interface IUpdateMarketplacePayload {
+export interface IUpdateSolanaMarketplacePayload {
   new_authority?: string;
   treasury_mint?: string;
   collections?: string[];
@@ -74,7 +77,7 @@ export interface IUpdateMarketplacePayload {
 
 export interface UpdateMarketplacePayload
   extends Omit<
-    IUpdateMarketplacePayload,
+    IUpdateSolanaMarketplacePayload,
     'treasury_mint' | 'seller_fee_basis_points' | 'new_authority'
   > {
   /**
@@ -95,7 +98,7 @@ export interface UpdateMarketplacePayload
 }
 
 export interface IUpdateMarketplacePayloadV2
-  extends Pick<TransactionControlOptions, 'skip_preflight'> {
+  extends Pick<SolanaTransactionControlOptions, 'skip_preflight'> {
   new_authority?: string;
   treasury_mint?: string;
   collections?: string[];
@@ -174,13 +177,13 @@ export interface IMarketplaceQueryResult {
 // V2 Marketplace Types
 // ========================================================================
 
-export interface IMarketplaceResponseV2 {
-  marketplace: MarketplaceV2;
+export interface ISolanaMarketplaceResponseV2 {
+  marketplace: SolanaMarketplaceV2;
   transactionStatus: string;
   signature: string;
 }
 
-export interface MarketplaceV2 {
+export interface SolanaMarketplaceV2 {
   id: number;
   name: string;
   client_id: string;
@@ -203,7 +206,7 @@ export interface MarketplaceV2 {
 
 export type MarketplaceQueryOptionsV2 = Partial<
   Pick<
-    MarketplaceV2,
+    SolanaMarketplaceV2,
     | 'name'
     | 'client_id'
     | 'authority'
@@ -218,7 +221,7 @@ export type MarketplaceQueryOptionsV2 = Partial<
   >
 >;
 
-export interface IMarketplaceQueryResultV2 {
+export interface ISolanaMarketplaceQueryResultV2 {
   id: number;
   name: string;
   client_id: string;
@@ -231,4 +234,73 @@ export interface IMarketplaceQueryResultV2 {
   seller_fee_basis_points: number;
   requires_sign_off: boolean;
   can_change_sale_price: boolean;
+}
+
+// =======================
+// EVM Marketplace Types
+// =======================
+
+export interface ICreateEVMMarketplacePayloadV2
+  extends EVMTransactionControlOptions {
+  payment_token?: string;
+  collections?: string[];
+  seller_fee_basis_points: number;
+  storefront?: IStorefrontConfig;
+}
+
+export interface IUpdateEVMMarketplacePayloadV2
+  extends EVMTransactionControlOptions {
+  payment_token?: string;
+  collections?: string[];
+  seller_fee_basis_points: number;
+  storefront?: IStorefrontConfig;
+}
+
+export interface IEVMMarketplaceV2 {
+  id: number;
+  name: string;
+  user_id: number;
+  client_id: string;
+  authority: string;
+  conduit_signature: string;
+  conduit_address: string;
+  sea_port_signature: string;
+  marketplace_address: string;
+  seller_fee_basis_points: number;
+  payment_token: string;
+  storefront_url: any;
+  collections: any[];
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IEVMMarketplaceStorefrontConfigV2 {
+  id: number;
+  client_id: number;
+  name: string;
+  subdomain: string;
+  description: string;
+  logo?: string;
+  banner?: string;
+  config: string;
+}
+
+export interface IQueryEVMMarketplaceResultV2 extends IEVMMarketplaceV2 {
+  storefront: IEVMMarketplaceStorefrontConfigV2 | null;
+  trade_volume: number;
+}
+
+export type IQueryEVMMarketplaceOptionsV2 = Partial<
+  Pick<
+    IEVMMarketplaceV2,
+    'name' | 'authority' | 'payment_token' | 'seller_fee_basis_points'
+  >
+>;
+
+export interface IQueryEVMMarketplacePaginationOptionsV2 {
+  /* The page number. Default is 1 */
+  page: number;
+  /* The number of results per page. Default is 10 */
+  size: number;
 }

@@ -44,16 +44,14 @@
           >skip_preflight</c-checkbox
         >
       </c-form-control>
-      <c-wrap-item>
-        <c-button
-          @click="listSolanaNFT"
-          size="sm"
-          variant="outline"
-          color-scheme="gray"
-        >
-          List NFT
-        </c-button>
-      </c-wrap-item>
+      <c-button
+        @click="listSolanaNFT"
+        size="sm"
+        variant="outline"
+        color-scheme="gray"
+      >
+        List NFT
+      </c-button>
     </c-stack>
   </FunctionalWell>
 </template>
@@ -61,7 +59,7 @@
 <script lang="ts" setup>
 import FunctionalWell from '@/components/ui/functional-well.vue';
 import { useMirrorWorld } from '~~/hooks/use-mirrorworld';
-import { SolanaCommitment } from '~~/../../packages/core/src/types/nft';
+import { TransactionCommitment } from '~~/../../packages/core/src/types/nft';
 
 const { mirrorworld } = useMirrorWorld();
 
@@ -71,7 +69,7 @@ const payload = reactive<BuySolanaNFTPayload>({
   mint_address: '',
   price: 0,
   auction_house: '',
-  confirmation: SolanaCommitment.confirmed,
+  confirmation: TransactionCommitment.confirmed,
   skip_preflight: false,
 });
 

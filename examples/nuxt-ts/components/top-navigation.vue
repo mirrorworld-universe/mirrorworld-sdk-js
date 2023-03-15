@@ -7,7 +7,16 @@
       rounded="none"
       variant="outline"
     >
-      V2 Routes
+      V2 Solana Routes
+    </c-button>
+    <c-button
+      size="sm"
+      :as="NuxtLink"
+      to="/v2/evm"
+      rounded="none"
+      variant="outline"
+    >
+      V2 EVM Routes
     </c-button>
   </c-h-stack>
 </template>

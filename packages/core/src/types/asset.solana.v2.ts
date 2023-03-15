@@ -1,4 +1,4 @@
-import { TransactionControlOptions } from './nft';
+import { SolanaTransactionControlOptions } from './nft';
 
 export interface SolanaNFTListingV2 {
   id: number;
@@ -99,7 +99,7 @@ export interface QueryAssetMintsStatusPayload {
 }
 
 export interface CreateVerifiedCollectionPayloadV2
-  extends TransactionControlOptions {
+  extends SolanaTransactionControlOptions {
   name: string;
   symbol: string;
   url: string;
@@ -127,7 +127,7 @@ export interface MintSolanaNFTWithPaymentOptionsV2 {
 }
 
 export interface MintSolanaNFTToCollectionPayloadV2
-  extends TransactionControlOptions {
+  extends SolanaTransactionControlOptions {
   name: string;
   symbol: string;
   url: string;

@@ -20,16 +20,14 @@
           </c-checkbox>
         </c-form-control>
       </template>
-      <c-wrap-item>
-        <c-button
-          @click="querySolanaMarketplaces"
-          size="sm"
-          variant="outline"
-          color-scheme="gray"
-        >
-          Query Marketplaces
-        </c-button>
-      </c-wrap-item>
+      <c-button
+        @click="querySolanaMarketplaces"
+        size="sm"
+        variant="outline"
+        color-scheme="gray"
+      >
+        Query Marketplaces
+      </c-button>
     </c-stack>
   </FunctionalWell>
 </template>

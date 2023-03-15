@@ -32,7 +32,7 @@ export interface CreateVerifiedCollectionPayload {
 export interface ICreateVerifiedCollectionPayload
   extends Omit<CreateVerifiedCollectionPayload, 'metadataUri'> {
   url: string;
-  confirmation: SolanaCommitment;
+  confirmation: TransactionCommitment;
 }
 
 export interface CreateVerifiedSubCollectionPayload
@@ -42,7 +42,7 @@ export interface CreateVerifiedSubCollectionPayload
 export interface ICreateVerifiedSubCollectionPayload
   extends ICreateVerifiedCollectionPayload {
   collection_mint: string;
-  confirmation: SolanaCommitment;
+  confirmation: TransactionCommitment;
 }
 
 export interface IMintNFTPayload {
@@ -65,7 +65,7 @@ export interface IUpdateNFTPayload {
   mint_address: string;
   update_authority?: string;
   seller_fee_basis_points?: number;
-  confirmation: SolanaCommitment;
+  confirmation: TransactionCommitment;
 }
 
 export interface UpdateNFTPayload
@@ -92,7 +92,7 @@ export interface IListNFTPayload {
   auction_house?: string;
 }
 
-export interface TransactionControlOptions {
+export interface SolanaTransactionControlOptions {
   /**
    * The commitment metric gives clients a standard measure of the network
    * confirmation for the block. It describes how finalized a block is at that
@@ -102,7 +102,7 @@ export interface TransactionControlOptions {
    * @default `confirmed` - This commitment level is usually used for transactions that have been included in a block, but have not yet been confirmed by the network. The node will query the most recent block that has been voted on by the supermajority of the cluster (optimistic confirmation)
    * @option `finalized` - This is the highest level of commitment and transactions are irreversible. The RPC node will query the most recent block confirmed by the supermajority of the cluster as having reached maximum lockout, meaning the cluster has recognized this block as finalized. Transactions at this level also tend to have a higher transaction fee.
    */
-  confirmation?: SolanaCommitment;
+  confirmation?: TransactionCommitment;
   /**
    * Skip preflight check is used to skip the preflight check when sending a transaction to the network.
    * Useful for debugging
@@ -144,7 +144,7 @@ export interface UpdateListingPayload
   auctionHouse?: string;
 }
 
-export interface IBuyNFTPayload {
+export interface IBuySolanaNFTPayload {
   /**
    * Mint Address of the NFT being purchased
    */
@@ -161,7 +161,8 @@ export interface IBuyNFTPayload {
   auction_house?: string;
 }
 
-export interface IBaseSolanaAuctionPayloadV2 extends TransactionControlOptions {
+export interface IBaseSolanaAuctionPayloadV2
+  extends SolanaTransactionControlOptions {
   /**
    * Mint Address of the NFT being purchased
    */
@@ -178,12 +179,52 @@ export interface IBaseSolanaAuctionPayloadV2 extends TransactionControlOptions {
   auction_house?: string;
 }
 
-export type IBuyNFTPayloadV2 = IBaseSolanaAuctionPayloadV2;
-export type IListNFTPayloadV2 = IBaseSolanaAuctionPayloadV2;
-export type ICancelNFTListingPayloadV2 = IBaseSolanaAuctionPayloadV2;
+export type IBuySolanaNFTPayloadV2 = IBaseSolanaAuctionPayloadV2;
+export type IBuySolanaListNFTPayloadV2 = IBaseSolanaAuctionPayloadV2;
+export type ISolanaCancelNFTListingPayloadV2 = IBaseSolanaAuctionPayloadV2;
+
+export interface EVMTransactionControlOptions {
+  /**
+   * The commitment metric gives clients a standard measure of the network
+   * confirmation for the block. It describes how finalized a block is at that
+   * point in time and clients can then use this information to derive their
+   * own measures of commitment.
+   *
+   * @default `confirmed` - This commitment level is usually used for transactions that have been included in a block, but have not yet been confirmed by the network. The node will query the most recent block that has been voted on by the supermajority of the cluster (optimistic confirmation)
+   * @option `finalized` - This is the highest level of commitment and transactions are irreversible. The RPC node will query the most recent block confirmed by the supermajority of the cluster as having reached maximum lockout, meaning the cluster has recognized this block as finalized. Transactions at this level also tend to have a higher transaction fee.
+   */
+  confirmation?: TransactionCommitment;
+}
+
+export interface IBaseEVMAuctionPayloadV2 extends EVMTransactionControlOptions {
+  /**
+   * Contract Address of the NFT being auctioned
+   */
+  collection_address: string;
+  /**
+   * Listing Price of the NFT
+   */
+  price: number;
+  /**
+   * Token ID of the NFT
+   */
+  token_id: number;
+  /**
+   * Marketplace Address address of the marketplace
+   * you are buying, lsiting or cancelling a listing for
+   */
+  marketplace_address: string;
+}
+
+export type IBuyEVMNFTPayloadV2 = IBaseEVMAuctionPayloadV2;
+export type IListEVMNFTPayloadV2 = IBaseEVMAuctionPayloadV2;
+export type ICancelListingEVMPayloadV2 = Omit<
+  IBaseEVMAuctionPayloadV2,
+  'price'
+>;
 
 export interface BuyNFTPayload
-  extends Omit<IBuyNFTPayload, 'mint_address' | 'auction_house'> {
+  extends Omit<IBuySolanaNFTPayload, 'mint_address' | 'auction_house'> {
   /**
    * Mint Address of the NFT being purchased
    */
@@ -227,13 +268,29 @@ export interface ITransferNFTPayload {
   to_wallet_address: number;
 }
 
-export interface ITransferNFTPayloadV2 extends TransactionControlOptions {
+export interface ITransferSolanaNFTPayloadV2
+  extends SolanaTransactionControlOptions {
   /**
    * Mint address of the NFT to transfer
    */
   mint_address: string;
   /**
    * Listing Price of the NFT
+   */
+  to_wallet_address: string;
+}
+
+export interface ITransferEVMNFTPayloadV2 extends EVMTransactionControlOptions {
+  /**
+   * Contract Address of the NFT being transferred
+   */
+  collection_address: string;
+  /**
+   * Token ID of the NFT
+   */
+  token_id: number;
+  /**
+   * To wallet address
    */
   to_wallet_address: string;
 }
@@ -387,7 +444,7 @@ export interface ISolanaNFTMintResult {
   status: string;
 }
 
-export enum SolanaCommitment {
+export enum TransactionCommitment {
   confirmed = 'confirmed',
   finalized = 'finalized',
 }

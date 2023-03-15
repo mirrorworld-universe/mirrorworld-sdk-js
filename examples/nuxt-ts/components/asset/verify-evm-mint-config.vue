@@ -1,7 +1,7 @@
 <template>
   <FunctionalWell>
     <c-stack>
-      <c-heading as="h3" font-size="sm"> Verify Solana Mint Config </c-heading>
+      <c-heading as="h3" font-size="sm"> Verify EVM Mint Config </c-heading>
       <template v-for="key in keysIn(payload)" :key="key">
         <c-form-control
           v-if="typeof payload[key] === 'string'"
@@ -24,7 +24,7 @@
         </c-form-control>
       </template>
       <c-button
-        @click="verifySolanaMintConfig"
+        @click="verifyEVMMintConfig"
         size="sm"
         variant="outline"
         color-scheme="gray"
@@ -42,19 +42,19 @@ import { keysIn } from 'lodash-es';
 
 const { mirrorworld } = useMirrorWorld();
 
-type VerifySolanaMintConfigPayloadV2 = Parameters<
-  typeof mirrorworld.value.verifySolanaMintConfig
+type VerifyEVMMintConfigPayloadV2 = Parameters<
+  typeof mirrorworld.value.verifyEVMMintConfig
 >[0];
 
 const requiredKeys = new Map<any, any>([['url', true]]);
 
-const payload = reactive<VerifySolanaMintConfigPayloadV2>({
+const payload = reactive<VerifyEVMMintConfigPayloadV2>({
   url: '',
 });
 
-async function verifySolanaMintConfig() {
+async function verifyEVMMintConfig() {
   try {
-    const result = await mirrorworld.value.verifySolanaMintConfig(payload);
+    const result = await mirrorworld.value.verifyEVMMintConfig(payload);
     console.log('result', result);
     alert(JSON.stringify(result, null, 2));
   } catch (error) {
