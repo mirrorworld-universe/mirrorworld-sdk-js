@@ -7,4 +7,7 @@ coverage
 .data
 .curl.http
 .env.local
+.test.ts.env
+.nuxt
 .test.ts
+examples/.env
