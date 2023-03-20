@@ -1,5 +1,5 @@
 ---
-'@mirrorworld/web3.js': major
+'@usemirrorworld/web3.js': major
 ---
 
 Create Multi-chain configurration"

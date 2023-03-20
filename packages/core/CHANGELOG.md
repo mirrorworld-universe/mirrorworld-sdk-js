@@ -1,4 +1,4 @@
-# @mirrorworld/web3.js
+# @usemirrorworld/web3.js
 
 ## 0.0.0-dev-20230213133952
 

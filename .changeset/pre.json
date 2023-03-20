@@ -2,9 +2,9 @@
   "mode": "pre",
   "tag": "v2",
   "initialVersions": {
-    "@mirrorworld/utils": "1.0.0",
-    "@mirrorworld/web3.js": "1.3.0",
-    "@mirrorworld/websocket": "1.0.0"
+    "@usemirrorworld/utils": "1.0.0",
+    "@usemirrorworld/web3.js": "1.3.0",
+    "@usemirrorworld/websocket": "1.0.0"
   },
   "changesets": []
 }

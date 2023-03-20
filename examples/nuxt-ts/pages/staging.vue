@@ -343,17 +343,21 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeMount, ref } from "vue";
-import { MirrorWorld, ClusterEnvironment, Solana } from "@mirrorworld/web3.js";
+import { computed, onBeforeMount, ref } from 'vue';
+import {
+  MirrorWorld,
+  ClusterEnvironment,
+  Solana,
+} from '@usemirrorworld/web3.js';
 //@ts-ignore
-import formatHighlight from "json-format-highlight";
+import formatHighlight from 'json-format-highlight';
 
 const mirrorworld = ref<MirrorWorld>(
   new MirrorWorld({
-    apiKey: "mw_testSpTASagrppVD7VVM4h0Cs9jSv0RA6iufbxf",
+    apiKey: 'mw_testSpTASagrppVD7VVM4h0Cs9jSv0RA6iufbxf',
     env: ClusterEnvironment.testnet,
     staging: true,
-    chainConfig: Solana("devnet"),
+    chainConfig: Solana('devnet'),
   })
 );
 
@@ -396,9 +400,9 @@ async function getNFTs() {
 
 const transferResult = ref();
 const transferPayload = reactive({
-  recipientAddress: "",
+  recipientAddress: '',
   amount: 0,
-  tokenMint: "",
+  tokenMint: '',
   tokenDecimals: 6,
 });
 const parsedTransferResult = computed(() =>
@@ -412,7 +416,7 @@ async function transferSPLToken() {
 
 const transferSOLResult = ref();
 const transferSOLPayload = reactive({
-  recipientAddress: "",
+  recipientAddress: '',
   amount: 0,
 });
 const parsedTransferSOLResult = computed(() =>
@@ -426,9 +430,9 @@ async function transferSOL() {
 
 const createVerifiedCollectionResult = ref();
 const createVerifiedCollectionPayload = reactive({
-  name: "",
-  symbol: "",
-  metadataUri: "https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json",
+  name: '',
+  symbol: '',
+  metadataUri: 'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json',
 });
 const parsedCreateVerifiedCollection = computed(() =>
   formatHighlight(JSON.stringify(createVerifiedCollectionResult.value, null, 2))
@@ -442,10 +446,10 @@ async function createVerifiedCollection() {
 
 const mintNFTResult = ref();
 const mintNFTPayload = reactive({
-  name: "",
-  symbol: "",
-  metadataUri: "https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json",
-  collection: "",
+  name: '',
+  symbol: '',
+  metadataUri: 'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json',
+  collection: '',
 });
 const parsedNFT = computed(() =>
   formatHighlight(JSON.stringify(mintNFTResult.value, null, 2))
@@ -456,18 +460,18 @@ async function mintNFT() {
 
 const updateNFTResult = ref();
 const updateNFTPayload = reactive({
-  name: "",
-  symbol: "",
-  metadataUri: "https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json",
-  mintAddress: "",
-  updateAuthority: "",
+  name: '',
+  symbol: '',
+  metadataUri: 'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json',
+  mintAddress: '',
+  updateAuthority: '',
   sellerFeeBasisPoints: 100,
 });
 
 const _updateNFTPayload = computed(() => ({
   ...updateNFTPayload,
   updateAuthority:
-    updateNFTPayload.updateAuthority === ""
+    updateNFTPayload.updateAuthority === ''
       ? undefined
       : updateNFTPayload.updateAuthority,
 }));
@@ -483,8 +487,8 @@ async function updateNFT() {
 
 const transferNFTResult = ref();
 const transferNFTPayload = reactive({
-  mintAddress: "",
-  recipientAddress: "",
+  mintAddress: '',
+  recipientAddress: '',
 });
 const parsedTransferNFTResult = computed(() =>
   formatHighlight(JSON.stringify(transferNFTResult.value, null, 2))
@@ -498,15 +502,15 @@ async function transferNFT() {
 
 const listNFTResult = ref();
 const listNFTPayload = reactive({
-  mintAddress: "",
+  mintAddress: '',
   price: 1,
-  auctionHouse: "",
+  auctionHouse: '',
 });
 
 const _listNFTPayload = computed(() => ({
   ...listNFTPayload,
   auctionHouse:
-    listNFTPayload.auctionHouse === ""
+    listNFTPayload.auctionHouse === ''
       ? undefined
       : listNFTPayload.auctionHouse,
 }));
@@ -520,15 +524,15 @@ async function listNFT() {
 
 const buyNFTResult = ref();
 const buyNFTPayload = reactive({
-  mintAddress: "",
+  mintAddress: '',
   price: 1,
-  auctionHouse: "",
+  auctionHouse: '',
 });
 
 const _buyNFTPayload = computed(() => ({
   ...buyNFTPayload,
   auctionHouse:
-    buyNFTPayload.auctionHouse === "" ? undefined : buyNFTPayload.auctionHouse,
+    buyNFTPayload.auctionHouse === '' ? undefined : buyNFTPayload.auctionHouse,
 }));
 
 const parsedBuyNFTResult = computed(() =>
@@ -540,15 +544,15 @@ async function buyNFT() {
 
 const updateListingResult = ref();
 const updateListingPayload = reactive({
-  mintAddress: "",
+  mintAddress: '',
   price: 1,
-  auctionHouse: "",
+  auctionHouse: '',
 });
 
 const _updateListingPayload = computed(() => ({
   ...updateListingPayload,
   auctionHouse:
-    updateListingPayload.auctionHouse === ""
+    updateListingPayload.auctionHouse === ''
       ? undefined
       : updateListingPayload.auctionHouse,
 }));
@@ -564,15 +568,15 @@ async function updateListing() {
 
 const cancelListingResult = ref();
 const cancelListingPayload = reactive({
-  mintAddress: "",
+  mintAddress: '',
   price: 1,
-  auctionHouse: "",
+  auctionHouse: '',
 });
 
 const _cancelListingPayload = computed(() => ({
   ...cancelListingPayload,
   auctionHouse:
-    cancelListingPayload.auctionHouse === ""
+    cancelListingPayload.auctionHouse === ''
       ? undefined
       : cancelListingPayload.auctionHouse,
 }));
@@ -588,14 +592,14 @@ async function cancelListing() {
 
 const createMarketplaceResult = ref();
 const createMarketplacePayload = reactive({
-  treasuryMint: "",
+  treasuryMint: '',
   sellerFeeBasisPoints: 200,
 });
 
 const _createMarketplacePayload = computed(() => ({
   ...createMarketplacePayload,
   treasuryMint:
-    createMarketplacePayload.treasuryMint === ""
+    createMarketplacePayload.treasuryMint === ''
       ? undefined
       : createMarketplacePayload.treasuryMint,
 }));
@@ -611,7 +615,7 @@ async function createMarketplace() {
 
 async function logout() {
   if (mirrorworld.value.user) {
-    console.debug("logout user");
+    console.debug('logout user');
     await mirrorworld.value.logout();
   }
 }
@@ -620,22 +624,22 @@ onBeforeMount(() => {
   const refreshToken = localStorage.getItem(`app-refresh-token`);
   if (refreshToken) {
     mirrorworld.value = new MirrorWorld({
-      apiKey: "mw_testSpTASagrppVD7VVM4h0Cs9jSv0RA6iufbxf",
+      apiKey: 'mw_testSpTASagrppVD7VVM4h0Cs9jSv0RA6iufbxf',
       env: ClusterEnvironment.testnet,
       autoLoginCredentials: refreshToken,
       staging: true,
-      chainConfig: Solana("devnet"),
+      chainConfig: Solana('devnet'),
     });
-    mirrorworld.value.on("auth:refreshToken", async (refreshToken) => {
+    mirrorworld.value.on('auth:refreshToken', async (refreshToken) => {
       await localStorage.setItem(`app-refresh-token`, refreshToken);
       await mirrorworld.value.fetchUser();
     });
   } else {
     mirrorworld.value = new MirrorWorld({
-      apiKey: "mw_testSpTASagrppVD7VVM4h0Cs9jSv0RA6iufbxf",
+      apiKey: 'mw_testSpTASagrppVD7VVM4h0Cs9jSv0RA6iufbxf',
       env: ClusterEnvironment.testnet,
       staging: true,
-      chainConfig: Solana("devnet"),
+      chainConfig: Solana('devnet'),
     });
   }
 });

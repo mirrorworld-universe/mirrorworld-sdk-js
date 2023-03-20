@@ -1,5 +1,5 @@
 ---
-'@mirrorworld/web3.js': patch
+'@usemirrorworld/web3.js': patch
 ---
 
 Fix: Logout method - path uri

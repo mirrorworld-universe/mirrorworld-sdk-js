@@ -1,4 +1,4 @@
-# @mirrorworld/utils
+# @usemirrorworld/utils
 
 ## 1.0.0
 

@@ -1,4 +1,4 @@
-# @mirrorworld/web3.js
+# @usemirrorworld/web3.js
 
 ## 1.0.0
 
