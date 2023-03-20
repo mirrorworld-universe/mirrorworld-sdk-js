@@ -1,5 +1,11 @@
 # @usemirrorworld/web3.js
 
+## 2.0.1
+
+### Patch Changes
+
+- Export types"
+
 ## 2.0.0
 
 ### Major Changes

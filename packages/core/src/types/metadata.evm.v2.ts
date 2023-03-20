@@ -1,4 +1,4 @@
-import { NFTSearchOrder, QueryNFTsFilterType } from './metadata.common.v2';
+import { NFTSearchOrder, NFTsQueryFilter } from './metadata.common.v2';
 
 export interface QueryEVMNFTsPayloadV2 {
   contract: string;
@@ -9,20 +9,6 @@ export interface QueryEVMNFTsPayloadV2 {
   marketplace_address?: string;
   filter?: NFTsQueryFilter[];
 }
-
-export type NFTsQueryFilter<
-  T extends QueryNFTsFilterType = QueryNFTsFilterType.enum
-> = {
-  filter_name: string;
-  filter_type: T extends QueryNFTsFilterType.enum
-    ? QueryNFTsFilterType.enum
-    : QueryNFTsFilterType.range;
-  filter_value: T extends QueryNFTsFilterType.enum
-    ? string[]
-    : T extends QueryNFTsFilterType.range
-    ? number[]
-    : unknown[];
-};
 
 export interface QueryEVMNFTsInfoResultV2 {
   total_page: number;
