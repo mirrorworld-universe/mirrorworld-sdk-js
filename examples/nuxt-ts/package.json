@@ -1,7 +1,7 @@
 {
   "name": "nuxt-example",
   "private": true,
-  "version": "1.0.0-v2.0"
+  "version": "1.0.0-v2.0",
   "scripts": {
     "build": "nuxt build",
     "clean": "echo 'Im clean'",
