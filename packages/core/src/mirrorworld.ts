@@ -226,6 +226,33 @@ import {
   SolanaTransferSOLPayloadV2,
   SolanaTransferSPLTokenPayloadV2,
 } from './types/wallet.solana.v2';
+import {
+  EVMMarketplaceEventsResultV2,
+  QueryEVMNFT,
+  QueryEVMNFTsInfoResultV2,
+  QueryEVMNFTsPayloadV2,
+  SearchEVMMarketplaceEventsPayloadV2,
+  SearchEVMNFTInCollectionPayloadV2,
+  SearchEVMRecommendedNFTInCollectionPayloadV2,
+} from './types/metadata.evm.v2';
+import {
+  QuerySolanaNFT,
+  QuerySolanaNFTsInfoResultV2,
+  QuerySolanaNFTsPayloadV2,
+  SearchSolanaMarketplaceEventsPayloadV2,
+  SearchSolanaNFTInCollectionPayloadV2,
+  SearchSolanaRecommendedNFTInCollectionPayloadV2,
+  SolanaMarketplaceEventsResultV2,
+} from './types/metadata.solana.v2';
+import {
+  CollectionFilterMetadataV2,
+  CollectionsResultV2,
+  CollectionSummaryV2,
+  SearchCollectionsInfoV2,
+  QueryCollectionsSummaryV2,
+  RegisterCollectionPayloadV2,
+  RegisterCollectionResultV2,
+} from './types/metadata.common.v2';
 
 export class MirrorWorld {
   // System variables
@@ -2974,12 +3001,7 @@ export class MirrorWorld {
    * Fetch EVM NFT Info
    */
   async fetchEVMNFTInfo(payload: QueryEVMNFTInfoPayload): Promise<EVMNFTInfo> {
-    assertAvailableFor('fetchSolanaNFTEvents', this.chainConfig, [
-      Ethereum('mainnet'),
-      Ethereum('goerli'),
-      Polygon('mumbai-mainnet'),
-      Polygon('mumbai-testnet'),
-    ]);
+    this.assertEVMOnly('fetchEVMNFTInfo');
 
     const result = fetchEVMNFTInfoSchema.validate({
       contract: payload.contract,
@@ -2999,16 +3021,108 @@ export class MirrorWorld {
   }
 
   /**
+   * @service Metadata
+   * Fetch EVM NFTs Info
+   */
+  async fetchEVMNFTsInfo<T extends QueryEVMNFTsPayloadV2>(
+    payload: T
+  ): Promise<QueryEVMNFTsInfoResultV2> {
+    this.assertEVMOnly('fetchEVMNFTsInfo');
+
+    const response = await this.metadata.post<
+      IResponse<QueryEVMNFTsInfoResultV2>
+    >(`/${this.base('metadata')}/nfts`, payload);
+
+    return response.data.data;
+  }
+
+  /**
+   * @service Metadata
+   * Search EVM Collection NFT
+   */
+  async searchEVMCollectionNFT(
+    payload: SearchEVMNFTInCollectionPayloadV2
+  ): Promise<QueryEVMNFT[]> {
+    this.assertEVMOnly('searchEVMCollectionNFT');
+
+    const response = await this.metadata.post<IResponse<QueryEVMNFT[]>>(
+      `/${this.base('metadata')}/nft/search`,
+      payload
+    );
+
+    return response.data.data;
+  }
+
+  /**
+   * @service Metadata
+   * Search Recommended EVM Collection NFT
+   */
+  async searchEVMRecommendedNFTInCollection(
+    payload: SearchEVMRecommendedNFTInCollectionPayloadV2
+  ): Promise<QueryEVMNFT[]> {
+    this.assertEVMOnly('searchEVMRecommendedNFTInCollection');
+
+    const response = await this.metadata.post<IResponse<QueryEVMNFT[]>>(
+      `/${this.base('metadata')}/nft/search/recommend`,
+      payload
+    );
+
+    return response.data.data;
+  }
+  /**
+   * @service Metadata
+   * Search EVM Marketplace Ebents
+   */
+  async searchEVMMarketplaceEvents(
+    payload: SearchEVMMarketplaceEventsPayloadV2
+  ): Promise<EVMMarketplaceEventsResultV2> {
+    this.assertEVMOnly('searchEVMMarketplaceEvents');
+
+    const response = await this.metadata.post<
+      IResponse<EVMMarketplaceEventsResultV2>
+    >(`/${this.base('metadata')}/marketplace/events`, payload);
+
+    return response.data.data;
+  }
+
+  /**
+   * @service Metadata
+   * Fetch Solana NFT Info
+   */
+  async fetchSolanaNFTInfo(mint_address: string): Promise<SolanaNFTInfo> {
+    this.assertSolanaOnly('fetchSolanaNFTInfo');
+
+    const response = await this.metadata.get<IResponse<SolanaNFTInfo>>(
+      `/${this.base('metadata')}/nft/${mint_address}`
+    );
+
+    return response.data.data;
+  }
+
+  /**
+   * @service Metadata
+   * Fetch Solana NFTs Info
+   */
+  async fetchSolanaNFTsInfo(
+    payload: QuerySolanaNFTsPayloadV2
+  ): Promise<QuerySolanaNFTsInfoResultV2> {
+    this.assertSolanaOnly('fetchSolanaNFTsInfo');
+
+    const response = await this.metadata.post<
+      IResponse<QuerySolanaNFTsInfoResultV2>
+    >(`/${this.base('metadata')}/nfts`, payload);
+
+    return response.data.data;
+  }
+
+  /**
    * @service Metadata service
-   * Fetch Solana NFT Activity
+   * Fetch Solana NFT Events Activity
    */
   async fetchSolanaNFTEvents(
     payload: QuerySolanaNFTActivityPayload
   ): Promise<SolanaNFTActivity[]> {
-    assertAvailableFor('fetchSolanaNFTEvents', this.chainConfig, [
-      Solana('mainnet-beta'),
-      Solana('devnet'),
-    ]);
+    this.assertSolanaOnly('fetchSolanaNFTEvents');
     const result = fetchSolanaNFTsActivitySchema.validate({
       mint_address: payload.mint_address,
       page: payload.page,
@@ -3027,27 +3141,100 @@ export class MirrorWorld {
 
   /**
    * @service Metadata
-   * Fetch Solana NFT Info
+   * Search Solana Collection NFT
    */
-  async fetchSolanaNFTInfo(
-    payload: QuerySolanaNFTInfoPayload
-  ): Promise<SolanaNFTInfo> {
-    assertAvailableFor('fetchSolanaNFTInfo', this.chainConfig, [
-      Solana('mainnet-beta'),
-      Solana('devnet'),
-    ]);
+  async searchSolanaCollectionNFT(
+    payload: SearchSolanaNFTInCollectionPayloadV2
+  ): Promise<QuerySolanaNFT[]> {
+    this.assertEVMOnly('searchSolanaCollectionNFT');
 
-    const result = fetchSolanaNFTInfoSchema.validate({
-      mint_address: payload.mint_address,
-    });
-    if (result.error) {
-      throw result.error;
-    }
-
-    const response = await this.metadata.get<IResponse<SolanaNFTInfo>>(
-      `/${this.base('metadata')}/nft/${result.value.mint_address}`
+    const response = await this.metadata.post<IResponse<QuerySolanaNFT[]>>(
+      `/${this.base('metadata')}/nft/search`,
+      payload
     );
 
+    return response.data.data;
+  }
+
+  /**
+   * @service Metadata
+   * Search Recommended NFT in Solana Collection
+   */
+  async searchSolanaRecommendedNFTInCollection(
+    payload: SearchSolanaRecommendedNFTInCollectionPayloadV2
+  ): Promise<QuerySolanaNFT[]> {
+    this.assertEVMOnly('searchSolanaRecommendedNFTInCollection');
+
+    const response = await this.metadata.post<IResponse<QuerySolanaNFT[]>>(
+      `/${this.base('metadata')}/nft/search/recommend`,
+      payload
+    );
+
+    return response.data.data;
+  }
+
+  /**
+   * @service Metadata
+   * Search Solana Marketplace Events
+   */
+  async searchSolanaMarketplaceEvents(
+    payload: SearchSolanaMarketplaceEventsPayloadV2
+  ): Promise<SolanaMarketplaceEventsResultV2> {
+    this.assertSolanaOnly('searchSolanaMarketplaceEvents');
+
+    const response = await this.metadata.post<
+      IResponse<SolanaMarketplaceEventsResultV2>
+    >(`/${this.base('metadata')}/marketplace/events`, payload);
+
+    return response.data.data;
+  }
+
+  /** Search NFT Collections Info */
+  async searchCollectionsInfo(
+    payload: SearchCollectionsInfoV2
+  ): Promise<CollectionsResultV2> {
+    const response = await this.metadata.post<IResponse<CollectionsResultV2>>(
+      `/${this.base('metadata')}/collections`,
+      payload
+    );
+    return response.data.data;
+  }
+
+  /** Search NFT Collection Filter Parameters */
+  async queryCollectionFilterMetadata(
+    collection: string
+  ): Promise<CollectionFilterMetadataV2> {
+    const response = await this.metadata.get<
+      IResponse<CollectionFilterMetadataV2>
+    >(
+      `/${this.base(
+        'metadata'
+      )}/collection/filter_info?collection=${collection}`
+    );
+    return response.data.data;
+  }
+
+  /** Search NFT Collection Filter Parameters */
+  async queryCollectionSummary(
+    payload: QueryCollectionsSummaryV2
+  ): Promise<CollectionSummaryV2[]> {
+    const response = await this.metadata.post<IResponse<CollectionSummaryV2[]>>(
+      `/${this.base('metadata')}/collection/summary`,
+      payload
+    );
+    return response.data.data;
+  }
+
+  /**
+   * Register an NFT collection info to Metadata service.
+   * After successful registration, the Metadata Service will index the collection data.
+   * */
+  async registerCollection(
+    payload: RegisterCollectionPayloadV2
+  ): Promise<RegisterCollectionResultV2> {
+    const response = await this.metadata.post<
+      IResponse<RegisterCollectionResultV2>
+    >(`/${this.base('metadata')}/collection/register`, payload);
     return response.data.data;
   }
 

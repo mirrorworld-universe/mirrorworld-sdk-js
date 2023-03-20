@@ -75,6 +75,7 @@ export interface EVMNFTActivity {
 }
 
 export interface QuerySolanaNFTActivityPayload {
+  auction_house?: string;
   mint_address: string;
   page: number;
   page_size: number;

@@ -64,14 +64,26 @@ export const fetchEVMNFTsActivitySchema =
 
 export const fetchSolanaNFTsActivitySchema =
   joi.object<QuerySolanaNFTActivityPayload>({
+    auction_house: joi
+      .string()
+      .optional()
+      .error(
+        MirrorWorldSDKError.new(
+          'INVALID_FETCH_SOLANA_NFT_ACTIVITY',
+          toErrorMessage(
+            'INVALID_FETCH_SOLANA_NFT_ACTIVITY',
+            '`contract` should be a valid string public address'
+          )
+        )
+      ),
     mint_address: joi
       .string()
       .required()
       .error(
         MirrorWorldSDKError.new(
-          'INVALID_FETCH_EVM_NFT_ACTIVITY',
+          'INVALID_FETCH_SOLANA_NFT_ACTIVITY',
           toErrorMessage(
-            'INVALID_FETCH_EVM_NFT_ACTIVITY',
+            'INVALID_FETCH_SOLANA_NFT_ACTIVITY',
             '`contract` should be a valid string public address'
           )
         )
@@ -81,9 +93,9 @@ export const fetchSolanaNFTsActivitySchema =
       .optional()
       .error(
         MirrorWorldSDKError.new(
-          'INVALID_FETCH_EVM_NFT_ACTIVITY',
+          'INVALID_FETCH_SOLANA_NFT_ACTIVITY',
           toErrorMessage(
-            'INVALID_FETCH_EVM_NFT_ACTIVITY',
+            'INVALID_FETCH_SOLANA_NFT_ACTIVITY',
             '`page_size` should be a valid integer'
           )
         )
@@ -93,9 +105,9 @@ export const fetchSolanaNFTsActivitySchema =
       .optional()
       .error(
         MirrorWorldSDKError.new(
-          'INVALID_FETCH_EVM_NFT_ACTIVITY',
+          'INVALID_FETCH_SOLANA_NFT_ACTIVITY',
           toErrorMessage(
-            'INVALID_FETCH_EVM_NFT_ACTIVITY',
+            'INVALID_FETCH_SOLANA_NFT_ACTIVITY',
             '`page_size` should be a valid integer'
           )
         )
