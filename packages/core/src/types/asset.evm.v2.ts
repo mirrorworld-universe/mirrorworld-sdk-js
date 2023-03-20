@@ -81,7 +81,7 @@ export interface MintEVMNFTToCollectionV2Payload
   /** The token_id of the NFT to be minted */
   token_id: number;
   /**  The wallet address to which the NFT will be minted */
-  to_wallet_address: string;
+  to_wallet_address?: string;
   /**
    *  The amount of NFTs to be minted. Default is 1. For erc721 collections this value should be 1
    * @default 1

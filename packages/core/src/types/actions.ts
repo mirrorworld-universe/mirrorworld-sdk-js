@@ -40,7 +40,15 @@ export type ActionType =
   | 'transfer_nft'
   | 'interaction'
   | 'create_marketplace'
-  | 'update_marketplace';
+  | 'update_marketplace'
+  | 'transfer_bnb'
+  | 'transfer_matic'
+  | 'transfer_eth'
+  | 'transfer_erc20_token'
+  | 'sign_transaction'
+  | 'personal_sign'
+  | 'sign_typed_data'
+  | 'sign_typed_data_with_version';
 
 export type Device = DeviceDetector.DeviceDetectorResult;
 

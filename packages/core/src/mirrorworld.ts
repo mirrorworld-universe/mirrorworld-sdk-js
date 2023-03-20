@@ -202,6 +202,30 @@ import {
   VerifyEVMMintConfigPayloadV2,
   VerifyEVMMintConfigResultV2,
 } from './types/asset.evm.v2';
+import {
+  EVMPersonalSignPayloadV2,
+  EVMPersonalSignResultV2,
+  EVMSignAndSendTransactionPayloadV2,
+  EVMSignAndSendTransactionV2Result,
+  EVMSignTypedDataPayloadV2,
+  EVMSignTypedDataV2Result,
+  EVMSignTypedDataWithVersionPayloadV2,
+  EVMSignTypedDataWithVersionV2Result,
+  EVMTransaction,
+  EVMTransferERCTokenPayloadV2,
+  EVMTransferTokensPayloadV2,
+  EVMTransferTokensResponseV2,
+  EVMUserTransactionsV2Data,
+  GetEVMUserTokensV2Data,
+} from './types/wallet.evm.v2';
+import {
+  GetSolanaTokensV2Data,
+  GetSolanaTransactionV2Data,
+  SolanaBaseSignatureResultV2,
+  SolanaTransactionV2,
+  SolanaTransferSOLPayloadV2,
+  SolanaTransferSPLTokenPayloadV2,
+} from './types/wallet.solana.v2';
 
 export class MirrorWorld {
   // System variables
@@ -2464,6 +2488,462 @@ export class MirrorWorld {
     );
     return response.data.data;
   }
+
+  // ANCHOR Wallet Service V2
+  // TODO
+  //
+  private warnAuthenticated() {
+    if (!this.user || !this.isLoggedIn || !this.__secretAccessKey) {
+      console.warn(`User is not logged in. Could potentially fail`);
+    }
+  }
+  /**
+   * Fetch authenticated user's EVM tokens
+   */
+  async fetchEVMUserTokens(): Promise<GetEVMUserTokensV2Data> {
+    this.assertEVMOnly('fetchEVMUserTokens');
+    this.warnAuthenticated();
+    const response = await this._wallet.get<IResponse<GetEVMUserTokensV2Data>>(
+      `/${this.base('wallet')}/tokens`
+    );
+    return response.data.data;
+  }
+  /**
+   * Get EVM User Transactions
+   */
+  async fetchEVMUserTransactions(): Promise<EVMUserTransactionsV2Data> {
+    this.assertEVMOnly('fetchEVMUserTransactions');
+    this.warnAuthenticated();
+    const response = await this._wallet.get<
+      IResponse<EVMUserTransactionsV2Data>
+    >(`/${this.base('wallet')}/transactions`);
+    return response.data.data;
+  }
+
+  /**
+   * Get EVM User Transactions
+   */
+  async fetchEVMTransactionsFromWallet(
+    wallet_address: string
+  ): Promise<EVMUserTransactionsV2Data> {
+    this.assertEVMOnly('fetchEVMUserTransactions');
+    this.warnAuthenticated();
+    const response = await this._wallet.get<
+      IResponse<EVMUserTransactionsV2Data>
+    >(`/${this.base('wallet')}/${wallet_address}/transactions`);
+    return response.data.data;
+  }
+
+  /**
+   * Fetch EVM transaction data by signature hash
+   */
+  async fetchEVMTransactionFromSignature(
+    transaction_signature: string
+  ): Promise<EVMTransaction> {
+    const response = await this._wallet.get<IResponse<EVMTransaction>>(
+      `/${this.base('wallet')}/transactions/${transaction_signature}`
+    );
+    return response.data.data;
+  }
+
+  /**
+   * Transfer ETH from EVM wallet to another EVM wallet
+   */
+  async transferETH(
+    payload: EVMTransferTokensPayloadV2
+  ): Promise<EVMTransferTokensResponseV2> {
+    assertAvailableFor('transferETH', this.chainConfig, [
+      Ethereum('goerli'),
+      Ethereum('mainnet'),
+    ]);
+    this.warnAuthenticated();
+
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'transfer_eth',
+      value: 0,
+      params: payload,
+    });
+
+    const response = await this._wallet.post<
+      IResponse<EVMTransferTokensResponseV2>
+    >(`/${this.base('wallet')}/transfer-eth`, payload, {
+      headers: {
+        ...(authorization_token && {
+          'x-authorization-token': authorization_token,
+        }),
+      },
+    });
+    return response.data.data;
+  }
+
+  /**
+   * Fetch EVM transaction data by signature hash
+   */
+  async transferBNB(
+    payload: EVMTransferTokensPayloadV2
+  ): Promise<EVMTransferTokensResponseV2> {
+    assertAvailableFor('transferBNB', this.chainConfig, [
+      BNBChain('bnb-mainnet'),
+      BNBChain('bnb-testnet'),
+    ]);
+    this.warnAuthenticated();
+
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'transfer_bnb',
+      value: 0,
+      params: payload,
+    });
+
+    const response = await this._wallet.post<
+      IResponse<EVMTransferTokensResponseV2>
+    >(`/${this.base('wallet')}/transfer-bnb`, payload, {
+      headers: {
+        ...(authorization_token && {
+          'x-authorization-token': authorization_token,
+        }),
+      },
+    });
+    return response.data.data;
+  }
+  /**
+   * Fetch EVM transaction data by signature hash
+   */
+  async transferMATIC(
+    payload: EVMTransferTokensPayloadV2
+  ): Promise<EVMTransferTokensResponseV2> {
+    assertAvailableFor('transferMATIC', this.chainConfig, [
+      Polygon('mumbai-mainnet'),
+      Polygon('mumbai-testnet'),
+    ]);
+
+    this.warnAuthenticated();
+
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'transfer_bnb',
+      value: 0,
+      params: payload,
+    });
+
+    const response = await this._wallet.post<
+      IResponse<EVMTransferTokensResponseV2>
+    >(`/${this.base('wallet')}/transfer-matic`, payload, {
+      headers: {
+        ...(authorization_token && {
+          'x-authorization-token': authorization_token,
+        }),
+      },
+    });
+    return response.data.data;
+  }
+
+  /** Transfer ERC20 token form your address to another address */
+  async transferERC20Token(
+    payload: EVMTransferERCTokenPayloadV2
+  ): Promise<EVMTransferTokensResponseV2> {
+    this.warnAuthenticated();
+
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'transfer_erc20_token',
+      value: 0,
+      params: payload,
+    });
+
+    const response = await this._wallet.post<
+      IResponse<EVMTransferTokensResponseV2>
+    >(`/${this.base('wallet')}/transfer-token`, payload, {
+      headers: {
+        ...(authorization_token && {
+          'x-authorization-token': authorization_token,
+        }),
+      },
+    });
+    return response.data.data;
+  }
+  /**
+   * Get the ERC tokens inside an EVM wallet address
+   */
+  async fetchEVMWalletTokens(wallet_address: string): Promise<any> {
+    const response = await this._wallet.get<IResponse<GetEVMUserTokensV2Data>>(
+      `/${this.base('wallet')}/tokens/${wallet_address}`
+    );
+    return response.data.data;
+  }
+  /**
+   * Get the Transactions inside an EVM wallet address
+   */
+  async fetchEVMWalletTransactions(
+    wallet_address: string
+  ): Promise<EVMUserTransactionsV2Data> {
+    const response = await this._wallet.get<
+      IResponse<EVMUserTransactionsV2Data>
+    >(`/${this.base('wallet')}/${wallet_address}/transactions`);
+    return response.data.data;
+  }
+
+  /** Performs personal signing of a string message */
+  async EVMPersonalSign(
+    payload: EVMPersonalSignPayloadV2
+  ): Promise<EVMPersonalSignResultV2> {
+    this.assertEVMOnly('EVMPersonalSign');
+    this.warnAuthenticated();
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'personal_sign',
+      value: 0,
+      params: payload,
+    });
+
+    const response = await this._wallet.post<
+      IResponse<EVMPersonalSignResultV2>
+    >(`/${this.base('wallet')}/personal-sign`, payload, {
+      headers: {
+        ...(authorization_token && {
+          'x-authorization-token': authorization_token,
+        }),
+      },
+    });
+
+    return response.data.data;
+  }
+
+  /**
+   * Performs off-chain signing of a an arbitrary typed message
+   * @example Message
+   * ```json
+   * {
+   *   "data": [
+   *     {
+   *       "name": "data",
+   *       "type": "string",
+   *       "value": "hello world"
+   *     }
+   *   ]
+   * }
+   * ```
+   * */
+  async EVMSignTypedData(
+    payload: EVMSignTypedDataPayloadV2
+  ): Promise<EVMSignTypedDataV2Result> {
+    this.assertEVMOnly('EVMPersonalSign');
+    this.warnAuthenticated();
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'sign_typed_data',
+      value: 0,
+      params: payload,
+    });
+
+    const response = await this._wallet.post<
+      IResponse<EVMSignTypedDataV2Result>
+    >(`/${this.base('wallet')}/sign-type-data`, payload, {
+      headers: {
+        ...(authorization_token && {
+          'x-authorization-token': authorization_token,
+        }),
+      },
+    });
+
+    return response.data.data;
+  }
+
+  /**
+   * Performs off-chain versioned signing of an arbitrary typed message
+   * @example Versioned Signing message
+   * ```json
+   * {
+   *   "messageType": [
+   *       {
+   *           "name": "data",
+   *           "type": "string"
+   *       }
+   *   ],
+   *   "domain": {
+   *       "name": "example.metamask.com",
+   *       "version": "1",
+   *       "chainId": 1,
+   *       "verifyingContract": "0x0000000000000000000000000000000000000000",
+   *       "salt": [
+   *           1,
+   *           2,
+   *           3
+   *       ],
+   *       "extraField": "stuff"
+   *   },
+   *   "primaryType": "Message",
+   *   "message": {
+   *       "data": "hello"
+   *   }
+   * }
+   * ```
+   * */
+  async EVMSignTypedDataVersioned(
+    payload: EVMSignTypedDataWithVersionPayloadV2
+  ): Promise<EVMSignTypedDataWithVersionV2Result> {
+    this.assertEVMOnly('EVMPersonalSign');
+    this.warnAuthenticated();
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'sign_typed_data_with_version',
+      value: 0,
+      params: payload,
+    });
+
+    const response = await this._wallet.post<
+      IResponse<EVMSignTypedDataWithVersionV2Result>
+    >(`/${this.base('wallet')}/sign-type-data-version`, payload, {
+      headers: {
+        ...(authorization_token && {
+          'x-authorization-token': authorization_token,
+        }),
+      },
+    });
+
+    return response.data.data;
+  }
+
+  /**
+   * Signs a transaction and sends it to the network
+   * @param payload
+   * @returns
+   */
+  async EVMSignAndSendTransaction(
+    payload: EVMSignAndSendTransactionPayloadV2
+  ): Promise<EVMSignAndSendTransactionV2Result> {
+    this.assertEVMOnly('EVMSignAndSendTransaction');
+    this.warnAuthenticated();
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'sign_transaction',
+      value: 0,
+      params: payload,
+    });
+
+    const response = await this._wallet.post<
+      IResponse<EVMSignAndSendTransactionV2Result>
+    >(`/${this.base('wallet')}/send-tx`, payload, {
+      headers: {
+        ...(authorization_token && {
+          'x-authorization-token': authorization_token,
+        }),
+      },
+    });
+
+    return response.data.data;
+  }
+
+  // ANCHOR Solana Service V2
+
+  /**
+   * Get Users tokens on solana. Requires authentication
+   * @returns
+   */
+  async fetchSolanaUserTokens(): Promise<GetSolanaTokensV2Data> {
+    this.assertSolanaOnly('fetchSolanaUserTokens');
+    this.warnAuthenticated();
+    const response = await this._wallet.get<IResponse<GetSolanaTokensV2Data>>(
+      `/${this.base('wallet')}/tokens`
+    );
+    return response.data.data;
+  }
+
+  /**
+   * Get Users transactions on solana. Requires authentication
+   * @returns
+   */
+  async fetchSolanaUserTransactions(): Promise<GetSolanaTransactionV2Data> {
+    this.assertSolanaOnly('fetchSolanaUserTokens');
+    this.warnAuthenticated();
+    const response = await this._wallet.get<
+      IResponse<GetSolanaTransactionV2Data>
+    >(`/${this.base('wallet')}/transactions`);
+    return response.data.data;
+  }
+
+  /**
+   * Get transactions performed by an arbitrary wallet
+   */
+  async fetchSolanaWalletTransactions(
+    wallet_address: string
+  ): Promise<GetSolanaTransactionV2Data> {
+    this.assertSolanaOnly('fetchSolanaUserTokens');
+    const response = await this._wallet.get<
+      IResponse<GetSolanaTransactionV2Data>
+    >(`/${this.base('wallet')}/${wallet_address}/transactions`);
+    return response.data.data;
+  }
+
+  /**
+   * Get raw transaction data from signature
+   */
+  async fetchSolanaWalletTransactionFromSignature(
+    signature: string
+  ): Promise<SolanaTransactionV2> {
+    this.assertSolanaOnly('fetchSolanaWalletTransactionFromSignature');
+    const response = await this._wallet.get<IResponse<SolanaTransactionV2>>(
+      `/${this.base('wallet')}/transaction/${signature}`
+    );
+    return response.data.data;
+  }
+
+  /**
+   * Get Solana tokens in wallet by wallet address
+   */
+  async fetchSolanaTokensFromWalletAddress(
+    wallet_address: string
+  ): Promise<GetSolanaTokensV2Data> {
+    this.assertSolanaOnly('fetchSolanaTokensFromWalletAddress');
+    const response = await this._wallet.get<IResponse<GetSolanaTokensV2Data>>(
+      `/${this.base('wallet')}/${wallet_address}/tokens`
+    );
+    return response.data.data;
+  }
+
+  async transferSOLV2(
+    payload: SolanaTransferSOLPayloadV2
+  ): Promise<SolanaBaseSignatureResultV2> {
+    this.assertSolanaOnly('transferSOLV2');
+    this.warnAuthenticated();
+
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'sign_transaction',
+      value: 0,
+      params: payload,
+    });
+
+    const response = await this._wallet.get<
+      IResponse<SolanaBaseSignatureResultV2>
+    >(`/${this.base('wallet')}/transfer-sol`, {
+      headers: {
+        ...(authorization_token && {
+          'x-authorization-token': authorization_token,
+        }),
+      },
+    });
+    return response.data.data;
+  }
+  async transferSPLTokenV2(
+    payload: SolanaTransferSPLTokenPayloadV2
+  ): Promise<SolanaBaseSignatureResultV2> {
+    this.assertSolanaOnly('transferSPLTokenV2');
+    this.warnAuthenticated();
+
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'sign_transaction',
+      value: 0,
+      params: payload,
+    });
+
+    const response = await this._wallet.get<
+      IResponse<SolanaBaseSignatureResultV2>
+    >(`/${this.base('wallet')}/transfer-sol`, {
+      headers: {
+        ...(authorization_token && {
+          'x-authorization-token': authorization_token,
+        }),
+      },
+    });
+    return response.data.data;
+  }
+
+  // ANCHOR Metadata Service V2
+  // TODO
+  //
 
   /**
    * @service Metadata service
