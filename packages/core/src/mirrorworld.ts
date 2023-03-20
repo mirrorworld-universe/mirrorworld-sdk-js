@@ -2970,6 +2970,35 @@ export class MirrorWorld {
   }
 
   /**
+   * @service Metadata
+   * Fetch EVM NFT Info
+   */
+  async fetchEVMNFTInfo(payload: QueryEVMNFTInfoPayload): Promise<EVMNFTInfo> {
+    assertAvailableFor('fetchSolanaNFTEvents', this.chainConfig, [
+      Ethereum('mainnet'),
+      Ethereum('goerli'),
+      Polygon('mumbai-mainnet'),
+      Polygon('mumbai-testnet'),
+    ]);
+
+    const result = fetchEVMNFTInfoSchema.validate({
+      contract: payload.contract,
+      token_id: payload.token_id,
+    });
+    if (result.error) {
+      throw result.error;
+    }
+
+    const response = await this.metadata.get<IResponse<EVMNFTInfo>>(
+      `/${this.base('metadata')}/nft/${result.value.contract}/${
+        result.value.token_id
+      }`
+    );
+
+    return response.data.data;
+  }
+
+  /**
    * @service Metadata service
    * Fetch Solana NFT Activity
    */
@@ -2999,7 +3028,6 @@ export class MirrorWorld {
   /**
    * @service Metadata
    * Fetch Solana NFT Info
-   * @deprecated
    */
   async fetchSolanaNFTInfo(
     payload: QuerySolanaNFTInfoPayload
@@ -3017,41 +3045,12 @@ export class MirrorWorld {
     }
 
     const response = await this.metadata.get<IResponse<SolanaNFTInfo>>(
-      `/${this.base('asset')}/nft/${result.value.mint_address}`
+      `/${this.base('metadata')}/nft/${result.value.mint_address}`
     );
 
     return response.data.data;
   }
 
-  /**
-   * @service Metadata
-   * Fetch EVM NFT Info
-   * @deprecated
-   */
-  async fetchEVMNFTInfo(payload: QueryEVMNFTInfoPayload): Promise<EVMNFTInfo> {
-    assertAvailableFor('fetchSolanaNFTEvents', this.chainConfig, [
-      Ethereum('mainnet'),
-      Ethereum('goerli'),
-      Polygon('mumbai-mainnet'),
-      Polygon('mumbai-testnet'),
-    ]);
-
-    const result = fetchEVMNFTInfoSchema.validate({
-      contract: payload.contract,
-      token_id: payload.token_id,
-    });
-    if (result.error) {
-      throw result.error;
-    }
-
-    const response = await this.metadata.get<IResponse<EVMNFTInfo>>(
-      `/${this.base('metadata')}/nft/${result.value.contract}/${
-        result.value.token_id
-      }`
-    );
-
-    return response.data.data;
-  }
   private assertEVMOnly(methodName: string) {
     return assertAvailableFor(methodName, this.chainConfig, [
       Ethereum('mainnet'),
