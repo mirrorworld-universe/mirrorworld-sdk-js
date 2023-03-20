@@ -4,7 +4,17 @@
   "initialVersions": {
     "@usemirrorworld/utils": "1.0.0",
     "@usemirrorworld/web3.js": "1.3.0",
-    "@usemirrorworld/websocket": "1.0.0"
+    "@usemirrorworld/websocket": "1.0.0",
+    "nuxt-example": "0.0.0",
+    "@usemirrorworld/react": "2.0.0",
+    "@usemirrorworld/vue": "2.0.0"
   },
-  "changesets": []
+  "changesets": [
+    "eight-waves-walk",
+    "funny-ties-drop",
+    "many-turtles-applaud",
+    "nine-trains-explain",
+    "shiny-fishes-perform",
+    "stupid-waves-try"
+  ]
 }
