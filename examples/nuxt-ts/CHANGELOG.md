@@ -1,5 +1,4 @@
 # nuxt-example
-
 ## 1.0.0-v2.0
 
 ### Major Changes
@@ -8,7 +7,7 @@
 
 ### Patch Changes
 
-- Updated dependencies
+
 - Updated dependencies [3ce93f7]
 - Updated dependencies [6307447]
 - Updated dependencies [c0a429c]

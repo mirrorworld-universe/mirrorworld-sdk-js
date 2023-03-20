@@ -3,7 +3,6 @@
 ## 2.0.0-v2.0
 
 ### Major Changes
-
 - Migrate SDK to v2
 - 50d2d5f: Create Multi-chain configurration"
 
