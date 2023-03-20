@@ -20,64 +20,18 @@ import { disableBodyScroll, enableBodyScroll } from 'body-scroll-lock';
 import { hideOthers } from 'aria-hidden';
 
 import {
-  BuyNFTPayload,
-  CancelListingPayload,
-  CreateVerifiedCollectionPayload,
   IBuySolanaNFTPayloadV2,
   ISolanaCancelNFTListingPayloadV2,
   IBuySolanaListNFTPayloadV2,
-  ISolanaNFT,
-  ISolanaNFTMintResult,
   ITransferSolanaNFTPayloadV2,
-  IVerifiedCollection,
-  ListNFTPayload,
-  MintNFTPayload,
-  QueryNFTsByCreatorsPayload,
-  QueryNFTsByMintAddressesPayload,
-  QueryNFTsByOwnersPayload,
-  QueryNFTsByUpdateAuthoritiesPayload,
-  TransactionCommitment,
-  SolanaNFTAuctionActivitiesPayload,
   SolanaNFTExtended,
-  TransferNFTPayload,
-  UpdateListingPayload,
-  UpdateNFTPayload,
   IBuyEVMNFTPayloadV2,
   IListEVMNFTPayloadV2,
   ICancelListingEVMPayloadV2,
   ITransferEVMNFTPayloadV2,
 } from './types/nft';
-import {
-  ISolanaToken,
-  TransferSOLPayload,
-  TransferSPLTokenPayload,
-} from './types/token';
-import {
-  ISolanaTransaction,
-  ISolanaTransactionsPayload,
-  ITransferSPLTokenResponse,
-} from './types/transaction';
-import {
-  transferSOLSchema,
-  transferSPLTokenSchema,
-} from './validators/token.validators';
-import {
-  createVerifiedCollectionSchema,
-  fetchNFTsByCreatorAddressesSchema,
-  fetchNFTsByMintAddressesSchema,
-  fetchNFTsByOwnerAddressesSchema,
-  fetchNFTsByUpdateAuthoritiesSchema,
-  mintNFTSchema,
-  transferNFTSchema,
-  updateNFTSchema,
-} from './validators/nft.validators';
-import {
-  buyNFTSchema,
-  cancelNFTListingSchema,
-  createMarketplaceSchema,
-  listNFTSchema,
-  updateMarketplaceSchema,
-} from './validators/marketplace.validators';
+import { ISolanaToken } from './types/token';
+import { ISolanaTransaction } from './types/transaction';
 import {
   BaseSolanaAuctionSchemaV2,
   BuyEVMNFTSchemaV2,
@@ -106,18 +60,10 @@ import {
   VerifySolanaMintConfigSchemaV2,
 } from './validators/asset.v2.validators';
 import {
-  CreateMarketplacePayload,
-  ICreateMarketplacePayload,
   ICreateEVMMarketplacePayloadV2,
-  IMarketplaceQueryResult,
   ISolanaMarketplaceQueryResultV2,
-  IMarketplaceResponse,
-  INFTListing,
   IUpdateMarketplacePayloadV2,
-  Marketplace,
-  MarketplaceQueryOptions,
   MarketplaceQueryOptionsV2,
-  UpdateMarketplacePayload,
   IEVMMarketplaceV2,
   IUpdateEVMMarketplacePayloadV2,
   IQueryEVMMarketplaceOptionsV2,
@@ -126,7 +72,6 @@ import {
   ICreateSolanaMarketplacePayloadV2,
   SolanaMarketplaceV2,
 } from './types/marketplace';
-import { throwError } from './errors/errors.interface';
 import { IAction, ICreateActionPayload } from './types/actions';
 import { createActionSchema } from './validators/action.validator';
 import { Emitter } from 'mitt';
@@ -136,7 +81,6 @@ import {
   ChainTypes,
   Ethereum,
   EVMChains,
-  isEVM,
   isSolana,
   Polygon,
   Solana,
@@ -148,18 +92,13 @@ import {
   MirrorWorldAPIClientV2,
   MirrorWorldAPIService,
 } from './services/api.v2';
-import { fetchEVMNFTsByOwnerAddressSchema } from './validators/evm.asset.validators';
 import {
   EVMNFTActivity,
   EVMNFTExtended,
   EVMNFTInfo,
-  NftJsonMetadata,
   QueryEVMNFTActivityPayload,
   QueryEVMNFTActivityResult,
   QueryEVMNFTInfoPayload,
-  QueryEVMNFTInfoPayloadV2,
-  QueryEVMNFTResultBody,
-  QueryEVMNFTResultRaw,
   QuerySolanaNFTActivityPayload,
   QuerySolanaNFTActivityResult,
   QuerySolanaNFTInfoPayload,
@@ -170,7 +109,6 @@ import { digest } from './utils/encrypt';
 import {
   fetchEVMNFTInfoSchema,
   fetchEVMNFTsActivitySchema,
-  fetchSolanaNFTInfoSchema,
   fetchSolanaNFTsActivitySchema,
 } from './validators/metadata.validators';
 import { assertAvailableFor } from './utils/chain.invariance';
