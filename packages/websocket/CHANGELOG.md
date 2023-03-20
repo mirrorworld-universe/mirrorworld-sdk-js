@@ -1,5 +1,23 @@
 # @usemirrorworld/web3.js
 
+## 2.0.0-v2.0
+
+### Major Changes
+
+- Migrate SDK to v2
+
+## 1.0.2
+
+### Patch Changes
+
+- 3e0d989: Fix: release new tag on @usemirrorworld/namespace
+
+## 1.0.1
+
+### Patch Changes
+
+- 2909ec4: Return auth token on login
+
 ## 1.0.0
 
 ### Patch Changes

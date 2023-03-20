@@ -3,7 +3,7 @@
 ## 2.0.0-v2.0
 
 ### Major Changes
-
+- Migrate SDK to v2
 - 50d2d5f: Create Multi-chain configurration"
 
 ### Minor Changes
@@ -28,6 +28,18 @@
 ### Patch Changes
 
 - dffc68e: Use \_self instead of \_blank on windw.open method
+
+## 1.3.1
+
+### Patch Changes
+
+- 2909ec4: Return auth token on login
+
+## 1.3.2
+
+### Patch Changes
+
+- 3e0d989: Fix: release new tag on @usemirrorworld/namespace
 
 ## 1.3.1
 

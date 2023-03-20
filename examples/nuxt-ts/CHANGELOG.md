@@ -1,8 +1,12 @@
 # nuxt-example
+## 1.0.0-v2.0
 
-## 0.0.1-v2.0
+### Major Changes
+
+- Migrate SDK to v2
 
 ### Patch Changes
+
 
 - Updated dependencies [3ce93f7]
 - Updated dependencies [6307447]

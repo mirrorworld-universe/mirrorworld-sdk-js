@@ -10,6 +10,7 @@
     "@usemirrorworld/vue": "2.0.0"
   },
   "changesets": [
+    "chilly-dogs-greet",
     "eight-waves-walk",
     "funny-ties-drop",
     "many-turtles-applaud",
