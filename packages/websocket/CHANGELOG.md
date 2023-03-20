@@ -1,5 +1,11 @@
 # @usemirrorworld/web3.js
 
+## 2.0.0
+
+### Major Changes
+
+- 5b21017: Migrate SDK to v2
+
 ## 2.0.0-v2.0
 
 ### Major Changes

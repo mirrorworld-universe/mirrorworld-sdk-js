@@ -1,8 +1,27 @@
 # @usemirrorworld/web3.js
 
+## 2.0.0
+
+### Major Changes
+
+- 5b21017: Migrate SDK to v2
+- 50d2d5f: Create Multi-chain configurration"
+
+### Minor Changes
+
+- 3ce93f7: Add v2 api client
+- 6307447: Add EVM endpoints helpers and validators
+- b5b5e02: chore: remove loclatoragekey for refresh token on logout"
+
+### Patch Changes
+
+- c0a429c: Fix popup event listeners for close
+- a8cb205: Fix: Logout method - path uri
+
 ## 2.0.0-v2.0
 
 ### Major Changes
+
 - Migrate SDK to v2
 - 50d2d5f: Create Multi-chain configurration"
 
