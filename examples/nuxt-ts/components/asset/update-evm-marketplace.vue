@@ -57,7 +57,7 @@ import { isEmpty, omitBy, keysIn } from 'lodash-es';
 const { mirrorworld } = useMirrorWorld();
 
 type UpdateEVMNFTMarketplacePayload = Parameters<
-  typeof mirrorworld.value.updateEVMMarketplace
+  typeof mirrorworld.value.Polygon.Asset.updateMarketplace
 >[0];
 
 const requiredKeys = new Map<any, any>([
@@ -72,7 +72,9 @@ const payload = reactive<UpdateEVMNFTMarketplacePayload>({
 
 async function updateEVMMarketplace() {
   try {
-    const result = await mirrorworld.value.updateEVMMarketplace(payload);
+    const result = await mirrorworld.value.Polygon.Asset.updateMarketplace(
+      payload
+    );
     console.log('result', result);
     alert(JSON.stringify(result, null, 2));
   } catch (error) {

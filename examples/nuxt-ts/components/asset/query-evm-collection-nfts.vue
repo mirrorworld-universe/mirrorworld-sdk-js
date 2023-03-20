@@ -36,7 +36,7 @@ const collection_address = ref('');
 
 async function getEVMCollectionNFTs() {
   try {
-    const result = await mirrorworld.value.getEVMCollectionNFTs(
+    const result = await mirrorworld.value.Polygon.Asset.getCollectionNFTs(
       collection_address.value
     );
     console.log('result', result);

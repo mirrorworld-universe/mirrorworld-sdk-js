@@ -57,7 +57,7 @@ import { useMirrorWorld } from '~~/hooks/use-mirrorworld';
 const { mirrorworld } = useMirrorWorld();
 
 type CreateEVMNFTMarketplacePayload = Parameters<
-  typeof mirrorworld.value.createEVMMarketplace
+  typeof mirrorworld.value.Polygon.Asset.createMarketplace
 >[0];
 
 const requiredKeys = new Map<any, any>([
@@ -72,7 +72,9 @@ const payload = reactive<CreateEVMNFTMarketplacePayload>({
 
 async function createEVMMarketplace() {
   try {
-    const result = await mirrorworld.value.createEVMMarketplace(payload);
+    const result = await mirrorworld.value.Polygon.Asset.createMarketplace(
+      payload
+    );
     console.log('result', result);
     alert(JSON.stringify(result, null, 2));
   } catch (error) {

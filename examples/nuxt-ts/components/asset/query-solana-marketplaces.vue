@@ -40,7 +40,7 @@ import { isEmpty, omitBy } from 'lodash-es';
 const { mirrorworld } = useMirrorWorld();
 
 type QuerySolanaMarketplacesPayload = Parameters<
-  typeof mirrorworld.value.querySolanaMarketplaces
+  typeof mirrorworld.value.Solana.Asset.queryMarketplaces
 >[0];
 
 const payload = reactive<QuerySolanaMarketplacesPayload>({
@@ -59,7 +59,7 @@ const payload = reactive<QuerySolanaMarketplacesPayload>({
 
 async function querySolanaMarketplaces() {
   try {
-    const result = await mirrorworld.value.querySolanaMarketplaces(
+    const result = await mirrorworld.value.Solana.Asset.queryMarketplaces(
       omitBy(payload, isEmpty)
     );
     console.log('result', result);

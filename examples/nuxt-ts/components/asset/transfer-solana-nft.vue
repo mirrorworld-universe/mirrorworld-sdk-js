@@ -54,7 +54,7 @@ import { TransactionCommitment } from '~~/../../packages/core/src/types/nft';
 const { mirrorworld } = useMirrorWorld();
 
 type TransferSolanaNFTPayload = Parameters<
-  typeof mirrorworld.value.transferSolanaNFT
+  typeof mirrorworld.value.Solana.Asset.transferNFT
 >[0];
 
 const payload = reactive<TransferSolanaNFTPayload>({
@@ -66,7 +66,7 @@ const payload = reactive<TransferSolanaNFTPayload>({
 
 async function transferSolanaNFT() {
   try {
-    const result = await mirrorworld.value.transferSolanaNFT(payload);
+    const result = await mirrorworld.value.Solana.Asset.transferNFT(payload);
     console.log('result', result);
     alert(JSON.stringify(result, null, 2));
   } catch (error) {

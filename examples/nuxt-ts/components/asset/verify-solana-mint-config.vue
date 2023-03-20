@@ -43,7 +43,7 @@ import { keysIn } from 'lodash-es';
 const { mirrorworld } = useMirrorWorld();
 
 type VerifySolanaMintConfigPayloadV2 = Parameters<
-  typeof mirrorworld.value.verifySolanaMintConfig
+  typeof mirrorworld.value.Solana.Asset.verifyMintConfig
 >[0];
 
 const requiredKeys = new Map<any, any>([['url', true]]);
@@ -54,7 +54,9 @@ const payload = reactive<VerifySolanaMintConfigPayloadV2>({
 
 async function verifySolanaMintConfig() {
   try {
-    const result = await mirrorworld.value.verifySolanaMintConfig(payload);
+    const result = await mirrorworld.value.Solana.Asset.verifyMintConfig(
+      payload
+    );
     console.log('result', result);
     alert(JSON.stringify(result, null, 2));
   } catch (error) {

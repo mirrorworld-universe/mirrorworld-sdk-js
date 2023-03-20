@@ -67,7 +67,7 @@ import { useMirrorWorld } from '~~/hooks/use-mirrorworld';
 const { mirrorworld } = useMirrorWorld();
 
 type QuerySolanaAssetMintsStatusPayload = Parameters<
-  typeof mirrorworld.value.searchSolanaNFTsByCreatorAddresses
+  typeof mirrorworld.value.Solana.Asset.searchNFTsByCreatorAddresses
 >[0];
 
 const creator_addresses = ref(['']);
@@ -91,9 +91,10 @@ async function searchSolanaNFTsByCreatorAddresses() {
     //   limit: 10,
     //   offset: 0,
     // });
-    const result = await mirrorworld.value.searchSolanaNFTsByCreatorAddresses<
-      'devnet' | 'mainnet-beta'
-    >(payload.value);
+    const result =
+      await mirrorworld.value.Solana.Asset.searchNFTsByCreatorAddresses<
+        'devnet' | 'mainnet-beta'
+      >(payload.value);
     console.log('result', result);
     alert(JSON.stringify(result, null, 2));
   } catch (error) {

@@ -123,6 +123,8 @@ import {
   IQueryEVMMarketplaceOptionsV2,
   IQueryEVMMarketplacePaginationOptionsV2,
   IQueryEVMMarketplaceResultV2,
+  ICreateSolanaMarketplacePayloadV2,
+  SolanaMarketplaceV2,
 } from './types/marketplace';
 import { throwError } from './errors/errors.interface';
 import { IAction, ICreateActionPayload } from './types/actions';
@@ -186,6 +188,7 @@ import {
   SolanaNFT,
   SolanaNFTDevnet,
   SolanaNFTListingV2,
+  UpdateSolanaNFTMetadataPayloadV2,
   VerifiedSolanaCollection,
   VerifySolanaMintConfigPayloadV2,
   VerifySolanaMintConfigResultV2,
@@ -632,34 +635,6 @@ export class MirrorWorld {
     return this._user!.wallet!;
   }
 
-  /** Get current user tokens */
-  get tokens(): ISolanaToken[] {
-    return this._tokens;
-  }
-
-  /** Set current user tokens */
-  private set tokens(value: ISolanaToken[]) {
-    this._tokens = value;
-  }
-
-  /** Get current user transactions */
-  get transactions(): ISolanaTransaction[] {
-    return this._transactions;
-  }
-
-  /** Set current user transactions */
-  private set transactions(value: ISolanaTransaction[]) {
-    this._transactions = value;
-  }
-
-  get nfts(): SolanaNFTExtended[] | EVMNFTExtended[] {
-    return this._nfts;
-  }
-
-  set nfts(value: SolanaNFTExtended[] | EVMNFTExtended[]) {
-    this._nfts = value;
-  }
-
   /** Get current user */
   get isLoggedIn(): boolean {
     return !!this.user && !!this.userRefreshToken;
@@ -887,6 +862,567 @@ export class MirrorWorld {
     return authWindow;
   }
 
+  /** Solana SDK Methods */
+  get Solana() {
+    /** Asset Service Methods for Solana */
+    const Asset = Object.freeze({
+      /** Purchase NFT on Solana AuctionHouse Instance */
+      buyNFT: this.buySolanaNFT.bind(this),
+      /** List NFT on Solana AuctionHouse Instance */
+      listNFT: this.listSolanaNFT.bind(this),
+      /** Cancel NFT Listing on Solana AuctionHouse Instance  */
+      cancelListing: this.cancelSolanaNFTListing.bind(this),
+      /** Transfer an NFT on Solana  */
+      transferNFT: this.transferSolanaNFT.bind(this),
+      /** Create a new NFT Marketplace on Solana */
+      createMarketplace: this.createSolanaMarketplace.bind(this),
+      /** Updates an existing NFT Marketplace on Solana  */
+      updateMarketplace: this.updateSolanaMarketplace.bind(this),
+      /**
+       * Queries marketplaces by the following properties for an authenticated user
+       * @param {MarketplaceQueryOptionsV2} query
+       * @param query.client_id
+       * @param query.name
+       * @param query.authority
+       * @param query.treasury_mint
+       * @param query.auction_house_fee_account
+       * @param query.auction_house_treasury
+       * @param query.treasury_withdrawal_destination
+       * @param query.fee_withdrawal_destination
+       * @param query.seller_fee_basis_points
+       * @param query.requires_sign_off
+       * @param query.can_change_sale_price
+       * @param pagination
+       */
+      queryMarketplaces: this.querySolanaMarketplaces.bind(this),
+      /** Queries the transaction status of a Solana asset by the transaction signature */
+      queryAssetTransactionStatus:
+        this.querySolanaAssetTransactionStatus.bind(this),
+      /** Queries the mint status of a set of mint addresses. This is useful when performing batch minting for a large array of mint addresses */
+      queryAssetMintsStatus: this.querySolanaAssetMintsStatus.bind(this),
+      /** Creates a new verified collection on Solana  */
+      createVerifiedCollection: this.createSolanaVerifiedCollection.bind(this),
+      /** Creates a new verified collection on Solana  */
+      getCollections: this.getSolanaCollections.bind(this),
+      /** Queries the Solana NFTs minted on a collection  */
+      getCollectionNFTs: this.getSolanaCollectionNFTs.bind(this),
+      /** Mints a new NFT to Solana collection */
+      mintNFT: this.mintSolanaNFT.bind(this),
+      /** Updates the metadata account of an NFT on Solana */
+      updateNFTMetadata: this.updateSolanaNFTMetadata.bind(this),
+      /** Verifies the mint configuration of a Solana NFT */
+      verifyMintConfig: this.verifySolanaMintConfig.bind(this),
+      /** Searches Solana NFTs by Mint Addresses */
+      searchNFTsByMintAddresses:
+        this.searchSolanaNFTsByMintAddresses.bind(this),
+      /** Searches Solana NFTs by Creator Addresses */
+      searchNFTsByCreatorAddresses:
+        this.searchSolanaNFTsByCreatorAddresses.bind(this),
+      /** Searches Solana NFTs by Creator Addresses */
+      searchNFTsByUpdateAuthorityAddresses:
+        this.searchSolanaNFTsByUpdateAuthorityAddresses.bind(this),
+      /** Searches Solana NFTs by Owner Addresses */
+      searchNFTsByOwnerAddresses:
+        this.searchSolanaNFTsByOwnerAddresses.bind(this),
+      /** Searches Solana NFTs by Mint Addresses */
+      searchNFTsByMintAddress: this.searchSolanaNFTByMintAddress.bind(this),
+    });
+
+    /** Wallet Service Methods for Solana */
+    const Wallet = Object.freeze({
+      /**  Get Users tokens on Solana. Requires authentication */
+      fetchTokens: this.fetchSolanaUserTokens.bind(this),
+      /** Get Users transactions on Solana. Requires authentication */
+      fetchTransactions: this.fetchSolanaUserTransactions.bind(this),
+      /** Get Solana tokens in wallet by wallet address */
+      fetchTokensInWallet: this.fetchSolanaTokensFromWalletAddress.bind(this),
+      /** Get transactions performed by an arbitrary wallet  */
+      fetchTransactionsByWallet: this.fetchSolanaWalletTransactions.bind(this),
+      /**  Get raw transaction data from signature  */
+      fetchTransactionBySignature:
+        this.fetchSolanaWalletTransactionFromSignature.bind(this),
+      /** Transfers SOL from user's wallet address to another wallet address */
+      transferSol: this.transferSOLV2.bind(this),
+      /** Transfers SPL Tokens from user's wallet address to another wallet address */
+      transferSPLToken: this.transferSPLTokenV2.bind(this),
+    });
+
+    /** Metadata Service Methods for Solana */
+    const Metadata = Object.freeze({
+      /** Fetch Solana NFT Info */
+      fetchNFTInfo: this.fetchSolanaNFTInfo.bind(this),
+      /** Fetch Solana NFT Activity */
+      fetchNFTEvents: this.fetchSolanaNFTEvents.bind(this),
+      /** Fetch Solana NFTs Info. Accepts Filtering Metadata */
+      fetchNFTsInfo: this.fetchSolanaNFTsInfo.bind(this),
+      /** Search Solana Collection NFT */
+      searchCollectionNFT: this.searchSolanaCollectionNFT.bind(this),
+      /** Search Recommended NFT in Solana Collection */
+      searchRecommendedNFTsInCollection:
+        this.searchSolanaRecommendedNFTInCollection.bind(this),
+      /** Search Solana Marketplace Events */
+      searchMarketplaceEvents: this.searchSolanaMarketplaceEvents.bind(this),
+      /** Search NFT Collections Info */
+      queryCollectionsInfo: this.queryCollectionsInfo.bind(this),
+      /** Search NFT Collection Filter Parameters */
+      queryCollectionFilterMetadata:
+        this.queryCollectionFilterMetadata.bind(this),
+      /** Search NFT Collection Filter Parameters */
+      queryCollectionSummary: this.queryCollectionSummary.bind(this),
+      /**
+       * Register an NFT collection info to Metadata service.
+       * After successful registration, the Metadata Service will index the collection data.
+       * */
+      registerCollection: this.registerCollection.bind(this),
+    });
+
+    return {
+      Asset,
+      Wallet,
+      Metadata,
+    };
+  }
+
+  /** Ethereum SDK Methods */
+  get Ethereum() {
+    /** Asset Service Methods for Ethereum */
+    const Asset = Object.freeze({
+      /** Purchase NFT on Ethereum Marketplace Address */
+      buyNFT: this.buyEVMNFT.bind(this),
+      /** Purchase NFT on Ethereum Marketplace Address */
+      listNFT: this.listEVMNFT.bind(this),
+      /** Cancel NFT Listing on Ethereum Marketplace Address */
+      cancelListing: this.cancelEVMNFTListing.bind(this),
+      /**  Transfer Ethereum NFT to another address */
+      transferNFT: this.transferEVMNFT.bind(this),
+      /** Create a new NFT Marketplace on Ethereum */
+      createMarketplace: this.createEVMMarketplace.bind(this),
+      /** Updates a sn existing NFT Marketplace on Ethereum */
+      updateMarketplace: this.updateEVMMarketplace.bind(this),
+      /** Search NFT Marketplace on Ethereum */
+      queryMarketplaces: this.queryEVMMarketplaces.bind(this),
+      /** Creates a new verified collection on Ethereum */
+      createCollection: this.createEVMCollection.bind(this),
+      /** Mints a new NFT to a collection on Ethereum */
+      mintNFT: this.mintEVMNFT.bind(this),
+      /** Verifies the mint configuration of a Ethereum NFT */
+      verifyMintConfig: this.verifyEVMMintConfig.bind(this),
+      /** Queries the Ethereum collections for an authenticated user */
+      getCollections: this.getEVMCollections.bind(this),
+      /** Queries the Ethereum NFTs minted to a collection  */
+      getCollectionNFTs: this.getEVMCollectionNFTs.bind(this),
+      /** Searches Ethereum NFTs by Owner Addresses */
+      searchNFTsByOwnerAddresses: this.searchEVMNFTsByOwnerAddresses.bind(this),
+      /** Fetch Ethereum NFT Info */
+      searchNFT: this.searchEVMNFTInfo.bind(this),
+      /** Search EVM NFTs by their contract_addresses and token_ids */
+      searchNFTs: this.searchEVMNFTs.bind(this),
+    });
+    /** Wallet Service Methods for Ethereum */
+    const Wallet = Object.freeze({
+      /** Fetch authenticated user's Ethereum tokens */
+      fetchTokens: this.fetchEVMUserTokens.bind(this),
+      /** Fetch authenticated user's Ethereum transactions */
+      fetchTransactions: this.fetchEVMUserTransactions.bind(this),
+      /** Fetch Ethereum Transactions in wallet address */
+      fetchWalletTransactions: this.fetchEVMTransactionsFromWallet.bind(this),
+      /** Fetch Ethereum Transaction Data by transaction hash */
+      fetchTransactionByHash: this.fetchEVMTransactionsFromWallet.bind(this),
+      /** Transfer ETH from EVM wallet to another EVM wallet */
+      transferETH: this.transferETH.bind(this),
+      /** Transfer ERC20 token form your address to another address */
+      transferERC20Token: this.transferERC20Token.bind(this),
+      /** Get the ERC tokens inside an Ethereum wallet address */
+      fetchTokensInWallet: this.fetchEVMWalletTokens.bind(this),
+      /** Get the Transactions authored by an Ethereum wallet address */
+      fetchTransactionsByWallet: this.fetchEVMWalletTransactions.bind(this),
+      /** Performs personal signing of a string message */
+      personalSign: this.EVMPersonalSign.bind(this),
+      /**
+       * Performs off-chain signing of a an arbitrary typed message
+       * @example Message
+       * ```json
+       * {
+       *   "data": [
+       *     {
+       *       "name": "data",
+       *       "type": "string",
+       *       "value": "hello world"
+       *     }
+       *   ]
+       * }
+       * ```
+       * */
+      signTypedData: this.EVMSignTypedData.bind(this),
+      /**
+       * Performs off-chain versioned signing of an arbitrary typed message
+       * @example Versioned Signing message
+       * ```json
+       * {
+       *   "messageType": [
+       *       {
+       *           "name": "data",
+       *           "type": "string"
+       *       }
+       *   ],
+       *   "domain": {
+       *       "name": "example.metamask.com",
+       *       "version": "1",
+       *       "chainId": 1,
+       *       "verifyingContract": "0x0000000000000000000000000000000000000000",
+       *       "salt": [
+       *           1,
+       *           2,
+       *           3
+       *       ],
+       *       "extraField": "stuff"
+       *   },
+       *   "primaryType": "Message",
+       *   "message": {
+       *       "data": "hello"
+       *   }
+       * }
+       * ```
+       * */
+      signTypedDataVersioned: this.EVMSignTypedDataVersioned.bind(this),
+      /**
+       * Signs a transaction and sends it to the network
+       * @param payload
+       * @returns
+       */
+      signAndSendTransaction: this.EVMSignAndSendTransaction.bind(this),
+    });
+    /** Metadata Service Methods for Ethereum */
+    const Metadata = Object.freeze({
+      /** Fetch Ethereum NFT Info */
+      fetchNFTInfo: this.fetchEVMNFTInfo.bind(this),
+      /** Fetch Ethereum NFT Activity */
+      fetchNFTEvents: this.fetchEVMNFTEvents.bind(this),
+      /** Fetch Ethereum NFTs Info. Accepts Filtering Metadata */
+      fetchNFTsInfo: this.fetchEVMNFTsInfo.bind(this),
+      /** Search Ethereum Collection NFT */
+      searchCollectionNFT: this.searchEVMCollectionNFT.bind(this),
+      /** Search Recommended NFT in Ethereum Collection */
+      searchRecommendedNFTsInCollection:
+        this.searchEVMRecommendedNFTInCollection.bind(this),
+      /** Search Ethereum Marketplace Events */
+      searchMarketplaceEvents: this.searchEVMMarketplaceEvents.bind(this),
+      /** Search NFT Collections Info */
+      queryCollectionsInfo: this.queryCollectionsInfo.bind(this),
+      /** Search NFT Collection Filter Parameters */
+      queryCollectionFilterMetadata:
+        this.queryCollectionFilterMetadata.bind(this),
+      /** Search NFT Collection Filter Parameters */
+      queryCollectionSummary: this.queryCollectionSummary.bind(this),
+      /**
+       * Register an NFT collection info to Metadata service.
+       * After successful registration, the Metadata Service will index the collection data.
+       * */
+      registerCollection: this.registerCollection,
+    });
+    return {
+      Asset,
+      Wallet,
+      Metadata,
+    };
+  }
+
+  /** BNB Chain SDK Methods */
+  get BNBChain() {
+    /** Asset Service Methods for BNB Chain */
+    const Asset = Object.freeze({
+      /** Purchase NFT on BNB Chain Marketplace Address */
+      buyNFT: this.buyEVMNFT.bind(this),
+      /** Purchase NFT on BNB Chain Marketplace Address */
+      listNFT: this.listEVMNFT.bind(this),
+      /** Cancel NFT Listing on BNB Chain Marketplace Address */
+      cancelListing: this.cancelEVMNFTListing.bind(this),
+      /**  Transfer BNB Chain NFT to another address */
+      transferNFT: this.transferEVMNFT.bind(this),
+      /** Create a new NFT Marketplace on BNB Chain */
+      createMarketplace: this.createEVMMarketplace.bind(this),
+      /** Updates a sn existing NFT Marketplace on BNB Chain */
+      updateMarketplace: this.updateEVMMarketplace.bind(this),
+      /** Search NFT Marketplace on BNB Chain */
+      queryMarketplaces: this.queryEVMMarketplaces.bind(this),
+      /** Creates a new verified collection on BNB Chain */
+      createCollection: this.createEVMCollection.bind(this),
+      /** Mints a new NFT to a collection on BNB Chain */
+      mintNFT: this.mintEVMNFT.bind(this),
+      /** Verifies the mint configuration of a BNB Chain NFT */
+      verifyMintConfig: this.verifyEVMMintConfig.bind(this),
+      /** Queries the BNB Chain collections for an authenticated user */
+      getCollections: this.getEVMCollections.bind(this),
+      /** Queries the BNB Chain NFTs minted to a collection  */
+      getCollectionNFTs: this.getEVMCollectionNFTs.bind(this),
+      /** Searches BNB Chain NFTs by Owner Addresses */
+      searchNFTsByOwnerAddresses: this.searchEVMNFTsByOwnerAddresses.bind(this),
+      /** Fetch BNB Chain NFT Info */
+      searchNFT: this.searchEVMNFTInfo.bind(this),
+      /** Search EVM NFTs by their contract_addresses and token_ids */
+      searchNFTs: this.searchEVMNFTs.bind(this),
+    });
+
+    /** Wallet Service Methods for BNB Chain */
+    const Wallet = Object.freeze({
+      /** Fetch authenticated user's BNB Chain tokens */
+      fetchTokens: this.fetchEVMUserTokens.bind(this),
+      /** Fetch authenticated user's BNB Chain transactions */
+      fetchTransactions: this.fetchEVMUserTransactions.bind(this),
+      /** Fetch BNB Chain Transactions in wallet address */
+      fetchWalletTransactions: this.fetchEVMTransactionsFromWallet.bind(this),
+      /** Fetch BNB Chain Transaction Data by transaction hash */
+      fetchTransactionByHash: this.fetchEVMTransactionsFromWallet.bind(this),
+      /** Transfers BNB from BNB Chain wallet to another BNB Chain wallet */
+      transferBNB: this.transferBNB.bind(this),
+      /** Transfers BEP20 token form your address to another addres on BNB Chain */
+      transferBEP20Token: this.transferERC20Token.bind(this),
+      /** Get the ERC tokens inside an BNB Chain wallet address */
+      fetchTokensInWallet: this.fetchEVMWalletTokens.bind(this),
+      /** Get the Transactions authored by an BNB Chain wallet address */
+      fetchTransactionsByWallet: this.fetchEVMWalletTransactions.bind(this),
+      /** Performs personal signing of a string message */
+      personalSign: this.EVMPersonalSign.bind(this),
+      /**
+       * Performs off-chain signing of a an arbitrary typed message
+       * @example Message
+       * ```json
+       * {
+       *   "data": [
+       *     {
+       *       "name": "data",
+       *       "type": "string",
+       *       "value": "hello world"
+       *     }
+       *   ]
+       * }
+       * ```
+       * */
+      signTypedData: this.EVMSignTypedData.bind(this),
+      /**
+       * Performs off-chain versioned signing of an arbitrary typed message
+       * @example Versioned Signing message
+       * ```json
+       * {
+       *   "messageType": [
+       *       {
+       *           "name": "data",
+       *           "type": "string"
+       *       }
+       *   ],
+       *   "domain": {
+       *       "name": "example.metamask.com",
+       *       "version": "1",
+       *       "chainId": 1,
+       *       "verifyingContract": "0x0000000000000000000000000000000000000000",
+       *       "salt": [
+       *           1,
+       *           2,
+       *           3
+       *       ],
+       *       "extraField": "stuff"
+       *   },
+       *   "primaryType": "Message",
+       *   "message": {
+       *       "data": "hello"
+       *   }
+       * }
+       * ```
+       * */
+      signTypedDataVersioned: this.EVMSignTypedDataVersioned.bind(this),
+      /**
+       * Signs a transaction and sends it to the network
+       * @param payload
+       * @returns
+       */
+      signAndSendTransaction: this.EVMSignAndSendTransaction.bind(this),
+    });
+    /** Metadata Service Methods for BNB Chain */
+    const Metadata = Object.freeze({
+      /** Fetch BNB Chain NFT Info */
+      fetchNFTInfo: this.fetchEVMNFTInfo.bind(this),
+      /** Fetch BNB Chain NFT Activity */
+      fetchNFTEvents: this.fetchEVMNFTEvents.bind(this),
+      /** Fetch BNB Chain NFTs Info. Accepts Filtering Metadata */
+      fetchNFTsInfo: this.fetchEVMNFTsInfo.bind(this),
+      /** Search BNB Chain Collection NFT */
+      searchCollectionNFT: this.searchEVMCollectionNFT.bind(this),
+      /** Search Recommended NFT in BNB Chain Collection */
+      searchRecommendedNFTsInCollection:
+        this.searchEVMRecommendedNFTInCollection.bind(this),
+      /** Search BNB Chain Marketplace Events */
+      searchMarketplaceEvents: this.searchEVMMarketplaceEvents.bind(this),
+      /** Search NFT Collections Info */
+      queryCollectionsInfo: this.queryCollectionsInfo.bind(this),
+      /** Search NFT Collection Filter Parameters */
+      queryCollectionFilterMetadata:
+        this.queryCollectionFilterMetadata.bind(this),
+      /** Search NFT Collection Filter Parameters */
+      queryCollectionSummary: this.queryCollectionSummary.bind(this),
+      /**
+       * Register an NFT collection info to Metadata service.
+       * After successful registration, the Metadata Service will index the collection data.
+       * */
+      registerCollection: this.registerCollection.bind(this),
+    });
+    return {
+      Asset,
+      Wallet,
+      Metadata,
+    };
+  }
+
+  /** Polygon SDK Methods */
+  get Polygon() {
+    /** Asset Service Methods for Polygon */
+    const Asset = Object.freeze({
+      /** Purchase NFT on Polygon Marketplace Address */
+      buyNFT: this.buyEVMNFT.bind(this),
+      /** Purchase NFT on Polygon Marketplace Address */
+      listNFT: this.listEVMNFT.bind(this),
+      /** Cancel NFT Listing on Polygon Marketplace Address */
+      cancelListing: this.cancelEVMNFTListing.bind(this),
+      /**  Transfer Polygon NFT to another address */
+      transferNFT: this.transferEVMNFT.bind(this),
+      /** Create a new NFT Marketplace on Polygon */
+      createMarketplace: this.createEVMMarketplace.bind(this),
+      /** Updates a sn existing NFT Marketplace on Polygon */
+      updateMarketplace: this.updateEVMMarketplace.bind(this),
+      /** Search NFT Marketplace on Polygon */
+      queryMarketplaces: this.queryEVMMarketplaces.bind(this),
+      /** Creates a new verified collection on Polygon */
+      createCollection: this.createEVMCollection.bind(this),
+      /** Mints a new NFT to a collection on Polygon */
+      mintNFT: this.mintEVMNFT.bind(this),
+      /** Verifies the mint configuration of a Polygon NFT */
+      verifyMintConfig: this.verifyEVMMintConfig.bind(this),
+      /** Queries the Polygon collections for an authenticated user */
+      getCollections: this.getEVMCollections.bind(this),
+      /** Queries the Polygon NFTs minted to a collection  */
+      getCollectionNFTs: this.getEVMCollectionNFTs.bind(this),
+      /** Searches Polygon NFTs by Owner Addresses */
+      searchNFTsByOwnerAddresses: this.searchEVMNFTsByOwnerAddresses.bind(this),
+      /** Fetch Polygon NFT Info */
+      searchNFT: this.searchEVMNFTInfo.bind(this),
+      /** Search EVM NFTs by their contract_addresses and token_ids */
+      searchNFTs: this.searchEVMNFTs.bind(this),
+    });
+
+    /** Wallet Service Methods for Polygon */
+    const Wallet = Object.freeze({
+      /** Fetch authenticated user's Polygon tokens */
+      fetchTokens: this.fetchEVMUserTokens.bind(this),
+      /** Fetch authenticated user's Polygon transactions */
+      fetchTransactions: this.fetchEVMUserTransactions.bind(this),
+      /** Fetch Polygon Transactions in wallet address */
+      fetchWalletTransactions: this.fetchEVMTransactionsFromWallet.bind(this),
+      /** Fetch Polygon Transaction Data by transaction hash */
+      fetchTransactionByHash: this.fetchEVMTransactionsFromWallet.bind(this),
+      /** Transfer MATIC from Polygon wallet to another Polygon wallet */
+      transferMATIC: this.transferMATIC.bind(this),
+      /** Transfer ERC20 token form your address to another address */
+      transferERC20Token: this.transferERC20Token.bind(this),
+      /** Get the ERC tokens inside an Polygon wallet address */
+      fetchTokensInWallet: this.fetchEVMWalletTokens.bind(this),
+      /** Get the Transactions authored by an Polygon wallet address */
+      fetchTransactionsByWallet: this.fetchEVMWalletTransactions.bind(this),
+      /** Performs personal signing of a string message */
+      personalSign: this.EVMPersonalSign.bind(this),
+      /**
+       * Performs off-chain signing of a an arbitrary typed message
+       * @example Message
+       * ```json
+       * {
+       *   "data": [
+       *     {
+       *       "name": "data",
+       *       "type": "string",
+       *       "value": "hello world"
+       *     }
+       *   ]
+       * }
+       * ```
+       * */
+      signTypedData: this.EVMSignTypedData.bind(this),
+      /**
+       * Performs off-chain versioned signing of an arbitrary typed message
+       * @example Versioned Signing message
+       * ```json
+       * {
+       *   "messageType": [
+       *       {
+       *           "name": "data",
+       *           "type": "string"
+       *       }
+       *   ],
+       *   "domain": {
+       *       "name": "example.metamask.com",
+       *       "version": "1",
+       *       "chainId": 1,
+       *       "verifyingContract": "0x0000000000000000000000000000000000000000",
+       *       "salt": [
+       *           1,
+       *           2,
+       *           3
+       *       ],
+       *       "extraField": "stuff"
+       *   },
+       *   "primaryType": "Message",
+       *   "message": {
+       *       "data": "hello"
+       *   }
+       * }
+       * ```
+       * */
+      signTypedDataVersioned: this.EVMSignTypedDataVersioned.bind(this),
+      /**
+       * Signs a transaction and sends it to the network
+       * @param payload
+       * @returns
+       */
+      signAndSendTransaction: this.EVMSignAndSendTransaction.bind(this),
+    });
+    /** Metadata Service Methods for Polygon */
+    const Metadata = Object.freeze({
+      /** Fetch Polygon NFT Info */
+      fetchNFTInfo: this.fetchEVMNFTInfo.bind(this),
+      /** Fetch Polygon NFT Activity */
+      fetchNFTEvents: this.fetchEVMNFTEvents.bind(this),
+      /** Fetch Polygon NFTs Info. Accepts Filtering Metadata */
+      fetchNFTsInfo: this.fetchEVMNFTsInfo.bind(this),
+      /** Search Polygon Collection NFT */
+      searchCollectionNFT: this.searchEVMCollectionNFT.bind(this),
+      /** Search Recommended NFT in Polygon Collection */
+      searchRecommendedNFTsInCollection:
+        this.searchEVMRecommendedNFTInCollection.bind(this),
+      /** Search Polygon Marketplace Events */
+      searchMarketplaceEvents: this.searchEVMMarketplaceEvents.bind(this),
+      /** Search NFT Collections Info */
+      queryCollectionsInfo: this.queryCollectionsInfo.bind(this),
+      /** Search NFT Collection Filter Parameters */
+      queryCollectionFilterMetadata:
+        this.queryCollectionFilterMetadata.bind(this),
+      /** Search NFT Collection Filter Parameters */
+      queryCollectionSummary: this.queryCollectionSummary.bind(this),
+      /**
+       * Register an NFT collection info to Metadata service.
+       * After successful registration, the Metadata Service will index the collection data.
+       * */
+      registerCollection: this.registerCollection.bind(this),
+    });
+    return {
+      Asset,
+      Wallet,
+      Metadata,
+    };
+  }
+
+  /**
+   * Opens wallet UI
+   * @param path
+   * @param shouldAutoClose
+   * @returns
+   */
   public async openWallet(
     path = '',
     shouldAutoClose = false
@@ -1021,679 +1557,6 @@ export class MirrorWorld {
         }
       }
     );
-  /**
-   * Fetches an NFT's mint address on Solana
-   * @param mintAddress
-   */
-  async getNftDetails(mintAddress: string): Promise<ISolanaNFT> {
-    const response = await this.api.get<IResponse<ISolanaNFT>>(
-      `/solana/nft/${mintAddress}`
-    );
-    return response.data.data;
-  }
-
-  /**
-   * Fetches the current user's tokens
-   */
-  async getTokens(): Promise<ISolanaToken[]> {
-    const response = await this.api.get<IResponse<ISolanaToken[]>>(
-      `/wallet/tokens`
-    );
-    const tokens = response.data.data;
-    this.tokens = tokens;
-    return tokens;
-  }
-
-  /**
-   * Fetches the wallet transactions for a user
-   */
-  async getTransactions(): Promise<ISolanaTransaction[]> {
-    const response = await this.api.get<IResponse<ISolanaTransactionsPayload>>(
-      `/wallet/transactions`
-    );
-    const transactions = response.data.data.transactions;
-    this.transactions = transactions;
-    return transactions;
-  }
-
-  /**
-   * Fetches the current user's NFTs.
-   */
-  async getNFTs(payload: {
-    limit: number;
-    offset: number;
-  }): Promise<SolanaNFTExtended[] | QueryEVMNFTResultBody> {
-    if (!this.user && !this.isLoggedIn) {
-      throwError('ERROR_USER_NOT_AUTHENTICATED');
-    }
-    const nfts = await this.fetchNFTsByOwnerAddresses({
-      owners: [this.user.wallet.sol_address],
-      ...payload,
-    });
-    // Solana NFTS return an array
-    if (Array.isArray(nfts)) {
-      this.nfts = nfts;
-    } else {
-      // EVM NFTS return an object
-      this.nfts = nfts.result;
-    }
-    return nfts;
-  }
-
-  /**
-   * Fetches the NFTs owned by a specific address.
-   */
-  async getNFTsOwnedByAddress(
-    address: string,
-    payload: {
-      limit: number;
-      offset: number;
-    }
-  ): Promise<SolanaNFTExtended[] | QueryEVMNFTResultBody> {
-    if (!this.user && !this.isLoggedIn) {
-      throwError('ERROR_USER_NOT_AUTHENTICATED');
-    }
-    return await this.fetchNFTsByOwnerAddresses({
-      owners: [address],
-      ...payload,
-    });
-  }
-
-  /**
-   * Transfer SPL token to a recipient
-   */
-  async transferSPLToken(payload: {
-    recipientAddress: TransferSPLTokenPayload['to_publickey'];
-    amount: TransferSPLTokenPayload['amount'];
-    tokenMint: TransferSPLTokenPayload['token_mint'];
-    tokenDecimals: TransferSPLTokenPayload['decimals'];
-  }): Promise<ITransferSPLTokenResponse> {
-    const result = transferSPLTokenSchema.validate({
-      to_publickey: payload.recipientAddress,
-      amount: payload.amount,
-      token_mint: payload.tokenMint,
-      decimals: payload.tokenDecimals,
-    });
-    if (result.error) {
-      throw result.error;
-    }
-    const { authorization_token } = await this.getApprovalToken({
-      type: 'transfer_spl_token',
-      value: payload.amount,
-      params: payload,
-    });
-    const response = await this.api.post<IResponse<ITransferSPLTokenResponse>>(
-      `/wallet/transfer-token`,
-      result.value,
-      {
-        headers: {
-          ...(authorization_token && {
-            'x-authorization-token': authorization_token,
-          }),
-        },
-      }
-    );
-    return response.data.data;
-  }
-
-  /**
-   * Transfer SOL to wallet address
-   */
-  async transferSOL(payload: {
-    recipientAddress: TransferSOLPayload['to_publickey'];
-    amount: TransferSOLPayload['amount'];
-  }): Promise<ITransferSPLTokenResponse> {
-    const result = transferSOLSchema.validate({
-      to_publickey: payload.recipientAddress,
-      amount: payload.amount,
-    });
-    if (result.error) {
-      throw result.error;
-    }
-
-    const { authorization_token } = await this.getApprovalToken({
-      type: 'transfer_sol',
-      value: payload.amount,
-      params: payload,
-    });
-
-    const response = await this.api.post<IResponse<ITransferSPLTokenResponse>>(
-      `/wallet/transfer-sol`,
-      result.value,
-      {
-        headers: {
-          ...(authorization_token && {
-            'x-authorization-token': authorization_token,
-          }),
-        },
-      }
-    );
-    return response.data.data;
-  }
-
-  /**
-   * @service Marketplace
-   * Create Verified Collection
-   */
-  async createVerifiedCollection(
-    payload: CreateVerifiedCollectionPayload,
-    commitment: TransactionCommitment = TransactionCommitment.confirmed
-  ): Promise<IVerifiedCollection> {
-    const result = createVerifiedCollectionSchema.validate({
-      name: payload.name,
-      symbol: payload.symbol,
-      url: payload.metadataUri,
-      confirmation: commitment,
-    });
-    if (result.error) {
-      throw result.error;
-    }
-
-    const { authorization_token } = await this.getApprovalToken({
-      type: 'create_collection',
-      value: 0,
-      params: payload,
-    });
-
-    const response = await this.api.post<IResponse<IVerifiedCollection>>(
-      `/solana/mint/collection`,
-      result.value,
-      {
-        headers: {
-          ...(authorization_token && {
-            'x-authorization-token': authorization_token,
-          }),
-        },
-      }
-    );
-    return response.data.data;
-  }
-
-  /**
-   * @service Marketplace
-   * Mint NFT into collection
-   */
-  async mintNFT(payload: MintNFTPayload): Promise<ISolanaNFTMintResult> {
-    const result = mintNFTSchema.validate({
-      name: payload.name,
-      symbol: payload.symbol,
-      url: payload.metadataUri,
-      collection_mint: payload.collection,
-    });
-    if (result.error) {
-      throw result.error;
-    }
-
-    const { authorization_token } = await this.getApprovalToken({
-      type: 'mint_nft',
-      value: 0,
-      params: payload,
-    });
-
-    const response = await this.api.post<IResponse<ISolanaNFTMintResult>>(
-      `/solana/mint/nft`,
-      result.value,
-      {
-        headers: {
-          ...(authorization_token && {
-            'x-authorization-token': authorization_token,
-          }),
-        },
-      }
-    );
-    return response.data.data;
-  }
-
-  /**
-   * @service Marketplace
-   * Update NFT metadata
-   */
-  async updateNFT(
-    payload: UpdateNFTPayload,
-    commitment: TransactionCommitment = TransactionCommitment.confirmed
-  ): Promise<ISolanaNFTMintResult> {
-    const result = updateNFTSchema.validate({
-      mint_address: payload.mintAddress,
-      name: payload.name,
-      symbol: payload.symbol,
-      url: payload.metadataUri,
-      update_authority: payload.updateAuthority,
-      seller_fee_basis_points: payload.sellerFeeBasisPoints,
-      confirmation: commitment,
-    });
-    if (result.error) {
-      throw result.error;
-    }
-
-    const { authorization_token } = await this.getApprovalToken({
-      type: 'update_nft',
-      value: 0,
-      params: payload,
-    });
-
-    const response = await this.api.post<IResponse<ISolanaNFTMintResult>>(
-      `/solana/mint/update`,
-      result.value,
-      {
-        headers: {
-          ...(authorization_token && {
-            'x-authorization-token': authorization_token,
-          }),
-        },
-      }
-    );
-    return response.data.data;
-  }
-
-  /**
-   * @service Marketplace
-   * List NFT ion Mirror World Marketplace
-   */
-  async listNFT(payload: ListNFTPayload): Promise<INFTListing> {
-    const result = listNFTSchema.validate({
-      mint_address: payload.mintAddress,
-      price: payload.price,
-      auction_house: payload.auctionHouse,
-    });
-    if (result.error) {
-      throw result.error;
-    }
-    const { authorization_token } = await this.getApprovalToken({
-      type: 'list_nft',
-      value: payload.price,
-      params: payload,
-    });
-
-    const response = await this.api.post<IResponse<INFTListing>>(
-      `/solana/marketplace/list`,
-      result.value,
-      {
-        headers: {
-          ...(authorization_token && {
-            'x-authorization-token': authorization_token,
-          }),
-        },
-      }
-    );
-    return response.data.data;
-  }
-
-  /**
-   * @service Marketplace
-   * Purchase NFT on Mirror World Marketplace
-   * @deprecated
-   */
-  async buyNFT(payload: BuyNFTPayload): Promise<INFTListing> {
-    const result = buyNFTSchema.validate({
-      mint_address: payload.mintAddress,
-      price: payload.price,
-      auction_house: payload.auctionHouse,
-    });
-    if (result.error) {
-      throw result.error;
-    }
-    const { authorization_token } = await this.getApprovalToken({
-      type: 'buy_nft',
-      value: payload.price,
-      params: payload,
-    });
-    const response = await this.api.post<IResponse<INFTListing>>(
-      `/solana/marketplace/buy`,
-      result.value,
-      {
-        headers: {
-          ...(authorization_token && {
-            'x-authorization-token': authorization_token,
-          }),
-        },
-      }
-    );
-    return response.data.data;
-  }
-
-  /**
-   * @service Marketplace
-   * Update NFT Listing on Mirror World Marketplace
-   */
-  async updateNFTListing(payload: UpdateListingPayload): Promise<INFTListing> {
-    const result = buyNFTSchema.validate({
-      mint_address: payload.mintAddress,
-      price: payload.price,
-      auction_house: payload.auctionHouse,
-    });
-    if (result.error) {
-      throw result.error;
-    }
-    const { authorization_token } = await this.getApprovalToken({
-      type: 'update_listing',
-      value: payload.price,
-      params: payload,
-    });
-    const response = await this.api.post<IResponse<INFTListing>>(
-      `/solana/marketplace/update`,
-      result.value,
-      {
-        headers: {
-          ...(authorization_token && {
-            'x-authorization-token': authorization_token,
-          }),
-        },
-      }
-    );
-    return response.data.data;
-  }
-
-  /**
-   * @service Marketplace
-   * Cancel listing NFT on Mirror World Marketplace
-   */
-  async cancelNFTListing(payload: CancelListingPayload): Promise<INFTListing> {
-    const result = cancelNFTListingSchema.validate({
-      mint_address: payload.mintAddress,
-      price: payload.price,
-      auction_house: payload.auctionHouse,
-    });
-    if (result.error) {
-      throw result.error;
-    }
-    const { authorization_token } = await this.getApprovalToken({
-      type: 'cancel_listing',
-      value: payload.price,
-      params: payload,
-    });
-    const response = await this.api.post<IResponse<INFTListing>>(
-      `/solana/marketplace/cancel`,
-      result.value,
-      {
-        headers: {
-          ...(authorization_token && {
-            'x-authorization-token': authorization_token,
-          }),
-        },
-      }
-    );
-    return response.data.data;
-  }
-
-  /**
-   * @service Marketplace
-   * Transfer NFT from holder's wallet to another address
-   */
-  async transferNFT(payload: TransferNFTPayload): Promise<INFTListing> {
-    const result = transferNFTSchema.validate({
-      mint_address: payload.mintAddress,
-      to_wallet_address: payload.recipientAddress,
-    });
-    if (result.error) {
-      throw result.error;
-    }
-    const { authorization_token } = await this.getApprovalToken({
-      type: 'transfer_nft',
-      value: 0,
-      params: payload,
-    });
-    const response = await this.api.post<IResponse<INFTListing>>(
-      `/solana/marketplace/transfer`,
-      result.value,
-      {
-        headers: {
-          ...(authorization_token && {
-            'x-authorization-token': authorization_token,
-          }),
-        },
-      }
-    );
-    return response.data.data;
-  }
-
-  /**
-   * @service Marketplace
-   * Fetch NFTs By Mint Addresses. Returns a detailed payload of all NFTs whose `mintAddresses`
-   * are provided
-   */
-  async fetchNFTsByMintAddresses(
-    payload: QueryNFTsByMintAddressesPayload
-  ): Promise<SolanaNFTExtended[]> {
-    const result = fetchNFTsByMintAddressesSchema.validate({
-      mint_addresses: payload.mintAddresses,
-      limit: payload.limit,
-      offset: payload.offset,
-    });
-    if (result.error) {
-      throw result.error;
-    }
-    const response = await this.api.post<
-      IResponse<{
-        nfts: SolanaNFTExtended[];
-      }>
-    >(`/solana/nft/mints`, result.value);
-    return response.data?.data?.nfts;
-  }
-
-  /**
-   * @service Marketplace
-   * Fetch NFTs By Creator Addresses. Returns a detailed payload of all NFTs whose `creatorAddresses`
-   * are provided
-   */
-  async fetchNFTsByCreatorAddresses(
-    payload: QueryNFTsByCreatorsPayload
-  ): Promise<SolanaNFTExtended[]> {
-    const result = fetchNFTsByCreatorAddressesSchema.validate({
-      creators: payload.creatorAddresses,
-      limit: payload.limit,
-      offset: payload.offset,
-    });
-    if (result.error) {
-      throw result.error;
-    }
-    const response = await this.api.post<
-      IResponse<{
-        nfts: SolanaNFTExtended[];
-      }>
-    >(`/solana/nft/creators`, result.value);
-    return response.data?.data?.nfts;
-  }
-
-  /**
-   * @service Marketplace
-   * Fetch NFTs By Update Authorities Addresses. Returns a detailed payload of all NFTs whose `updateAuthorities`
-   * are provided
-   */
-  async fetchNFTsByUpdateAuthorities(
-    payload: QueryNFTsByUpdateAuthoritiesPayload
-  ): Promise<SolanaNFTExtended[]> {
-    const result = fetchNFTsByUpdateAuthoritiesSchema.validate({
-      update_authorities: payload.updateAuthorities,
-      limit: payload.limit,
-      offset: payload.offset,
-    });
-    if (result.error) {
-      throw result.error;
-    }
-    const response = await this.api.post<
-      IResponse<{
-        nfts: SolanaNFTExtended[];
-      }>
-    >(`/solana/nft/udpate-authorities`, result.value);
-    return response.data?.data?.nfts;
-  }
-
-  /**
-   * @service Marketplace
-   * Fetch NFTs By Owners Addresses. Returns a detailed payload of all NFTs whose `owners`
-   * are provided
-   */
-  async fetchNFTsByOwnerAddresses(
-    payload: QueryNFTsByOwnersPayload
-  ): Promise<SolanaNFTExtended[] | QueryEVMNFTResultBody> {
-    if (isEVM(this.chainConfig)) {
-      const result = fetchEVMNFTsByOwnerAddressSchema.validate({
-        owner_address: payload.owners[0],
-        limit: payload.limit,
-        cursor: payload.cursor,
-      });
-
-      if (result.error) {
-        throw result.error;
-      }
-
-      const response = await this.asset.post<IResponse<QueryEVMNFTResultRaw>>(
-        `/${this.base('asset')}/nft/owner`,
-        result.value
-      );
-      console.log(response.data.data);
-      const parsedResult = response.data.data.result.map((nft) => ({
-        ...nft,
-        metadata: JSON.parse(nft.metadata) as NftJsonMetadata,
-      }));
-
-      return {
-        ...response.data.data,
-        result: parsedResult,
-      };
-    }
-
-    // Otherwise assume Solana
-    const result = fetchNFTsByOwnerAddressesSchema.validate({
-      owners: payload.owners,
-      limit: payload.limit,
-      offset: payload.offset,
-    });
-    if (result.error) {
-      throw result.error;
-    }
-    const response = await this.api.post<
-      IResponse<{
-        nfts: SolanaNFTExtended[];
-      }>
-    >(`/solana/nft/owners`, result.value);
-    return response.data?.data?.nfts;
-  }
-
-  /**
-   * @service Marketplace
-   * Fetch Solana NFT Marketplace Activity
-   */
-  async fetchNFTMarketplaceActivity(
-    mintAddress: string
-  ): Promise<SolanaNFTAuctionActivitiesPayload> {
-    const response = await this.api.get<
-      IResponse<SolanaNFTAuctionActivitiesPayload>
-    >(`/solana/activity/${mintAddress}`);
-    return response.data?.data;
-  }
-
-  /**
-   * Creates a new marketplace instance.
-   * @param payload
-   */
-  async createMarketplace(
-    payload: CreateMarketplacePayload
-  ): Promise<Marketplace> {
-    const result = createMarketplaceSchema.validate({
-      treasury_mint: payload.treasuryMint,
-      collections: payload.collections,
-      seller_fee_basis_points: payload.sellerFeeBasisPoints,
-      storefront: payload.storefront,
-    });
-    if (result.error) {
-      throw result.error;
-    }
-
-    const { authorization_token } = await this.getApprovalToken({
-      type: 'create_marketplace',
-      value: 0,
-      params: payload,
-    });
-
-    const response = await this.api.post<IResponse<IMarketplaceResponse>>(
-      `/solana/marketplaces/create`,
-      result.value,
-      {
-        headers: {
-          ...(authorization_token && {
-            'x-authorization-token': authorization_token,
-          }),
-        },
-      }
-    );
-
-    return response.data?.data?.marketplace;
-  }
-
-  /**
-   * Updates a marketplace instance.
-   * @param payload
-   */
-  async updateMarketplace(
-    payload: UpdateMarketplacePayload
-  ): Promise<Marketplace> {
-    const result = updateMarketplaceSchema.validate({
-      treasury_mint: payload.treasuryMint,
-      collections: payload.collections,
-      seller_fee_basis_points: payload.sellerFeeBasisPoints,
-      storefront: payload.storefront,
-      new_authority: payload.newAuthority,
-    });
-    if (result.error) {
-      throw result.error;
-    }
-
-    const { authorization_token } = await this.getApprovalToken({
-      type: 'update_marketplace',
-      value: 0,
-      params: payload,
-    });
-
-    const response = await this.api.post<IResponse<IMarketplaceResponse>>(
-      `/solana/marketplaces/update`,
-      result.value,
-      {
-        headers: {
-          ...(authorization_token && {
-            'x-authorization-token': authorization_token,
-          }),
-        },
-      }
-    );
-
-    return response.data?.data?.marketplace;
-  }
-
-  /**
-   * Queries marketplaces by the following properties
-   * | 'name'
-   * | 'client_id'
-   * | 'authority'
-   * | 'treasury_mint'
-   * | 'auction_house_fee_account'
-   * | 'auction_house_treasury'
-   * | 'treasury_withdrawal_destination'
-   * | 'fee_withdrawal_destination'
-   * | 'seller_fee_basis_points'
-   * | 'requires_sign_off'
-   * | 'can_change_sale_price'
-   * @param query
-   * @param pagination
-   */
-  async queryMarketplaces(
-    query: MarketplaceQueryOptions,
-    pagination: {
-      page?: number;
-      count?: number;
-    } = {
-      page: 1,
-      count: 24,
-    }
-  ): Promise<IMarketplaceQueryResult[]> {
-    const params = qs.stringify({ ...query, ...pagination });
-
-    const response = await this.api.get<
-      IPaginatedResponse<IMarketplaceQueryResult[]>
-    >(`/solana/marketplaces?${params}`);
-
-    return response.data.data.data;
-  }
 
   // ==========================================================================================================
   //   V2 SDK METHODS
@@ -1711,9 +1574,10 @@ export class MirrorWorld {
   /**
    * Purchase NFT on Solana AuctionHouse Instance
    */
-  async buySolanaNFT(
+  private async buySolanaNFT(
     payload: IBuySolanaNFTPayloadV2
   ): Promise<SolanaNFTListingV2> {
+    assertSolanaOnly('buySolanaNFT', this.chainConfig);
     const result = BaseSolanaAuctionSchemaV2.validate(payload);
     if (result.error) {
       throw result.error;
@@ -1741,9 +1605,10 @@ export class MirrorWorld {
   /**
    * List NFT on Solana AuctionHouse Instance
    */
-  async listSolanaNFT(
+  private async listSolanaNFT(
     payload: IBuySolanaListNFTPayloadV2
   ): Promise<SolanaNFTListingV2> {
+    assertSolanaOnly('listSolanaNFT', this.chainConfig);
     const result = BaseSolanaAuctionSchemaV2.validate(payload);
     if (result.error) {
       throw result.error;
@@ -1771,9 +1636,10 @@ export class MirrorWorld {
   /**
    * Cancel NFT Listing on Solana AuctionHouse Instance
    */
-  async cancelSolanaNFTListing(
+  private async cancelSolanaNFTListing(
     payload: ISolanaCancelNFTListingPayloadV2
   ): Promise<SolanaNFTListingV2> {
+    assertSolanaOnly('cancelSolanaNFTListing', this.chainConfig);
     const result = BaseSolanaAuctionSchemaV2.validate(payload);
     if (result.error) {
       throw result.error;
@@ -1801,9 +1667,10 @@ export class MirrorWorld {
   /**
    * Transfer an NFT on Solana
    */
-  async transferSolanaNFT(
+  private async transferSolanaNFT(
     payload: ITransferSolanaNFTPayloadV2
   ): Promise<SolanaNFTListingV2> {
+    assertSolanaOnly('transferSolanaNFT', this.chainConfig);
     const result = TransferSolanaNFTSchemaV2.validate(payload);
     if (result.error) {
       throw result.error;
@@ -1831,9 +1698,10 @@ export class MirrorWorld {
   /**
    * Create a new NFT Marketplace on Solana
    */
-  async createSolanaMarketplace(
-    payload: ICreateEVMMarketplacePayloadV2
-  ): Promise<SolanaNFTListingV2> {
+  private async createSolanaMarketplace(
+    payload: ICreateSolanaMarketplacePayloadV2
+  ): Promise<SolanaMarketplaceV2> {
+    assertSolanaOnly('createSolanaMarketplace', this.chainConfig);
     const result = CreateMarketplaceSchemaV2.validate(payload);
     if (result.error) {
       throw result.error;
@@ -1844,7 +1712,7 @@ export class MirrorWorld {
       params: payload,
     });
 
-    const response = await this.asset.post<IResponse<SolanaNFTListingV2>>(
+    const response = await this.asset.post<IResponse<SolanaMarketplaceV2>>(
       `/${this.base('asset')}/marketplaces/create`,
       result.value,
       {
@@ -1861,9 +1729,10 @@ export class MirrorWorld {
   /**
    * Updates an existing NFT Marketplace on Solana
    */
-  async updateSolanaMarketplace(
+  private async updateSolanaMarketplace(
     payload: IUpdateMarketplacePayloadV2
   ): Promise<SolanaNFTListingV2> {
+    assertSolanaOnly('updateSolanaMarketplace', this.chainConfig);
     const result = UpdateMarketplaceSchemaV2.validate(payload);
     if (result.error) {
       throw result.error;
@@ -1904,7 +1773,7 @@ export class MirrorWorld {
    * @param query.can_change_sale_price
    * @param pagination
    */
-  async querySolanaMarketplaces(
+  private async querySolanaMarketplaces(
     query: MarketplaceQueryOptionsV2,
     pagination: {
       page?: number;
@@ -1914,6 +1783,7 @@ export class MirrorWorld {
       count: 24,
     }
   ): Promise<IPaginatedResponse<ISolanaMarketplaceQueryResultV2[]>['data']> {
+    assertSolanaOnly('querySolanaMarketplaces', this.chainConfig);
     const params = qs.stringify({ ...query, ...pagination });
 
     const response = await this.asset.get<
@@ -1926,9 +1796,10 @@ export class MirrorWorld {
   /**
    * Queries the transaction status of a Solana asset by the transaction signature
    */
-  async querySolanaAssetTransactionStatus(
+  private async querySolanaAssetTransactionStatus(
     payload: QueryAssetTransactionStatusPayload
   ): Promise<QueryAssetTransactionStatusResult> {
+    assertSolanaOnly('querySolanaAssetTransactionStatus', this.chainConfig);
     const result = QueryAssetTransactionStatusSchemaV2.validate(payload);
     if (result.error) {
       throw result.error;
@@ -1944,9 +1815,10 @@ export class MirrorWorld {
    * Queries the mint status of a set of mint addresses. This is useful when performing batch minting for a large array of
    * mint addresses
    */
-  async querySolanaAssetMintsStatus(
+  private async querySolanaAssetMintsStatus(
     payload: QueryAssetMintsStatusPayload
   ): Promise<any> {
+    assertSolanaOnly('querySolanaAssetMintsStatus', this.chainConfig);
     const result = QueryAssetMintsStatusSchemaV2.validate(payload);
     if (result.error) {
       throw result.error;
@@ -1961,9 +1833,10 @@ export class MirrorWorld {
   /**
    * Creates a new verified collection on Solana
    */
-  async createSolanaVerifiedCollection(
+  private async createSolanaVerifiedCollection(
     payload: CreateVerifiedCollectionPayloadV2
   ): Promise<VerifiedSolanaCollection> {
+    assertSolanaOnly('createSolanaVerifiedCollection', this.chainConfig);
     const result = CreateVerifiedCollectionSchemaV2.validate(payload);
     if (result.error) {
       throw result.error;
@@ -1990,11 +1863,12 @@ export class MirrorWorld {
   }
 
   /**
-   * Creates a new verified collection on Solana
+   * Mints a new NFT to Solana collection
    */
-  async mintSolanaNFT(
+  private async mintSolanaNFT(
     payload: MintSolanaNFTToCollectionPayloadV2
   ): Promise<MintSolanaNFTToCollectionResultV2> {
+    assertSolanaOnly('mintSolanaNFT', this.chainConfig);
     const result = MintSolanaNFTToCollectionSchemaV2.validate(payload);
     if (result.error) {
       throw result.error;
@@ -2019,9 +1893,36 @@ export class MirrorWorld {
   }
 
   /**
+   * Updates the metadata account of an NFT on Solana
+   */
+  private async updateSolanaNFTMetadata(
+    payload: UpdateSolanaNFTMetadataPayloadV2
+  ): Promise<MintSolanaNFTToCollectionResultV2> {
+    assertSolanaOnly('updateSolanaNFTMetadata', this.chainConfig);
+    this.warnAuthenticated();
+
+    const { authorization_token } = await this.getApprovalToken({
+      type: 'mint_nft',
+      value: 0,
+      params: payload,
+    });
+
+    const response = await this.asset.post<
+      IResponse<MintSolanaNFTToCollectionResultV2>
+    >(`/${this.base('asset')}/mint/update`, payload, {
+      headers: {
+        ...(authorization_token && {
+          'x-authorization-token': authorization_token,
+        }),
+      },
+    });
+    return response.data.data;
+  }
+
+  /**
    * Verifies the mint configuration of a Solana NFT
    */
-  async verifySolanaMintConfig(
+  private async verifySolanaMintConfig(
     payload: VerifySolanaMintConfigPayloadV2
   ): Promise<VerifySolanaMintConfigResultV2> {
     const result = VerifySolanaMintConfigSchemaV2.validate(payload);
@@ -2034,15 +1935,46 @@ export class MirrorWorld {
     return response.data.data;
   }
 
+  /**
+   * Queries the Solana collections for an authenticated user
+   * @requires Authenticated
+   */
+  private async getSolanaCollections(): Promise<VerifiedSolanaCollection[]> {
+    this.warnAuthenticated();
+    assertSolanaOnly('getSolanaCollections', this.chainConfig);
+    const response = await this.asset.get<
+      IResponse<VerifiedSolanaCollection[]>
+    >(`/${this.base('asset')}/mint/get-collections`);
+    return response.data.data;
+  }
+
+  /**
+   * Queries the Solana NFTs minted on a collection
+   * @requires Authenticated
+   */
+  private async getSolanaCollectionNFTs(
+    collection_mint_address: string
+  ): Promise<SolanaNFT[]> {
+    this.warnAuthenticated();
+    assertSolanaOnly('getSolanaCollections', this.chainConfig);
+    const response = await this.asset.get<IResponse<SolanaNFT[]>>(
+      `/${this.base(
+        'asset'
+      )}/mint/get-collection-nfts/${collection_mint_address}`
+    );
+    return response.data.data;
+  }
+
   // ANCHOR
   /**
    * Searches Solana NFTs by Mint Addresses
    */
-  async searchSolanaNFTsByMintAddresses<
+  private async searchSolanaNFTsByMintAddresses<
     T extends ChainConfig<SolanaChain>['network']
   >(
     payload: SearchSolanaNFTsByMintAddressesPayloadV2
   ): Promise<T extends 'devnet' ? SolanaNFTDevnet : SolanaNFT> {
+    assertSolanaOnly('searchSolanaNFTsByMintAddresses', this.chainConfig);
     const result = SearchSolanaNFTsByMintAddressesSchemaV2.validate(payload);
     if (result.error) {
       throw result.error;
@@ -2058,11 +1990,12 @@ export class MirrorWorld {
   /**
    * Searches Solana NFTs by Creator Addresses
    */
-  async searchSolanaNFTsByCreatorAddresses<
+  private async searchSolanaNFTsByCreatorAddresses<
     T extends ChainConfig<SolanaChain>['network']
   >(
     payload: SearchSolanaNFTsByCreatorsPayloadV2
   ): Promise<T extends 'devnet' ? SolanaNFTDevnet : SolanaNFT> {
+    assertSolanaOnly('searchSolanaNFTsByCreatorAddresses', this.chainConfig);
     const result = SearchSolanaNFTsByCreatorAddressesSchemaV2.validate(payload);
     if (result.error) {
       throw result.error;
@@ -2082,11 +2015,15 @@ export class MirrorWorld {
   /**
    * Searches Solana NFTs by Update authorities Addresses
    */
-  async searchSolanaNFTsByUpdateAuthorityAddresses<
+  private async searchSolanaNFTsByUpdateAuthorityAddresses<
     T extends ChainConfig<SolanaChain>['network']
   >(
     payload: SearchSolanaNFTsByUpdateAuthoritiesPayloadV2
   ): Promise<T extends 'devnet' ? SolanaNFTDevnet : SolanaNFT> {
+    assertSolanaOnly(
+      'searchSolanaNFTsByUpdateAuthorityAddresses',
+      this.chainConfig
+    );
     const result =
       SearchSolanaNFTsByUpdateAuthorityAddressesSchemaV2.validate(payload);
     if (result.error) {
@@ -2107,11 +2044,12 @@ export class MirrorWorld {
   /**
    * Searches Solana NFTs by Owner Addresses
    */
-  async searchSolanaNFTsByOwnerAddresses<
+  private async searchSolanaNFTsByOwnerAddresses<
     T extends ChainConfig<SolanaChain>['network']
   >(
     payload: SearchSolanaNFTsByOwnersPayloadV2
   ): Promise<T extends 'devnet' ? SolanaNFTDevnet : SolanaNFT> {
+    assertSolanaOnly('searchSolanaNFTsByOwnerAddresses', this.chainConfig);
     const result = SearchSolanaNFTsByOwnerAddressesSchemaV2.validate(payload);
     if (result.error) {
       throw result.error;
@@ -2132,10 +2070,10 @@ export class MirrorWorld {
    * @service Metadata
    * Fetch Solana NFT Info
    */
-  async searchSolanaNFTByMintAddress(
+  private async searchSolanaNFTByMintAddress(
     payload: QuerySolanaNFTInfoPayload
   ): Promise<SolanaNFT> {
-    this.assertSolanaOnly('searchSolanaNFTByMintAddress');
+    assertSolanaOnly('searchSolanaNFTByMintAddress', this.chainConfig);
     const result = SearchSolanaNFTInfoSchemaV2.validate({
       mint_address: payload.mint_address,
     });
@@ -2153,8 +2091,10 @@ export class MirrorWorld {
   /**
    * Purchase NFT on EVM Marketplace Address
    */
-  async buyEVMNFT(payload: IBuyEVMNFTPayloadV2): Promise<EVMNFTListingV2> {
-    this.assertEVMOnly('buyEVMNFT');
+  private async buyEVMNFT(
+    payload: IBuyEVMNFTPayloadV2
+  ): Promise<EVMNFTListingV2> {
+    assertEVMOnly('buyEVMNFT', this.chainConfig);
     const result = BuyEVMNFTSchemaV2.validate(payload);
     if (result.error) {
       throw result.error;
@@ -2183,8 +2123,10 @@ export class MirrorWorld {
   /**
    * List NFT on EVM Marketplace Address
    */
-  async listEVMNFT(payload: IListEVMNFTPayloadV2): Promise<EVMNFTListingV2> {
-    this.assertEVMOnly('listEVMNFT');
+  private async listEVMNFT(
+    payload: IListEVMNFTPayloadV2
+  ): Promise<EVMNFTListingV2> {
+    assertEVMOnly('listEVMNFT', this.chainConfig);
     const result = ListEVMNFTSchemaV2.validate(payload);
     if (result.error) {
       throw result.error;
@@ -2213,10 +2155,10 @@ export class MirrorWorld {
   /**
    * Cancel NFT Listing on EVM Marketplace Address
    */
-  async cancelEVMNFTListing(
+  private async cancelEVMNFTListing(
     payload: ICancelListingEVMPayloadV2
   ): Promise<EVMNFTListingV2> {
-    this.assertEVMOnly('cancelEVMNFTListing');
+    assertEVMOnly('cancelEVMNFTListing', this.chainConfig);
     const result = CancelEVMNFTListingSchemaV2.validate(payload);
     if (result.error) {
       throw result.error;
@@ -2245,10 +2187,10 @@ export class MirrorWorld {
   /**
    * Transfer EVM NFT to another address
    */
-  async transferEVMNFT(
+  private async transferEVMNFT(
     payload: ITransferEVMNFTPayloadV2
   ): Promise<EVMNFTListingV2> {
-    this.assertEVMOnly('transferEVMNFT');
+    assertEVMOnly('transferEVMNFT', this.chainConfig);
     const result = TransferEVMNFTSchemaV2.validate(payload);
     if (result.error) {
       throw result.error;
@@ -2277,10 +2219,10 @@ export class MirrorWorld {
   /**
    * Create a new NFT Marketplace on EVM
    */
-  async createEVMMarketplace(
+  private async createEVMMarketplace(
     payload: ICreateEVMMarketplacePayloadV2
   ): Promise<IEVMMarketplaceV2> {
-    this.assertEVMOnly('createEVMMarketplace');
+    assertEVMOnly('createEVMMarketplace', this.chainConfig);
     const result = CreateEVMMarketplaceSchemaV2.validate(payload);
     if (result.error) {
       throw result.error;
@@ -2308,10 +2250,10 @@ export class MirrorWorld {
   /**
    * Update NFT Marketplace on EVM
    */
-  async updateEVMMarketplace(
+  private async updateEVMMarketplace(
     payload: IUpdateEVMMarketplacePayloadV2
   ): Promise<IEVMMarketplaceV2> {
-    this.assertEVMOnly('updateEVMMarketplace');
+    assertEVMOnly('updateEVMMarketplace', this.chainConfig);
     const result = UpdateEVMMarketplaceSchemaV2.validate(payload);
     if (result.error) {
       throw result.error;
@@ -2339,14 +2281,14 @@ export class MirrorWorld {
   /**
    * Search NFT Marketplace on EVM
    */
-  async queryEVMMarketplaces(
+  private async queryEVMMarketplaces(
     query: IQueryEVMMarketplaceOptionsV2,
     pagination: IQueryEVMMarketplacePaginationOptionsV2 = {
       page: 1,
       size: 24,
     }
   ): Promise<IPaginatedResponse<IQueryEVMMarketplaceResultV2[]>['data']> {
-    this.assertEVMOnly('queryEVMMarketplaces');
+    assertEVMOnly('queryEVMMarketplaces', this.chainConfig);
     const params = qs.stringify({ ...query, ...pagination });
 
     const response = await this.asset.get<
@@ -2360,10 +2302,10 @@ export class MirrorWorld {
   /**
    * Creates a new verified collection on EVM
    */
-  async createEVMCollection(
+  private async createEVMCollection(
     payload: CreateEVMCollectionV2Payload
   ): Promise<CreateEVMCollectionResultV2> {
-    this.assertEVMOnly('createEVMCollection');
+    assertEVMOnly('createEVMCollection', this.chainConfig);
     const result = CreateEVMCollectionSchemaV2.validate(payload);
     if (result.error) {
       throw result.error;
@@ -2390,10 +2332,10 @@ export class MirrorWorld {
   /**
    * Mints a new NFT to a collection on EVM
    */
-  async mintEVMNFT(
+  private async mintEVMNFT(
     payload: MintEVMNFTToCollectionV2Payload
   ): Promise<MintEVMNFTToCollectionResultV2> {
-    this.assertEVMOnly('mintEVMNFT');
+    assertEVMOnly('mintEVMNFT', this.chainConfig);
     const result = MintEVMNFTToCollectionSchemaV2.validate(payload);
     if (result.error) {
       throw result.error;
@@ -2420,10 +2362,10 @@ export class MirrorWorld {
   /**
    * Verifies the mint config for an NFT on EVM
    */
-  async verifyEVMMintConfig(
+  private async verifyEVMMintConfig(
     payload: VerifyEVMMintConfigPayloadV2
   ): Promise<VerifyEVMMintConfigResultV2> {
-    this.assertEVMOnly('verifyEVMMintConfig');
+    assertEVMOnly('verifyEVMMintConfig', this.chainConfig);
     const result = VerifyEVMMintConfigSchemaV2.validate(payload);
     if (result.error) {
       throw result.error;
@@ -2438,8 +2380,8 @@ export class MirrorWorld {
    * Queries the EVM collections for an authenticated user
    * @requires Authenticated
    */
-  async getEVMCollections(): Promise<EVMCollectionV2[]> {
-    this.assertEVMOnly('getEVMCollections');
+  private async getEVMCollections(): Promise<EVMCollectionV2[]> {
+    assertEVMOnly('getEVMCollections', this.chainConfig);
     const response = await this.asset.get<IResponse<EVMCollectionV2[]>>(
       `/${this.base('asset')}/mint/get-collections`
     );
@@ -2447,11 +2389,11 @@ export class MirrorWorld {
   }
 
   /**
-   * Queries the EVM collections for an authenticated user
+   * Queries the EVM NFTs minted to a collection
    * @requires Authentication
    */
-  async getEVMCollectionNFTs(collection_address: string): Promise<any> {
-    this.assertEVMOnly('getEVMCollectionNFTs');
+  private async getEVMCollectionNFTs(collection_address: string): Promise<any> {
+    assertEVMOnly('getEVMCollectionNFTs', this.chainConfig);
     const response = await this.asset.get<IResponse<any>>(
       `/${this.base('asset')}/mint/get-collection-nfts/${collection_address}`
     );
@@ -2459,9 +2401,9 @@ export class MirrorWorld {
   }
 
   /**
-   * Searches Solana NFTs by Owner Addresses
+   * Searches EVM NFTs by Owner Addresses
    */
-  async searchEVMNFTsByOwnerAddresses<
+  private async searchEVMNFTsByOwnerAddresses<
     T extends ChainConfig<EVMChains>['network']
   >(payload: SearchEVMNFTsByOwnerAddressesPayloadV2): Promise<any> {
     this.assertEVMOnly('searchEVMNFTsByOwnerAddresses');
@@ -2480,11 +2422,11 @@ export class MirrorWorld {
    * @service Asset
    * Fetch EVM NFT Info
    */
-  async searchEVMNFTInfo(
+  private async searchEVMNFTInfo(
     contract_address: string,
     token_id: number
   ): Promise<EVMNFTInfo> {
-    this.assertEVMOnly('searchEVMNFTInfo');
+    assertEVMOnly('searchEVMNFTInfo', this.chainConfig);
 
     const response = await this.asset.get<IResponse<EVMNFTInfo>>(
       `/${this.base('asset')}/nft/${contract_address}/${token_id}`
@@ -2498,8 +2440,8 @@ export class MirrorWorld {
    * @param payload
    * @returns
    */
-  async searchEVMNFTs(payload: SearchEVMNFTsPayloadV2) {
-    this.assertEVMOnly('searchEVMNFTs');
+  private async searchEVMNFTs(payload: SearchEVMNFTsPayloadV2) {
+    assertEVMOnly('searchEVMNFTs', this.chainConfig);
     const result = SearchEVMNFTsSchemaV2.validate(
       payload.tokens.map((t) => ({
         token_address: t.contract_address,
@@ -2527,8 +2469,8 @@ export class MirrorWorld {
   /**
    * Fetch authenticated user's EVM tokens
    */
-  async fetchEVMUserTokens(): Promise<GetEVMUserTokensV2Data> {
-    this.assertEVMOnly('fetchEVMUserTokens');
+  private async fetchEVMUserTokens(): Promise<GetEVMUserTokensV2Data> {
+    assertEVMOnly('fetchEVMUserTokens', this.chainConfig);
     this.warnAuthenticated();
     const response = await this._wallet.get<IResponse<GetEVMUserTokensV2Data>>(
       `/${this.base('wallet')}/tokens`
@@ -2538,8 +2480,8 @@ export class MirrorWorld {
   /**
    * Get EVM User Transactions
    */
-  async fetchEVMUserTransactions(): Promise<EVMUserTransactionsV2Data> {
-    this.assertEVMOnly('fetchEVMUserTransactions');
+  private async fetchEVMUserTransactions(): Promise<EVMUserTransactionsV2Data> {
+    assertEVMOnly('fetchEVMUserTransactions', this.chainConfig);
     this.warnAuthenticated();
     const response = await this._wallet.get<
       IResponse<EVMUserTransactionsV2Data>
@@ -2550,10 +2492,10 @@ export class MirrorWorld {
   /**
    * Get EVM User Transactions
    */
-  async fetchEVMTransactionsFromWallet(
+  private async fetchEVMTransactionsFromWallet(
     wallet_address: string
   ): Promise<EVMUserTransactionsV2Data> {
-    this.assertEVMOnly('fetchEVMUserTransactions');
+    assertEVMOnly('fetchEVMUserTransactions', this.chainConfig);
     this.warnAuthenticated();
     const response = await this._wallet.get<
       IResponse<EVMUserTransactionsV2Data>
@@ -2564,7 +2506,7 @@ export class MirrorWorld {
   /**
    * Fetch EVM transaction data by signature hash
    */
-  async fetchEVMTransactionFromSignature(
+  private async fetchEVMTransactionFromSignature(
     transaction_signature: string
   ): Promise<EVMTransaction> {
     const response = await this._wallet.get<IResponse<EVMTransaction>>(
@@ -2576,7 +2518,7 @@ export class MirrorWorld {
   /**
    * Transfer ETH from EVM wallet to another EVM wallet
    */
-  async transferETH(
+  private async transferETH(
     payload: EVMTransferTokensPayloadV2
   ): Promise<EVMTransferTokensResponseV2> {
     assertAvailableFor('transferETH', this.chainConfig, [
@@ -2606,7 +2548,7 @@ export class MirrorWorld {
   /**
    * Fetch EVM transaction data by signature hash
    */
-  async transferBNB(
+  private async transferBNB(
     payload: EVMTransferTokensPayloadV2
   ): Promise<EVMTransferTokensResponseV2> {
     assertAvailableFor('transferBNB', this.chainConfig, [
@@ -2635,7 +2577,7 @@ export class MirrorWorld {
   /**
    * Fetch EVM transaction data by signature hash
    */
-  async transferMATIC(
+  private async transferMATIC(
     payload: EVMTransferTokensPayloadV2
   ): Promise<EVMTransferTokensResponseV2> {
     assertAvailableFor('transferMATIC', this.chainConfig, [
@@ -2664,7 +2606,7 @@ export class MirrorWorld {
   }
 
   /** Transfer ERC20 token form your address to another address */
-  async transferERC20Token(
+  private async transferERC20Token(
     payload: EVMTransferERCTokenPayloadV2
   ): Promise<EVMTransferTokensResponseV2> {
     this.warnAuthenticated();
@@ -2689,7 +2631,7 @@ export class MirrorWorld {
   /**
    * Get the ERC tokens inside an EVM wallet address
    */
-  async fetchEVMWalletTokens(wallet_address: string): Promise<any> {
+  private async fetchEVMWalletTokens(wallet_address: string): Promise<any> {
     const response = await this._wallet.get<IResponse<GetEVMUserTokensV2Data>>(
       `/${this.base('wallet')}/tokens/${wallet_address}`
     );
@@ -2698,7 +2640,7 @@ export class MirrorWorld {
   /**
    * Get the Transactions inside an EVM wallet address
    */
-  async fetchEVMWalletTransactions(
+  private async fetchEVMWalletTransactions(
     wallet_address: string
   ): Promise<EVMUserTransactionsV2Data> {
     const response = await this._wallet.get<
@@ -2708,10 +2650,10 @@ export class MirrorWorld {
   }
 
   /** Performs personal signing of a string message */
-  async EVMPersonalSign(
+  private async EVMPersonalSign(
     payload: EVMPersonalSignPayloadV2
   ): Promise<EVMPersonalSignResultV2> {
-    this.assertEVMOnly('EVMPersonalSign');
+    assertEVMOnly('EVMPersonalSign', this.chainConfig);
     this.warnAuthenticated();
     const { authorization_token } = await this.getApprovalToken({
       type: 'personal_sign',
@@ -2747,10 +2689,10 @@ export class MirrorWorld {
    * }
    * ```
    * */
-  async EVMSignTypedData(
+  private async EVMSignTypedData(
     payload: EVMSignTypedDataPayloadV2
   ): Promise<EVMSignTypedDataV2Result> {
-    this.assertEVMOnly('EVMPersonalSign');
+    assertEVMOnly('EVMPersonalSign', this.chainConfig);
     this.warnAuthenticated();
     const { authorization_token } = await this.getApprovalToken({
       type: 'sign_typed_data',
@@ -2801,10 +2743,10 @@ export class MirrorWorld {
    * }
    * ```
    * */
-  async EVMSignTypedDataVersioned(
+  private async EVMSignTypedDataVersioned(
     payload: EVMSignTypedDataWithVersionPayloadV2
   ): Promise<EVMSignTypedDataWithVersionV2Result> {
-    this.assertEVMOnly('EVMPersonalSign');
+    assertEVMOnly('EVMPersonalSign', this.chainConfig);
     this.warnAuthenticated();
     const { authorization_token } = await this.getApprovalToken({
       type: 'sign_typed_data_with_version',
@@ -2830,10 +2772,10 @@ export class MirrorWorld {
    * @param payload
    * @returns
    */
-  async EVMSignAndSendTransaction(
+  private async EVMSignAndSendTransaction(
     payload: EVMSignAndSendTransactionPayloadV2
   ): Promise<EVMSignAndSendTransactionV2Result> {
-    this.assertEVMOnly('EVMSignAndSendTransaction');
+    assertEVMOnly('EVMSignAndSendTransaction', this.chainConfig);
     this.warnAuthenticated();
     const { authorization_token } = await this.getApprovalToken({
       type: 'sign_transaction',
@@ -2860,8 +2802,8 @@ export class MirrorWorld {
    * Get Users tokens on solana. Requires authentication
    * @returns
    */
-  async fetchSolanaUserTokens(): Promise<GetSolanaTokensV2Data> {
-    this.assertSolanaOnly('fetchSolanaUserTokens');
+  private async fetchSolanaUserTokens(): Promise<GetSolanaTokensV2Data> {
+    assertSolanaOnly('fetchSolanaUserTokens', this.chainConfig);
     this.warnAuthenticated();
     const response = await this._wallet.get<IResponse<GetSolanaTokensV2Data>>(
       `/${this.base('wallet')}/tokens`
@@ -2873,8 +2815,8 @@ export class MirrorWorld {
    * Get Users transactions on solana. Requires authentication
    * @returns
    */
-  async fetchSolanaUserTransactions(): Promise<GetSolanaTransactionV2Data> {
-    this.assertSolanaOnly('fetchSolanaUserTokens');
+  private async fetchSolanaUserTransactions(): Promise<GetSolanaTransactionV2Data> {
+    assertSolanaOnly('fetchSolanaUserTokens', this.chainConfig);
     this.warnAuthenticated();
     const response = await this._wallet.get<
       IResponse<GetSolanaTransactionV2Data>
@@ -2885,10 +2827,10 @@ export class MirrorWorld {
   /**
    * Get transactions performed by an arbitrary wallet
    */
-  async fetchSolanaWalletTransactions(
+  private async fetchSolanaWalletTransactions(
     wallet_address: string
   ): Promise<GetSolanaTransactionV2Data> {
-    this.assertSolanaOnly('fetchSolanaUserTokens');
+    assertSolanaOnly('fetchSolanaUserTokens', this.chainConfig);
     const response = await this._wallet.get<
       IResponse<GetSolanaTransactionV2Data>
     >(`/${this.base('wallet')}/${wallet_address}/transactions`);
@@ -2898,10 +2840,13 @@ export class MirrorWorld {
   /**
    * Get raw transaction data from signature
    */
-  async fetchSolanaWalletTransactionFromSignature(
+  private async fetchSolanaWalletTransactionFromSignature(
     signature: string
   ): Promise<SolanaTransactionV2> {
-    this.assertSolanaOnly('fetchSolanaWalletTransactionFromSignature');
+    assertSolanaOnly(
+      'fetchSolanaWalletTransactionFromSignature',
+      this.chainConfig
+    );
     const response = await this._wallet.get<IResponse<SolanaTransactionV2>>(
       `/${this.base('wallet')}/transaction/${signature}`
     );
@@ -2911,20 +2856,21 @@ export class MirrorWorld {
   /**
    * Get Solana tokens in wallet by wallet address
    */
-  async fetchSolanaTokensFromWalletAddress(
+  private async fetchSolanaTokensFromWalletAddress(
     wallet_address: string
   ): Promise<GetSolanaTokensV2Data> {
-    this.assertSolanaOnly('fetchSolanaTokensFromWalletAddress');
+    assertSolanaOnly('fetchSolanaTokensFromWalletAddress', this.chainConfig);
     const response = await this._wallet.get<IResponse<GetSolanaTokensV2Data>>(
       `/${this.base('wallet')}/${wallet_address}/tokens`
     );
     return response.data.data;
   }
 
-  async transferSOLV2(
+  /** Transfers SOL from user's wallet address to another wallet address */
+  private async transferSOLV2(
     payload: SolanaTransferSOLPayloadV2
   ): Promise<SolanaBaseSignatureResultV2> {
-    this.assertSolanaOnly('transferSOLV2');
+    assertSolanaOnly('transferSOLV2', this.chainConfig);
     this.warnAuthenticated();
 
     const { authorization_token } = await this.getApprovalToken({
@@ -2944,10 +2890,12 @@ export class MirrorWorld {
     });
     return response.data.data;
   }
-  async transferSPLTokenV2(
+
+  /** Transfers SPL Tokens from user's wallet address to another wallet address */
+  private async transferSPLTokenV2(
     payload: SolanaTransferSPLTokenPayloadV2
   ): Promise<SolanaBaseSignatureResultV2> {
-    this.assertSolanaOnly('transferSPLTokenV2');
+    assertSolanaOnly('transferSPLTokenV2', this.chainConfig);
     this.warnAuthenticated();
 
     const { authorization_token } = await this.getApprovalToken({
@@ -2976,10 +2924,10 @@ export class MirrorWorld {
    * @service Metadata service
    * Fetch EVM NFT Activity
    */
-  async fetchEVMNFTEvents(
+  private async fetchEVMNFTEvents(
     payload: QueryEVMNFTActivityPayload
   ): Promise<EVMNFTActivity[]> {
-    this.assertEVMOnly('fetchEVMNFTEvents');
+    assertEVMOnly('fetchEVMNFTEvents', this.chainConfig);
     const result = fetchEVMNFTsActivitySchema.validate({
       contract: payload.contract,
       token_id: payload.token_id,
@@ -3000,8 +2948,10 @@ export class MirrorWorld {
    * @service Metadata
    * Fetch EVM NFT Info
    */
-  async fetchEVMNFTInfo(payload: QueryEVMNFTInfoPayload): Promise<EVMNFTInfo> {
-    this.assertEVMOnly('fetchEVMNFTInfo');
+  private async fetchEVMNFTInfo(
+    payload: QueryEVMNFTInfoPayload
+  ): Promise<EVMNFTInfo> {
+    assertEVMOnly('fetchEVMNFTInfo', this.chainConfig);
 
     const result = fetchEVMNFTInfoSchema.validate({
       contract: payload.contract,
@@ -3024,10 +2974,10 @@ export class MirrorWorld {
    * @service Metadata
    * Fetch EVM NFTs Info
    */
-  async fetchEVMNFTsInfo<T extends QueryEVMNFTsPayloadV2>(
+  private async fetchEVMNFTsInfo<T extends QueryEVMNFTsPayloadV2>(
     payload: T
   ): Promise<QueryEVMNFTsInfoResultV2> {
-    this.assertEVMOnly('fetchEVMNFTsInfo');
+    assertEVMOnly('fetchEVMNFTsInfo', this.chainConfig);
 
     const response = await this.metadata.post<
       IResponse<QueryEVMNFTsInfoResultV2>
@@ -3040,10 +2990,10 @@ export class MirrorWorld {
    * @service Metadata
    * Search EVM Collection NFT
    */
-  async searchEVMCollectionNFT(
+  private async searchEVMCollectionNFT(
     payload: SearchEVMNFTInCollectionPayloadV2
   ): Promise<QueryEVMNFT[]> {
-    this.assertEVMOnly('searchEVMCollectionNFT');
+    assertEVMOnly('searchEVMCollectionNFT', this.chainConfig);
 
     const response = await this.metadata.post<IResponse<QueryEVMNFT[]>>(
       `/${this.base('metadata')}/nft/search`,
@@ -3057,10 +3007,10 @@ export class MirrorWorld {
    * @service Metadata
    * Search Recommended EVM Collection NFT
    */
-  async searchEVMRecommendedNFTInCollection(
+  private async searchEVMRecommendedNFTInCollection(
     payload: SearchEVMRecommendedNFTInCollectionPayloadV2
   ): Promise<QueryEVMNFT[]> {
-    this.assertEVMOnly('searchEVMRecommendedNFTInCollection');
+    assertEVMOnly('searchEVMRecommendedNFTInCollection', this.chainConfig);
 
     const response = await this.metadata.post<IResponse<QueryEVMNFT[]>>(
       `/${this.base('metadata')}/nft/search/recommend`,
@@ -3073,10 +3023,10 @@ export class MirrorWorld {
    * @service Metadata
    * Search EVM Marketplace Ebents
    */
-  async searchEVMMarketplaceEvents(
+  private async searchEVMMarketplaceEvents(
     payload: SearchEVMMarketplaceEventsPayloadV2
   ): Promise<EVMMarketplaceEventsResultV2> {
-    this.assertEVMOnly('searchEVMMarketplaceEvents');
+    assertEVMOnly('searchEVMMarketplaceEvents', this.chainConfig);
 
     const response = await this.metadata.post<
       IResponse<EVMMarketplaceEventsResultV2>
@@ -3089,8 +3039,10 @@ export class MirrorWorld {
    * @service Metadata
    * Fetch Solana NFT Info
    */
-  async fetchSolanaNFTInfo(mint_address: string): Promise<SolanaNFTInfo> {
-    this.assertSolanaOnly('fetchSolanaNFTInfo');
+  private async fetchSolanaNFTInfo(
+    mint_address: string
+  ): Promise<SolanaNFTInfo> {
+    assertSolanaOnly('fetchSolanaNFTInfo', this.chainConfig);
 
     const response = await this.metadata.get<IResponse<SolanaNFTInfo>>(
       `/${this.base('metadata')}/nft/${mint_address}`
@@ -3103,10 +3055,10 @@ export class MirrorWorld {
    * @service Metadata
    * Fetch Solana NFTs Info
    */
-  async fetchSolanaNFTsInfo(
+  private async fetchSolanaNFTsInfo(
     payload: QuerySolanaNFTsPayloadV2
   ): Promise<QuerySolanaNFTsInfoResultV2> {
-    this.assertSolanaOnly('fetchSolanaNFTsInfo');
+    assertSolanaOnly('fetchSolanaNFTsInfo', this.chainConfig);
 
     const response = await this.metadata.post<
       IResponse<QuerySolanaNFTsInfoResultV2>
@@ -3119,10 +3071,10 @@ export class MirrorWorld {
    * @service Metadata service
    * Fetch Solana NFT Events Activity
    */
-  async fetchSolanaNFTEvents(
+  private async fetchSolanaNFTEvents(
     payload: QuerySolanaNFTActivityPayload
   ): Promise<SolanaNFTActivity[]> {
-    this.assertSolanaOnly('fetchSolanaNFTEvents');
+    assertSolanaOnly('fetchSolanaNFTEvents', this.chainConfig);
     const result = fetchSolanaNFTsActivitySchema.validate({
       mint_address: payload.mint_address,
       page: payload.page,
@@ -3143,10 +3095,10 @@ export class MirrorWorld {
    * @service Metadata
    * Search Solana Collection NFT
    */
-  async searchSolanaCollectionNFT(
+  private async searchSolanaCollectionNFT(
     payload: SearchSolanaNFTInCollectionPayloadV2
   ): Promise<QuerySolanaNFT[]> {
-    this.assertEVMOnly('searchSolanaCollectionNFT');
+    assertEVMOnly('searchSolanaCollectionNFT', this.chainConfig);
 
     const response = await this.metadata.post<IResponse<QuerySolanaNFT[]>>(
       `/${this.base('metadata')}/nft/search`,
@@ -3160,10 +3112,10 @@ export class MirrorWorld {
    * @service Metadata
    * Search Recommended NFT in Solana Collection
    */
-  async searchSolanaRecommendedNFTInCollection(
+  private async searchSolanaRecommendedNFTInCollection(
     payload: SearchSolanaRecommendedNFTInCollectionPayloadV2
   ): Promise<QuerySolanaNFT[]> {
-    this.assertEVMOnly('searchSolanaRecommendedNFTInCollection');
+    assertEVMOnly('searchSolanaRecommendedNFTInCollection', this.chainConfig);
 
     const response = await this.metadata.post<IResponse<QuerySolanaNFT[]>>(
       `/${this.base('metadata')}/nft/search/recommend`,
@@ -3177,10 +3129,10 @@ export class MirrorWorld {
    * @service Metadata
    * Search Solana Marketplace Events
    */
-  async searchSolanaMarketplaceEvents(
+  private async searchSolanaMarketplaceEvents(
     payload: SearchSolanaMarketplaceEventsPayloadV2
   ): Promise<SolanaMarketplaceEventsResultV2> {
-    this.assertSolanaOnly('searchSolanaMarketplaceEvents');
+    assertSolanaOnly('searchSolanaMarketplaceEvents', this.chainConfig);
 
     const response = await this.metadata.post<
       IResponse<SolanaMarketplaceEventsResultV2>
@@ -3190,7 +3142,7 @@ export class MirrorWorld {
   }
 
   /** Search NFT Collections Info */
-  async searchCollectionsInfo(
+  private async queryCollectionsInfo(
     payload: SearchCollectionsInfoV2
   ): Promise<CollectionsResultV2> {
     const response = await this.metadata.post<IResponse<CollectionsResultV2>>(
@@ -3201,7 +3153,7 @@ export class MirrorWorld {
   }
 
   /** Search NFT Collection Filter Parameters */
-  async queryCollectionFilterMetadata(
+  private async queryCollectionFilterMetadata(
     collection: string
   ): Promise<CollectionFilterMetadataV2> {
     const response = await this.metadata.get<
@@ -3215,7 +3167,7 @@ export class MirrorWorld {
   }
 
   /** Search NFT Collection Filter Parameters */
-  async queryCollectionSummary(
+  private async queryCollectionSummary(
     payload: QueryCollectionsSummaryV2
   ): Promise<CollectionSummaryV2[]> {
     const response = await this.metadata.post<IResponse<CollectionSummaryV2[]>>(
@@ -3229,7 +3181,7 @@ export class MirrorWorld {
    * Register an NFT collection info to Metadata service.
    * After successful registration, the Metadata Service will index the collection data.
    * */
-  async registerCollection(
+  private async registerCollection(
     payload: RegisterCollectionPayloadV2
   ): Promise<RegisterCollectionResultV2> {
     const response = await this.metadata.post<
@@ -3255,4 +3207,28 @@ export class MirrorWorld {
       Solana('devnet'),
     ]);
   }
+}
+
+function assertSolanaOnly(
+  methodName: string,
+  chainConfig: ChainConfig<ChainTypes>
+) {
+  return assertAvailableFor(methodName, chainConfig, [
+    Solana('mainnet-beta'),
+    Solana('devnet'),
+  ]);
+}
+
+function assertEVMOnly(
+  methodName: string,
+  chainConfig: ChainConfig<ChainTypes>
+) {
+  return assertAvailableFor(methodName, chainConfig, [
+    Ethereum('mainnet'),
+    Ethereum('goerli'),
+    Polygon('mumbai-mainnet'),
+    Polygon('mumbai-testnet'),
+    BNBChain('bnb-mainnet'),
+    BNBChain('bnb-testnet'),
+  ]);
 }

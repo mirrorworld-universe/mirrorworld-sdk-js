@@ -58,7 +58,7 @@ import { TransactionCommitment } from '~~/../../packages/core/src/types/nft';
 const { mirrorworld } = useMirrorWorld();
 
 type MintEVMNFTToCollectionV2Payload = Parameters<
-  typeof mirrorworld.value.mintEVMNFT
+  typeof mirrorworld.value.Polygon.Asset.mintNFT
 >[0];
 
 const requiredKeys = new Map<any, any>([
@@ -76,7 +76,7 @@ const payload = reactive<MintEVMNFTToCollectionV2Payload>({
 
 async function mintEVMNFT() {
   try {
-    const result = await mirrorworld.value.mintEVMNFT(
+    const result = await mirrorworld.value.Polygon.Asset.mintNFT(
       omitBy(payload, isEmpty) as any as MintEVMNFTToCollectionV2Payload
     );
     console.log('result', result);

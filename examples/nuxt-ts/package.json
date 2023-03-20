@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "build": "nuxt build",
+    "clean": "echo 'Im clean'",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",

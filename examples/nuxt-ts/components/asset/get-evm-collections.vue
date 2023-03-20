@@ -23,7 +23,7 @@ const { mirrorworld } = useMirrorWorld();
 
 async function getEVMCollections() {
   try {
-    const result = await mirrorworld.value.getEVMCollections();
+    const result = await mirrorworld.value.Polygon.Asset.getCollections();
     console.log('result', result);
     alert(JSON.stringify(result, null, 2));
   } catch (error) {

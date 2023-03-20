@@ -59,7 +59,7 @@ import { EVMContractType } from '~~/../../packages/core/src/types/asset.evm.v2';
 const { mirrorworld } = useMirrorWorld();
 
 type CreateEVMCollectionPayloadV2 = Parameters<
-  typeof mirrorworld.value.createEVMCollection
+  typeof mirrorworld.value.Polygon.Asset.createCollection
 >[0];
 
 const requiredKeys = new Map<any, any>([
@@ -81,7 +81,7 @@ const payload = reactive<CreateEVMCollectionPayloadV2>({
 
 async function createEVMCollection() {
   try {
-    const result = await mirrorworld.value.createEVMCollection(
+    const result = await mirrorworld.value.Polygon.Asset.createCollection(
       omitBy(payload, isEmpty) as any as CreateEVMCollectionPayloadV2
     );
     console.log('result', result);

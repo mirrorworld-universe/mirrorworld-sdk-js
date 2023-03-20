@@ -57,7 +57,9 @@ import { TransactionCommitment } from '~~/../../packages/core/src/types/nft';
 
 const { mirrorworld } = useMirrorWorld();
 
-type BuyEVMNFTPayload = Parameters<typeof mirrorworld.value.buyEVMNFT>[0];
+type BuyEVMNFTPayload = Parameters<
+  typeof mirrorworld.value.Polygon.Asset.buyNFT
+>[0];
 
 const requiredKeys = new Map<any, any>([
   ['collection_address', true],
@@ -76,7 +78,7 @@ const payload = reactive<BuyEVMNFTPayload>({
 
 async function buyEVMNFT() {
   try {
-    const result = await mirrorworld.value.buyEVMNFT(
+    const result = await mirrorworld.value.Polygon.Asset.buyNFT(
       omitBy(payload, isEmpty) as unknown as BuyEVMNFTPayload
     );
     console.log('result', result);

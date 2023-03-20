@@ -43,7 +43,7 @@ import { keysIn } from 'lodash-es';
 const { mirrorworld } = useMirrorWorld();
 
 type VerifyEVMMintConfigPayloadV2 = Parameters<
-  typeof mirrorworld.value.verifyEVMMintConfig
+  typeof mirrorworld.value.Polygon.Asset.verifyMintConfig
 >[0];
 
 const requiredKeys = new Map<any, any>([['url', true]]);
@@ -54,7 +54,9 @@ const payload = reactive<VerifyEVMMintConfigPayloadV2>({
 
 async function verifyEVMMintConfig() {
   try {
-    const result = await mirrorworld.value.verifyEVMMintConfig(payload);
+    const result = await mirrorworld.value.Polygon.Asset.verifyMintConfig(
+      payload
+    );
     console.log('result', result);
     alert(JSON.stringify(result, null, 2));
   } catch (error) {

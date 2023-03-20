@@ -46,7 +46,7 @@ import { TransactionCommitment } from '~~/../../packages/core/src/types/nft';
 const { mirrorworld } = useMirrorWorld();
 
 type CreateSolanaVerifiedCollectionPayloadV2 = Parameters<
-  typeof mirrorworld.value.createSolanaVerifiedCollection
+  typeof mirrorworld.value.Solana.Asset.createVerifiedCollection
 >[0];
 
 const requiredKeys = new Map<any, any>([
@@ -69,13 +69,14 @@ const payload = reactive({
 
 async function createSolanaVerifiedCollection() {
   try {
-    const result = await mirrorworld.value.createSolanaVerifiedCollection(
-      // @ts-ignore
-      {
-        ...omitBy(payload, isEmpty),
-        skip_preflight: true,
-      }
-    );
+    const result =
+      await mirrorworld.value.Solana.Asset.createVerifiedCollection(
+        // @ts-ignore
+        {
+          ...omitBy(payload, isEmpty),
+          skip_preflight: true,
+        }
+      );
     console.log('result', result);
     alert(JSON.stringify(result, null, 2));
   } catch (error) {

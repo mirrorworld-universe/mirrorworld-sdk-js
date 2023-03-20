@@ -151,6 +151,21 @@ export interface MintSolanaNFTToCollectionResultV2 {
   status: string;
 }
 
+export interface UpdateSolanaNFTMetadataPayloadV2
+  extends SolanaTransactionControlOptions {
+  /**  The mint address of the NFT */
+  mint_address: string;
+  /**  The url of the NFT's json config */
+  url: string;
+  /**  The seller fee basis points of the NFT */
+  seller_fee_basis_points: number;
+  /**  The name of the NFT */
+  name: string;
+  /**  The symbol of the NFT */
+  symbol: string;
+  /**  The update authority of the NFT */
+  update_authority: string;
+}
 export interface VerifySolanaMintConfigPayloadV2 {
   url: string;
 }

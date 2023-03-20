@@ -65,7 +65,7 @@ import { filterUndefined } from '@chakra-ui/utils';
 const { mirrorworld } = useMirrorWorld();
 
 type QuerySolanaAssetMintsStatusPayload = Parameters<
-  typeof mirrorworld.value.querySolanaAssetMintsStatus
+  typeof mirrorworld.value.Solana.Asset.queryAssetMintsStatus
 >[0];
 
 const mint_addresses = ref(['']);
@@ -76,7 +76,7 @@ const payload = computed<QuerySolanaAssetMintsStatusPayload>(() => ({
 
 async function querySolanaAssetMintsStatus() {
   try {
-    const result = await mirrorworld.value.querySolanaAssetMintsStatus(
+    const result = await mirrorworld.value.Solana.Asset.queryAssetMintsStatus(
       payload.value
     );
     console.log('result', result);

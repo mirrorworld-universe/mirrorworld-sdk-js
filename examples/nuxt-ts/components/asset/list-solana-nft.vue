@@ -63,7 +63,9 @@ import { TransactionCommitment } from '~~/../../packages/core/src/types/nft';
 
 const { mirrorworld } = useMirrorWorld();
 
-type BuySolanaNFTPayload = Parameters<typeof mirrorworld.value.buySolanaNFT>[0];
+type BuySolanaNFTPayload = Parameters<
+  typeof mirrorworld.value.Solana.Asset.listNFT
+>[0];
 
 const payload = reactive<BuySolanaNFTPayload>({
   mint_address: '',
@@ -75,7 +77,7 @@ const payload = reactive<BuySolanaNFTPayload>({
 
 async function listSolanaNFT() {
   try {
-    const result = await mirrorworld.value.listSolanaNFT(payload);
+    const result = await mirrorworld.value.Solana.Asset.listNFT(payload);
     console.log('result', result);
     alert(JSON.stringify(result, null, 2));
   } catch (error) {

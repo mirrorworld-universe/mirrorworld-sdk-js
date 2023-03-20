@@ -40,7 +40,7 @@ import { isEmpty, omitBy } from 'lodash-es';
 const { mirrorworld } = useMirrorWorld();
 
 type QueryEVMMarketplacesPayload = Parameters<
-  typeof mirrorworld.value.queryEVMMarketplaces
+  typeof mirrorworld.value.Polygon.Asset.queryMarketplaces
 >[0];
 
 const payload = reactive<QueryEVMMarketplacesPayload>({
@@ -52,7 +52,7 @@ const payload = reactive<QueryEVMMarketplacesPayload>({
 
 async function queryEVMMarketplaces() {
   try {
-    const result = await mirrorworld.value.queryEVMMarketplaces(
+    const result = await mirrorworld.value.Polygon.Asset.queryMarketplaces(
       omitBy(payload, isEmpty)
     );
     console.log('result', result);

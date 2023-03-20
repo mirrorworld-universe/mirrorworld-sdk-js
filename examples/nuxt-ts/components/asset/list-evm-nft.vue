@@ -57,7 +57,9 @@ import { TransactionCommitment } from '~~/../../packages/core/src/types/nft';
 
 const { mirrorworld } = useMirrorWorld();
 
-type ListEVMNFTPayload = Parameters<typeof mirrorworld.value.listEVMNFT>[0];
+type ListEVMNFTPayload = Parameters<
+  typeof mirrorworld.value.Polygon.Asset.listNFT
+>[0];
 
 const requiredKeys = new Map<any, any>([
   ['collection_address', true],
@@ -76,7 +78,7 @@ const payload = reactive<ListEVMNFTPayload>({
 
 async function listEVMNFT() {
   try {
-    const result = await mirrorworld.value.listEVMNFT(
+    const result = await mirrorworld.value.Polygon.Asset.listNFT(
       omitBy(payload, isEmpty) as unknown as ListEVMNFTPayload
     );
     console.log('result', result);

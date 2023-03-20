@@ -64,7 +64,7 @@ import { useMirrorWorld } from '~~/hooks/use-mirrorworld';
 const { mirrorworld } = useMirrorWorld();
 
 type QuerySolanaAssetTransactionStatusPayload = Parameters<
-  typeof mirrorworld.value.querySolanaAssetTransactionStatus
+  typeof mirrorworld.value.Solana.Asset.queryAssetTransactionStatus
 >[0];
 
 const signatures = ref(['']);
@@ -75,9 +75,10 @@ const payload = computed(() => ({
 
 async function querySolanaAssetTransactionStatus() {
   try {
-    const result = await mirrorworld.value.querySolanaAssetTransactionStatus(
-      payload.value
-    );
+    const result =
+      await mirrorworld.value.Solana.Asset.queryAssetTransactionStatus(
+        payload.value
+      );
     console.log('result', result);
     alert(JSON.stringify(result, null, 2));
   } catch (error) {

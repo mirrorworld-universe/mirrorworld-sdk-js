@@ -58,7 +58,7 @@ import { TransactionCommitment } from '~~/../../packages/core/src/types/nft';
 const { mirrorworld } = useMirrorWorld();
 
 type TransferEVMNFTPayload = Parameters<
-  typeof mirrorworld.value.transferEVMNFT
+  typeof mirrorworld.value.Polygon.Asset.transferNFT
 >[0];
 
 const requiredKeys = new Map<any, any>([
@@ -76,7 +76,7 @@ const payload = reactive<TransferEVMNFTPayload>({
 
 async function transferEVMNFT() {
   try {
-    const result = await mirrorworld.value.transferEVMNFT(
+    const result = await mirrorworld.value.Polygon.Asset.transferNFT(
       omitBy(payload, isEmpty) as unknown as TransferEVMNFTPayload
     );
     console.log('result', result);

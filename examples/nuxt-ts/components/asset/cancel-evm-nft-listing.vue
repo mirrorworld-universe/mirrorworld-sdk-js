@@ -58,7 +58,7 @@ import { TransactionCommitment } from '~~/../../packages/core/src/types/nft';
 const { mirrorworld } = useMirrorWorld();
 
 type CancelEVMNFTListingPayload = Parameters<
-  typeof mirrorworld.value.cancelEVMNFTListing
+  typeof mirrorworld.value.Polygon.Asset.cancelListing
 >[0];
 
 const requiredKeys = new Map<any, any>([
@@ -76,7 +76,7 @@ const payload = reactive<CancelEVMNFTListingPayload>({
 
 async function listEVMNFT() {
   try {
-    const result = await mirrorworld.value.cancelEVMNFTListing(
+    const result = await mirrorworld.value.Polygon.Asset.cancelListing(
       omitBy(payload, isEmpty) as unknown as CancelEVMNFTListingPayload
     );
     console.log('result', result);

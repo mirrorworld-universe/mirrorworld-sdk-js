@@ -56,7 +56,7 @@ import { useMirrorWorld } from '~~/hooks/use-mirrorworld';
 const { mirrorworld } = useMirrorWorld();
 
 type TransferSolanaNFTPayload = Parameters<
-  typeof mirrorworld.value.updateSolanaMarketplace
+  typeof mirrorworld.value.Solana.Asset.updateMarketplace
 >[0];
 
 const payload = reactive<TransferSolanaNFTPayload>({
@@ -67,7 +67,9 @@ const payload = reactive<TransferSolanaNFTPayload>({
 
 async function updateSolanaMarketplace() {
   try {
-    const result = await mirrorworld.value.updateSolanaMarketplace(payload);
+    const result = await mirrorworld.value.Solana.Asset.updateMarketplace(
+      payload
+    );
     console.log('result', result);
     alert(JSON.stringify(result, null, 2));
   } catch (error) {
