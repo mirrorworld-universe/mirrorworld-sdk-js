@@ -1,5 +1,17 @@
 # @usemirrorworld/web3.js
 
+## 1.0.2
+
+### Patch Changes
+
+- 3e0d989: Fix: release new tag on @usemirrorworld/namespace
+
+## 1.0.1
+
+### Patch Changes
+
+- 2909ec4: Return auth token on login
+
 ## 1.0.0
 
 ### Patch Changes

@@ -4,7 +4,10 @@ node_modules
 dist
 coverage
 /.idea/
-.test.ts
-.env.local
 .data
 .curl.http
+.env.local
+.test.ts.env
+.nuxt
+.test.ts
+examples/.env
