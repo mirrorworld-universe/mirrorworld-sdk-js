@@ -863,9 +863,8 @@ export class MirrorWorld {
       searchNFTsByOwnerAddresses:
         this.searchSolanaNFTsByOwnerAddresses.bind(this),
       /** Searches Solana NFTs by Mint Addresses */
-      searchNFTsByMintAddress: this.searchSolanaNFTByMintAddress.bind(this),
+      searchNFTByMintAddress: this.searchSolanaNFTByMintAddress.bind(this),
     });
-
     /** Wallet Service Methods for Solana */
     const Wallet = Object.freeze({
       /**  Get Users tokens on Solana. Requires authentication */
@@ -884,7 +883,6 @@ export class MirrorWorld {
       /** Transfers SPL Tokens from user's wallet address to another wallet address */
       transferSPLToken: this.transferSPLTokenV2.bind(this),
     });
-
     /** Metadata Service Methods for Solana */
     const Metadata = Object.freeze({
       /** Fetch Solana NFT Info */
@@ -913,7 +911,6 @@ export class MirrorWorld {
        * */
       registerCollection: this.registerCollection.bind(this),
     });
-
     return {
       Asset,
       Wallet,
@@ -1100,7 +1097,6 @@ export class MirrorWorld {
       /** Search EVM NFTs by their contract_addresses and token_ids */
       searchNFTs: this.searchEVMNFTs.bind(this),
     });
-
     /** Wallet Service Methods for BNB Chain */
     const Wallet = Object.freeze({
       /** Fetch authenticated user's BNB Chain tokens */
@@ -1245,7 +1241,6 @@ export class MirrorWorld {
       /** Search EVM NFTs by their contract_addresses and token_ids */
       searchNFTs: this.searchEVMNFTs.bind(this),
     });
-
     /** Wallet Service Methods for Polygon */
     const Wallet = Object.freeze({
       /** Fetch authenticated user's Polygon tokens */

@@ -197,17 +197,17 @@ export type ComputeSearchSolanaNFTRequestPayload<
     [K in T]: string[];
   };
 
-export interface SearchSolanaNFTsByMintAddressesPayloadV2
-  extends ComputeSearchSolanaNFTRequestPayload<'mint_addresses'> {}
+export type SearchSolanaNFTsByMintAddressesPayloadV2 =
+  ComputeSearchSolanaNFTRequestPayload<'mint_addresses'>;
 
-export interface SearchSolanaNFTsByCreatorsPayloadV2
-  extends ComputeSearchSolanaNFTRequestPayload<'creators'> {}
+export type SearchSolanaNFTsByCreatorsPayloadV2 =
+  ComputeSearchSolanaNFTRequestPayload<'creators'>;
 
-export interface SearchSolanaNFTsByUpdateAuthoritiesPayloadV2
-  extends ComputeSearchSolanaNFTRequestPayload<'update_authorities'> {}
+export type SearchSolanaNFTsByUpdateAuthoritiesPayloadV2 =
+  ComputeSearchSolanaNFTRequestPayload<'update_authorities'>;
 
-export interface SearchSolanaNFTsByOwnersPayloadV2
-  extends ComputeSearchSolanaNFTRequestPayload<'owners'> {}
+export type SearchSolanaNFTsByOwnersPayloadV2 =
+  ComputeSearchSolanaNFTRequestPayload<'owners'>;
 
 export interface SearchSolanaNFTsResponseV2 {
   nfts: SolanaNFT[];

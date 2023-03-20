@@ -36,7 +36,7 @@ import { useMirrorWorld } from '~~/hooks/use-mirrorworld';
 const { mirrorworld } = useMirrorWorld();
 
 type SearchSolanaNFTByMintAddress = Parameters<
-  typeof mirrorworld.value.Solana.Asset.searchNFTsByMintAddress
+  typeof mirrorworld.value.Solana.Asset.searchNFTByMintAddress
 >[0];
 
 const requiredKeys = new Map<any, any>([['mint_address', true]]);
@@ -47,7 +47,7 @@ const payload = reactive<SearchSolanaNFTByMintAddress>({
 
 async function searchSolanaNFTByMintAddress() {
   try {
-    const result = await mirrorworld.value.Solana.Asset.searchNFTsByMintAddress(
+    const result = await mirrorworld.value.Solana.Asset.searchNFTByMintAddress(
       payload
     );
     console.log('result', result);

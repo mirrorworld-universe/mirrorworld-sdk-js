@@ -1,4 +1,4 @@
-import { inject, provide } from "vue";
+import { inject, provide } from 'vue';
 
 type CreateContextReturn<T> = [(opts: T) => void, (fallback?: T) => T, symbol];
 

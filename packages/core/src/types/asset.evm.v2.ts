@@ -67,7 +67,7 @@ export interface BaseEVMCollectionV2 {
   transaction_hash: null | string;
 }
 
-export interface CreateEVMCollectionResultV2 extends BaseEVMCollectionV2 {}
+export type CreateEVMCollectionResultV2 = BaseEVMCollectionV2;
 
 export interface EVMCollectionV2 extends BaseEVMCollectionV2 {
   contract_address: string;
@@ -129,8 +129,8 @@ export type ComputeSearchEVMNFTRequestPayload<T extends SearchEVMNftsFilters> =
       [K in T]: string[];
     };
 
-export interface SearchEVMNFTsByOwnerAddressesPayloadV2
-  extends ComputeSearchEVMNFTRequestPayload<'owner_address'> {}
+export type SearchEVMNFTsByOwnerAddressesPayloadV2 =
+  ComputeSearchEVMNFTRequestPayload<'owner_address'>;
 
 export interface SearchEVMNFTsPayloadV2 {
   tokens: {
