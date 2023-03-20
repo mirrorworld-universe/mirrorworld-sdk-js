@@ -1,5 +1,11 @@
 # @usemirrorworld/utils
 
+## 2.0.0-v2.0
+
+### Major Changes
+
+- Migrate SDK to v2
+
 ## 1.0.2
 
 ### Patch Changes
