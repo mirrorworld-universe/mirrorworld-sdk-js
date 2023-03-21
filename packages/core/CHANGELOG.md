@@ -1,5 +1,11 @@
 # @usemirrorworld/web3.js
 
+## 2.0.3
+
+### Patch Changes
+
+- 2781394: Remove `clusterEnv` property from changelog1
+
 ## 2.0.2
 
 ### Patch Changes
