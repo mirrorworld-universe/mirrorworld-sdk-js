@@ -529,20 +529,6 @@ export class MirrorWorld {
     return this._apiKey;
   }
 
-  /** Get instance's environment */
-  get clusterEnv(): ClusterEnvironment {
-    return this._env;
-  }
-
-  /** Get instance's environment */
-  get network(): 'mainnet' | 'devnet' {
-    return this._env === ClusterEnvironment.mainnet
-      ? 'mainnet'
-      : this._env === ClusterEnvironment.testnet
-      ? 'devnet'
-      : 'devnet';
-  }
-
   get chainConfig(): ChainConfig<ChainTypes> {
     return this._chainConfig;
   }
