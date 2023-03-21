@@ -1,5 +1,11 @@
 # @usemirrorworld/web3.js
 
+## 2.0.2
+
+### Patch Changes
+
+- 11f83a8: Deprecate `env` property from constructir options"
+
 ## 2.0.1
 
 ### Patch Changes

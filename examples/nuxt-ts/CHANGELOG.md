@@ -1,5 +1,12 @@
 # nuxt-example
 
+## 1.0.2
+
+### Patch Changes
+
+- Updated dependencies [11f83a8]
+  - @usemirrorworld/web3.js@2.0.2
+
 ## 1.0.1
 
 ### Patch Changes
