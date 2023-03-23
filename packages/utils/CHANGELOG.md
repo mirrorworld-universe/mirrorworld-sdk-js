@@ -1,5 +1,11 @@
 # @usemirrorworld/utils
 
+## 2.0.3
+
+### Patch Changes
+
+- Fixes types for the `QueryEVMNFTsPayloadV2` to support enumeration and range query types
+
 ## 2.0.2
 
 ### Patch Changes

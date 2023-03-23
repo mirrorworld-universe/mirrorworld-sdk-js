@@ -1,5 +1,13 @@
 # nuxt-example
 
+## 1.0.6
+
+### Patch Changes
+
+- Fixes types for the `QueryEVMNFTsPayloadV2` to support enumeration and range query types
+- Updated dependencies
+  - @usemirrorworld/web3.js@2.0.6
+
 ## 1.0.5
 
 ### Patch Changes

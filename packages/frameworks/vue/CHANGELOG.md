@@ -1,5 +1,11 @@
 # @usemirrorworld/vue
 
+## 3.0.3
+
+### Patch Changes
+
+- Fixes types for the `QueryEVMNFTsPayloadV2` to support enumeration and range query types
+
 ## 3.0.2
 
 ### Patch Changes
