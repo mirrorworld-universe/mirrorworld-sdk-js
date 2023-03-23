@@ -826,7 +826,7 @@ export class MirrorWorld {
       queryAssetMintsStatus: this.querySolanaAssetMintsStatus.bind(this),
       /** Creates a new verified collection on Solana  */
       createVerifiedCollection: this.createSolanaVerifiedCollection.bind(this),
-      /** Creates a new verified collection on Solana  */
+      /** Gets the collection's created by an authenticated user.  */
       getCollections: this.getSolanaCollections.bind(this),
       /** Queries the Solana NFTs minted on a collection  */
       getCollectionNFTs: this.getSolanaCollectionNFTs.bind(this),
