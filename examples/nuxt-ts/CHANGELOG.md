@@ -1,5 +1,13 @@
 # nuxt-example
 
+## 1.0.4
+
+### Patch Changes
+
+- af76af2: Fixes types export for Asset service
+- Updated dependencies [af76af2]
+  - @usemirrorworld/web3.js@2.0.4
+
 ## 1.0.3
 
 ### Patch Changes
