@@ -14,3 +14,4 @@ export * from './types/wallet.evm.v2';
 export * from './types/wallet.solana.v2';
 export * from './types/nft.v2';
 export * from './types/nft';
+export * from './types/marketplace';
