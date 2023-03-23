@@ -1,5 +1,11 @@
 # @usemirrorworld/react
 
+## 3.0.2
+
+### Patch Changes
+
+- Fix types exports for marketplace methods"
+
 ## 3.0.1
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @usemirrorworld/web3.js
 
+## 2.0.2
+
+### Patch Changes
+
+- Fix types exports for marketplace methods"
+
 ## 2.0.1
 
 ### Patch Changes

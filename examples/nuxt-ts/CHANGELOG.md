@@ -1,5 +1,13 @@
 # nuxt-example
 
+## 1.0.5
+
+### Patch Changes
+
+- Fix types exports for marketplace methods"
+- Updated dependencies
+  - @usemirrorworld/web3.js@2.0.5
+
 ## 1.0.4
 
 ### Patch Changes
