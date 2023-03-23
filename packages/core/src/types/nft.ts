@@ -10,7 +10,7 @@ export interface ISolanaNFT {
   attributes?: MetadataAttribute[] | null;
   listings?: null[] | null;
 }
-export interface Creator {
+interface Creator {
   address: string;
   verified: boolean;
   share: number;
