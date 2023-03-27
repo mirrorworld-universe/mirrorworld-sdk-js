@@ -17,13 +17,12 @@ npm install @usemirrorworld/web3.js
 ## Usage
 
 ```ts
-import { MirrorWorld, ClusterEnvironment } from '@usemirrorworld/web3.js';
+import { MirrorWorld, Solana } from '@usemirrorworld/web3.js';
 
 const mirrorworld = ref<MirrorWorld>(
   new MirrorWorld({
     apiKey: 'YOUR_SECRET_API_KEY',
-    env: ClusterEnvironment.testnet, // Can be ClusterEnvionment.mainnet for mainnet
-    clientId: 'YOUR_CLIENT_ID',
+    chainConfig: Solana("mainnet-beta")
   })
 );
 
@@ -33,24 +32,6 @@ async function login() {
 }
 ```
 
-## WebSocket Usage
-
-```ts
-import Websocket from '@usemirrorworld/websocket';
-import { ClusterEnvironment } from '@usemirrorworld/web3.js';
-
-const websocket = new Websocket({
-  apiKey: 'YOUR_SECRET_API_KEY',
-  clientId: 'YOUR_CLIENT_ID',
-  env: ClusterEnvironment.testnet,
-});
-
-// Establish connection
-websocket.connect();
-
-// Subscribe callback function to a topic
-websocket.onEvent('market_update', (data) => console.log(data));
-```
 
 ## Full API Documentation
 
@@ -61,7 +42,7 @@ You can view the documentation for Mirror World SDK for Mobile on our [Official 
 1. Authentication
    1. Social Authentication
    2. Login with Email/Password
-2. Marketplace
+2. Asset Management
    1. Get current user's NFTs
    2. Mint NFTs
    3. List NFTs
@@ -78,37 +59,25 @@ You can view the documentation for Mirror World SDK for Mobile on our [Official 
    2. Get account tokens
    3. Transfer SPL Tokens
    4. Transfer SOL
+   5. Transfer MATIC
+   6. Transfer BNB
+ 
 
 ## Get Started Today
 
 1. Go to [Mirror World Developer Dashboard](https://app.mirrorworld.fun) and create a project, create an application.
 2. Install Mirror World SDK Demo for Javascript using `yarn install @usemirrorworld/web3.js` and start building.
 
-## Roadmap
-
-See Roadmap here:
-
-1. **Wallet**
-   - [-] Transaction signing (In progress)
-   - [-] Crypto On-ramping (In progress)
-2. **Marketplace**
-   - [-] Create Marketplace Instance (In progress)
-   - [-] Collection indexing and querying (In progress)
-3. **Cross-chain Support**
-   - [ ] Ethereum Support
-   - [ ] Polygon Support
-   - [ ] Aptos Support
-   - [ ] Sui Support
 
 ## Community
 
-- **Discord**: [Join Discord](https://discord.com/invite/Vxrw4rqaDM)
+- **Discord**: [Join Discord](https://mirrorworld.fun/discord)
 - **Twitter**: [Follow us](https://twitter.com/joinmirrorworld)
 - **Telegram Group**: [Join](https://t.me/mirrorworld_sdk)
 - **Telegram Channel**: [Subscribe](https://t.me/mirrorworld_news)
 
 ## Licence
 
-MIT License
+Apache 2.0
 
 Copyright (c) 2021 Mirror World Inc.
