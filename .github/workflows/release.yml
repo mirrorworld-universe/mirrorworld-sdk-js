@@ -63,6 +63,18 @@ jobs:
           git config --global user.name "lilemw"
           git config --global user.email "jasonpublic230@yahoo.com"
 
+      - name: Configure npm
+        run: |
+          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc
+          cat .npmrc
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Sleep for 60 seconds
+        run: sleep 60s
+        shell: bash
+
       - name: Create Release Pull Request
         uses: changesets/action@v1
         with:

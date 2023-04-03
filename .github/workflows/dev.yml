@@ -66,7 +66,7 @@ jobs:
 
       - name: Setup CI Git User
         run: |
-          git config --global user.name "lilemw"
+          git config --global user.name "lile_mw"
           git config --global user.email "jasonpublic230@yahoo.com"
 
       - name: Configure npm
