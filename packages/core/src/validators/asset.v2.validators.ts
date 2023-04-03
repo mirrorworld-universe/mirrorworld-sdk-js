@@ -1265,6 +1265,7 @@ export const MintEVMNFTToCollectionSchemaV2: joi.ObjectSchema<MintEVMNFTToCollec
       ),
     to_wallet_address: joi
       .string()
+      .uri()
       .optional()
       .error(
         MirrorWorldSDKError.new(

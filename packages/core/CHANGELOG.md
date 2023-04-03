@@ -1,11 +1,5 @@
 # @usemirrorworld/web3.js
 
-## 2.0.7
-
-### Patch Changes
-
-- Fixes incorrect validation on to_wallet_address 
-
 ## 2.0.6
 
 ### Patch Changes
