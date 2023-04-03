@@ -1,5 +1,11 @@
 # @usemirrorworld/web3.js
 
+## 2.0.7
+
+### Patch Changes
+
+- fix invalid uri check for to_wallet_address
+
 ## 2.0.6
 
 ### Patch Changes
