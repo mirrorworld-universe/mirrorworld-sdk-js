@@ -582,7 +582,7 @@ export class MirrorWorld {
     event: T,
     payload: MirrorWorldEvents[T]
   ): void {
-    return emitter.emit(event, payload);
+    emitter.emit(event, payload);
   }
 
   private defineInternalListeners() {
@@ -591,7 +591,7 @@ export class MirrorWorld {
     });
   }
 
-  private useCredentials({ accessToken }: { accessToken: string }) {
+  public useCredentials({ accessToken }: { accessToken: string }) {
     const createAccessTokenInterceptor =
       (accessToken: string) => (config: AxiosRequestConfig) => {
         return {
