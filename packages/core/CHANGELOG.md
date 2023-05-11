@@ -1,5 +1,11 @@
 # @usemirrorworld/web3.js
 
+## 2.1.0
+
+### Minor Changes
+
+- e2c2c11: Make `useCredentials` public
+
 ## 2.0.6
 
 ### Patch Changes
