@@ -6,7 +6,7 @@ import {
   ChainConfig,
   ChainTypes,
   IUser,
-} from '@usemirrorworld/web3.js';
+} from '@mirrorworld/web3.js';
 import { AnyFn } from '@vueuse/core';
 import { canUseDom } from '@/utils';
 

@@ -12,11 +12,7 @@
 
 <script lang="ts" setup>
 import { computed, nextTick, onMounted, ref, watch, watchEffect } from 'vue';
-import {
-  MirrorWorld,
-  ClusterEnvironment,
-  IUser,
-} from '@usemirrorworld/web3.js';
+import { MirrorWorld, ClusterEnvironment, IUser } from '@mirrorworld/web3.js';
 import { useRoute } from '#app';
 import formatHighlight from 'json-format-highlight';
 

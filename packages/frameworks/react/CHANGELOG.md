@@ -1,4 +1,4 @@
-# @usemirrorworld/react
+# @mirrorworld/react
 
 ## 3.0.3
 

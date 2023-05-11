@@ -1,4 +1,4 @@
-# @usemirrorworld/vue
+# @mirrorworld/vue
 
 ## 3.0.3
 
