@@ -1,5 +1,11 @@
 # @mirrorworld/react
 
+## 3.1.0
+
+### Minor Changes
+
+- 113c546: update @mirrorworld/web3.js package
+
 ## 3.0.3
 
 ### Patch Changes
