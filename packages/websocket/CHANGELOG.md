@@ -1,5 +1,11 @@
 # @mirrorworld/web3.js
 
+## 2.1.0
+
+### Minor Changes
+
+- 113c546: update @mirrorworld/web3.js package
+
 ## 2.0.3
 
 ### Patch Changes
