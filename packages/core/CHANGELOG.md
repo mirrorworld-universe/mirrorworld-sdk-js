@@ -1,4 +1,4 @@
-# @usemirrorworld/web3.js
+# @mirrorworld/web3.js
 
 ## 2.1.0
 
@@ -100,7 +100,7 @@
 
 ### Patch Changes
 
-- 3e0d989: Fix: release new tag on @usemirrorworld/namespace
+- 3e0d989: Fix: release new tag on @mirrorworld/namespace
 
 ## 1.3.1
 
