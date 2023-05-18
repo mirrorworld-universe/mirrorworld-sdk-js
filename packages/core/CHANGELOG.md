@@ -1,5 +1,11 @@
 # @mirrorworld/web3.js
 
+## 2.2.1
+
+### Patch Changes
+
+- 5ab9055: Fix return types
+
 ## 2.2.0
 
 ### Minor Changes
