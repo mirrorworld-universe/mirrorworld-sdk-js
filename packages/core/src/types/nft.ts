@@ -214,6 +214,10 @@ export interface IBaseEVMAuctionPayloadV2 extends EVMTransactionControlOptions {
    * you are buying, lsiting or cancelling a listing for
    */
   marketplace_address: string;
+  /**
+   * Address used when using an external wallet
+   */
+  from_wallet_address?: string;
 }
 
 export type IBuyEVMNFTPayloadV2 = IBaseEVMAuctionPayloadV2;

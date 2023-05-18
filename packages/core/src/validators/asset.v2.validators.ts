@@ -910,6 +910,18 @@ export const BaseEVMAuctionSchemaV2 = joi.object<IBaseEVMAuctionPayloadV2>({
         )
       )
     ),
+  from_wallet_address: joi
+    .string()
+    .optional()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_NFT_AUCTION_PAYLOAD',
+        toErrorMessage(
+          'INVALID_NFT_AUCTION_PAYLOAD',
+          '`from_wallet_address` should be a valid evm address'
+        )
+      )
+    ),
 });
 
 export const BuyEVMNFTSchemaV2 = BaseEVMAuctionSchemaV2;
