@@ -123,6 +123,7 @@ import {
   SearchSolanaNFTsByMintAddressesPayloadV2,
   SearchSolanaNFTsByOwnersPayloadV2,
   SearchSolanaNFTsByUpdateAuthoritiesPayloadV2,
+  SearchSolanaNFTsResponseV2,
   SolanaNFT,
   SolanaNFTDevnet,
   SolanaNFTListingV2,
@@ -1963,11 +1964,9 @@ export class MirrorWorld {
   /**
    * Searches Solana NFTs by Owner Addresses
    */
-  private async searchSolanaNFTsByOwnerAddresses<
-    T extends ChainConfig<SolanaChain>['network']
-  >(
+  private async searchSolanaNFTsByOwnerAddresses(
     payload: SearchSolanaNFTsByOwnersPayloadV2
-  ): Promise<T extends 'devnet' ? SolanaNFTDevnet : SolanaNFT> {
+  ): Promise<SearchSolanaNFTsResponseV2> {
     assertSolanaOnly('searchSolanaNFTsByOwnerAddresses', this.chainConfig);
     const result = SearchSolanaNFTsByOwnerAddressesSchemaV2.validate(payload);
     if (result.error) {
@@ -1978,10 +1977,9 @@ export class MirrorWorld {
         `[MirrorWorld:searchSolanaNFTsByOwnerAddresses]: "searchSolanaNFTsByOwnerAddresses" is a long-running task on Solana devnet and may time. We're currently working to improve its performance.`
       );
     }
-    const response = await this.asset.post<IResponse<any>>(
-      `/${this.base('asset')}/nft/owners`,
-      result.value
-    );
+    const response = await this.asset.post<
+      IResponse<SearchSolanaNFTsResponseV2>
+    >(`/${this.base('asset')}/nft/owners`, result.value);
     return response.data.data;
   }
 
