@@ -1,5 +1,13 @@
 # nuxt-example
 
+## 1.1.2
+
+### Patch Changes
+
+- Add token metadata types"
+- Updated dependencies
+  - @mirrorworld/web3.js@2.2.2
+
 ## 1.1.1
 
 ### Patch Changes
