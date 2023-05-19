@@ -1017,6 +1017,18 @@ export const TransferEVMNFTSchemaV2 = joi.object<ITransferEVMNFTPayloadV2>({
         )
       )
     ),
+  from_wallet_address: joi
+    .string()
+    .optional()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_TRANSFER_NFT_PAYLOAD',
+        toErrorMessage(
+          'INVALID_TRANSFER_NFT_PAYLOAD',
+          '`from_wallet_address` should be a valid evm address'
+        )
+      )
+    ),
   confirmation: joi
     .string()
     .allow('confirmed', 'finalized')

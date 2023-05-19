@@ -924,6 +924,8 @@ export class MirrorWorld {
       listNFTTransaction: this.listEVMNFTTransaction.bind(this),
       /** Cancel NFT Listing on Ethereum Marketplace Address with External Wallet */
       cancelListingTransaction: this.cancelEVMNFTListingTransaction.bind(this),
+      /**  Transfer Ethereum NFT to another address with External Wallet */
+      transferNFTTransaction: this.transferNFTTransaction.bind(this),
       /** Create a new NFT Marketplace on Ethereum */
       createMarketplace: this.createEVMMarketplace.bind(this),
       /** Updates a sn existing NFT Marketplace on Ethereum */
@@ -1074,6 +1076,8 @@ export class MirrorWorld {
       listNFTTransaction: this.listEVMNFTTransaction.bind(this),
       /** Cancel NFT Listing on Ethereum Marketplace Address with External Wallet */
       cancelListingTransaction: this.cancelEVMNFTListingTransaction.bind(this),
+      /**  Transfer Ethereum NFT to another address with External Wallet */
+      transferNFTTransaction: this.transferNFTTransaction.bind(this),
       /** Create a new NFT Marketplace on BNB Chain */
       createMarketplace: this.createEVMMarketplace.bind(this),
       /** Updates a sn existing NFT Marketplace on BNB Chain */
@@ -1224,6 +1228,8 @@ export class MirrorWorld {
       listNFTTransaction: this.listEVMNFTTransaction.bind(this),
       /** Cancel NFT Listing on Ethereum Marketplace Address with External Wallet */
       cancelListingTransaction: this.cancelEVMNFTListingTransaction.bind(this),
+      /**  Transfer Ethereum NFT to another address with External Wallet */
+      transferNFTTransaction: this.transferNFTTransaction.bind(this),
       /** Create a new NFT Marketplace on Polygon */
       createMarketplace: this.createEVMMarketplace.bind(this),
       /** Updates a sn existing NFT Marketplace on Polygon */
@@ -2279,6 +2285,38 @@ export class MirrorWorld {
       }
     );
     return response.data.data;
+  }
+
+  private async transferNFTTransaction(
+    payload: ITransferEVMNFTPayloadV2
+  ): Promise<EvmWalletRequest> {
+    assertEVMOnly('buyEVMNFT', this.chainConfig);
+    const result = BuyEVMNFTSchemaV2.validate(payload);
+    if (result.error) {
+      throw result.error;
+    }
+    if (!result.value.from_wallet_address) {
+      throw new Error('from_wallet_address is required');
+    }
+
+    const { data } = await this.asset.post<
+      IResponse<EVMNFTListingTransactionV2>
+    >(`/${this.base('asset')}/auction/transfer/transaction`, result.value);
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    return window.ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [
+        {
+          from: data.data.tx?.from, // The user's active address.
+          to: data.data.tx?.to,
+          data: data.data.tx?.data,
+          value: data.data.tx?.value?.hex,
+          gas: '100000',
+        },
+      ],
+    });
   }
 
   /**

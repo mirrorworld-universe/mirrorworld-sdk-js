@@ -297,6 +297,10 @@ export interface ITransferEVMNFTPayloadV2 extends EVMTransactionControlOptions {
    * To wallet address
    */
   to_wallet_address: string;
+  /**
+   * From wallet address
+   */
+  from_wallet_address?: string;
 }
 
 export interface TransferNFTPayload {
