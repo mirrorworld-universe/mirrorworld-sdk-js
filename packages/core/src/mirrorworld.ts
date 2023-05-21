@@ -918,13 +918,13 @@ export class MirrorWorld {
       cancelListing: this.cancelEVMNFTListing.bind(this),
       /**  Transfer Ethereum NFT to another address */
       transferNFT: this.transferEVMNFT.bind(this),
-      /** Purchase NFT on Ethereum Marketplace Address */
+      /** Create Purchase NFT transaction on Ethereum Marketplace Address */
       buyNFTTransaction: this.buyEVMNFTTransaction.bind(this),
-      /** List NFT on Ethereum Marketplace Address with External Wallet */
+      /** Create List NFT transaction on Ethereum Marketplace Address */
       listNFTTransaction: this.listEVMNFTTransaction.bind(this),
-      /** Cancel NFT Listing on Ethereum Marketplace Address with External Wallet */
+      /** Create Cancel NFT Listing transaction on Ethereum Marketplace Address */
       cancelListingTransaction: this.cancelEVMNFTListingTransaction.bind(this),
-      /**  Transfer Ethereum NFT to another address with External Wallet */
+      /** Create Transfer Ethereum NFT to another address transaction */
       transferNFTTransaction: this.transferNFTTransaction.bind(this),
       /** Create a new NFT Marketplace on Ethereum */
       createMarketplace: this.createEVMMarketplace.bind(this),
@@ -1070,13 +1070,13 @@ export class MirrorWorld {
       cancelListing: this.cancelEVMNFTListing.bind(this),
       /**  Transfer BNB Chain NFT to another address */
       transferNFT: this.transferEVMNFT.bind(this),
-      /** Purchase NFT on Ethereum Marketplace Address */
+      /** Create Purchase NFT transaction on Ethereum Marketplace Address */
       buyNFTTransaction: this.buyEVMNFTTransaction.bind(this),
-      /** List NFT on Ethereum Marketplace Address with External Wallet */
+      /** Create List NFT transaction on Ethereum Marketplace Address */
       listNFTTransaction: this.listEVMNFTTransaction.bind(this),
-      /** Cancel NFT Listing on Ethereum Marketplace Address with External Wallet */
+      /** Create Cancel NFT Listing transaction on Ethereum Marketplace Address */
       cancelListingTransaction: this.cancelEVMNFTListingTransaction.bind(this),
-      /**  Transfer Ethereum NFT to another address with External Wallet */
+      /** Create Transfer Ethereum NFT to another address transaction */
       transferNFTTransaction: this.transferNFTTransaction.bind(this),
       /** Create a new NFT Marketplace on BNB Chain */
       createMarketplace: this.createEVMMarketplace.bind(this),
@@ -1222,13 +1222,13 @@ export class MirrorWorld {
       cancelListing: this.cancelEVMNFTListing.bind(this),
       /**  Transfer Polygon NFT to another address */
       transferNFT: this.transferEVMNFT.bind(this),
-      /** Purchase NFT on Ethereum Marketplace Address */
+      /** Create Purchase NFT transaction on Ethereum Marketplace Address */
       buyNFTTransaction: this.buyEVMNFTTransaction.bind(this),
-      /** List NFT on Ethereum Marketplace Address with External Wallet */
+      /** Create List NFT transaction on Ethereum Marketplace Address */
       listNFTTransaction: this.listEVMNFTTransaction.bind(this),
-      /** Cancel NFT Listing on Ethereum Marketplace Address with External Wallet */
+      /** Create Cancel NFT Listing transaction on Ethereum Marketplace Address */
       cancelListingTransaction: this.cancelEVMNFTListingTransaction.bind(this),
-      /**  Transfer Ethereum NFT to another address with External Wallet */
+      /** Create Transfer Ethereum NFT to another address transaction */
       transferNFTTransaction: this.transferNFTTransaction.bind(this),
       /** Create a new NFT Marketplace on Polygon */
       createMarketplace: this.createEVMMarketplace.bind(this),
@@ -2073,6 +2073,9 @@ export class MirrorWorld {
     if (result.error) {
       throw result.error;
     }
+    if (!(window as Window & { ethereum?: any })?.ethereum) {
+      throw new Error('Ethereum provider is not defined');
+    }
     if (!result.value.from_wallet_address) {
       throw new Error('from_wallet_address is required');
     }
@@ -2081,9 +2084,7 @@ export class MirrorWorld {
       IResponse<EVMNFTListingTransactionV2>
     >(`/${this.base('asset')}/auction/buy/transaction`, result.value);
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return window.ethereum.request({
+    return (window as Window & { ethereum?: any }).ethereum.request({
       method: 'eth_sendTransaction',
       params: [
         {
@@ -2137,6 +2138,9 @@ export class MirrorWorld {
     if (result.error) {
       throw result.error;
     }
+    if (!(window as Window & { ethereum?: any })?.ethereum) {
+      throw new Error('Ethereum provider is not defined');
+    }
     if (!result.value.from_wallet_address) {
       throw new Error('from_wallet_address is required');
     }
@@ -2144,9 +2148,7 @@ export class MirrorWorld {
       IResponse<EVMNFTListingTransactionV2>
     >(`/${this.base('asset')}/auction/list/transaction`, result.value);
     if (data.data.type === 'approval') {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      return window.ethereum.request({
+      return (window as Window & { ethereum?: any }).ethereum.request({
         method: 'eth_sendTransaction',
         params: [
           {
@@ -2177,9 +2179,7 @@ export class MirrorWorld {
   private async signMessage(account: string, message: string) {
     const params = [account, message];
     const method = 'eth_signTypedData_v4';
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return window.ethereum.request({
+    return (window as Window & { ethereum?: any }).ethereum.request({
       method: method,
       params: params,
     });
@@ -2225,6 +2225,9 @@ export class MirrorWorld {
     if (result.error) {
       throw result.error;
     }
+    if (!(window as Window & { ethereum?: any })?.ethereum) {
+      throw new Error('Ethereum provider is not defined');
+    }
     if (!result.value.from_wallet_address) {
       throw new Error('from_wallet_address is required');
     }
@@ -2233,9 +2236,7 @@ export class MirrorWorld {
     >(`/${this.base('asset')}/auction/cancel/transaction`, result.value);
 
     if (data.data.type === 'cancel') {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      await window.ethereum.request({
+      await (window as Window & { ethereum?: any }).ethereum.request({
         method: 'eth_sendTransaction',
         params: [
           {
@@ -2295,6 +2296,9 @@ export class MirrorWorld {
     if (result.error) {
       throw result.error;
     }
+    if (!(window as Window & { ethereum?: any })?.ethereum) {
+      throw new Error('Ethereum provider is not defined');
+    }
     if (!result.value.from_wallet_address) {
       throw new Error('from_wallet_address is required');
     }
@@ -2303,9 +2307,7 @@ export class MirrorWorld {
       IResponse<EVMNFTListingTransactionV2>
     >(`/${this.base('asset')}/auction/transfer/transaction`, result.value);
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return window.ethereum.request({
+    return (window as Window & { ethereum?: any }).ethereum.request({
       method: 'eth_sendTransaction',
       params: [
         {
