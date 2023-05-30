@@ -10,7 +10,7 @@ import {
 import { AnyFn } from '@vueuse/core';
 import { canUseDom } from '@/utils';
 
-const SECRET_ACCESS_KEY = 'YOUR_SECRET_ACCESS_KEY';
+// const SECRET_ACCESS_KEY = 'YOUR_SECRET_ACCESS_KEY';
 
 function forcePurgeClientStorage() {
   console.debug('call:forcePurgeClientStorage:useMirrorWorld');
@@ -46,10 +46,12 @@ const autoLoginCredentials = canUseDom
 let __mirrorworld: MirrorWorld;
 
 function createMirrorWorld() {
+  console.log("=======createMirrorWorld=======");
   return new MirrorWorld({
     // apiKey: "mw_4UBrXhk4sCp40pMO98FWk8eMkbGpk5dyMKB",
-    apiKey: 'mw_oEW0ZFiiPewhvktSKU1uJi3ZqyfTSHLtzd3',
-    env: ClusterEnvironment.mainnet,
+    // apiKey: 'mw_oEW0ZFiiPewhvktSKU1uJi3ZqyfTSHLtzd3',
+    apiKey:"mw_TaIB0eljYJZXsXrxpdOXvAkA4XyCuUGxNWp",
+    env: ClusterEnvironment.testnet,
     // staging: true,
     chainConfig: __chainConfig,
     ...(!!autoLoginCredentials && { autoLoginCredentials }),
@@ -57,7 +59,7 @@ function createMirrorWorld() {
     //   uxMode: "popup"
     //  }
     auth: {
-      secretAccessKey: SECRET_ACCESS_KEY,
+      // secretAccessKey: SECRET_ACCESS_KEY,
     },
   });
 }

@@ -18,6 +18,7 @@ import { canUseDom, isSafari } from './utils';
 import { animate } from 'motion';
 import { disableBodyScroll, enableBodyScroll } from 'body-scroll-lock';
 import { hideOthers } from 'aria-hidden';
+import { SUIWrapper } from './chain-wrapper/sui-wrapper'
 
 import {
   IBuySolanaNFTPayloadV2,
@@ -194,6 +195,8 @@ import {
   RegisterCollectionPayloadV2,
   RegisterCollectionResultV2,
 } from './types/metadata.common.v2';
+import { string } from 'joi';
+import { SUITransferSUIPayloadV2, SUITransferTokenPayload } from './types/wallet.sui.v2';
 
 export class MirrorWorld {
   // System variables
@@ -604,7 +607,8 @@ export class MirrorWorld {
         };
       };
 
-    const preferredCredential = this.__secretAccessKey || accessToken;
+    // const preferredCredential = this.__secretAccessKey || accessToken;
+    const preferredCredential = accessToken;
     const serviceCredentialsInterceptorId = this.api.interceptors.request.use(
       createAccessTokenInterceptor(preferredCredential)
     );
@@ -1329,6 +1333,7 @@ export class MirrorWorld {
        * */
       registerCollection: this.registerCollection.bind(this),
     });
+
     return {
       Asset,
       Wallet,
@@ -1336,6 +1341,29 @@ export class MirrorWorld {
     };
   }
 
+
+  /** SUI SDK Methods */
+  get SUI() {
+    /** Asset Service Methods for SUI */
+    const Asset = Object.freeze({
+    });
+    /** Wallet Service Methods for SUI */
+    const Wallet = Object.freeze({
+      getTransactionByDigest:this.suiGetTransactionByDigest.bind(this),
+      transferSUI:this.suiTransferSUI.bind(this),
+      transferToken:this.suiTransferToken.bind(this),
+      getTokens:this.suiGetTokens.bind(this)
+    });
+    /** Metadata Service Methods for Polygon */
+    const Metadata = Object.freeze({
+    });
+    
+    return {
+      Asset,
+      Wallet,
+      Metadata,
+    };
+  }
   /**
    * Opens wallet UI
    * @param path
@@ -1356,60 +1384,135 @@ export class MirrorWorld {
   /***
    * Logs in a user. Opens a popup window for the login operation
    */
-  login(): Promise<{
-    user: IUser;
-    refreshToken: string;
-  }> {
-    return new Promise<{ user: IUser; refreshToken: string }>(
-      async (resolve, reject) => {
-        try {
-          let authWindow: Window | undefined = undefined;
-          const handleWalletUIMessage = async (event: MessageEvent) => {
-            const { deserialize } = await import('bson');
-            if (event.data?.name === 'mw:auth:login') {
-              const payload = deserialize(event.data.payload);
-              console.debug('auth:payload ===>', payload);
-              if (payload.access_token && payload.refresh_token) {
-                this.userRefreshToken = payload.refresh_token;
-                this.useCredentials({
-                  accessToken: payload.access_token,
-                });
-                await this.fetchUser();
-                if (this._storageKey && canUseDom && this.userRefreshToken) {
-                  const internalRefreshTokenKey = `${this._storageKey}:refresh`;
-                  localStorage.setItem(
-                    internalRefreshTokenKey,
-                    this.userRefreshToken
-                  );
-                }
-                resolve({
-                  user: this.user,
-                  refreshToken: this.userRefreshToken!,
-                });
-                if (this._uxMode === 'popup') {
-                  authWindow && authWindow.close();
-                } else {
-                  windowEmitter.emit('close');
-                }
+  login(): Promise<{ user: any; refreshToken: string }> {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // 定义 authWindow 变量并初始化为 undefined
+        let authWindow: Window | undefined = undefined;
+  
+        // 定义处理钱包授权弹窗消息的回调函数
+        const handleWalletUIMessage = async (event: MessageEvent) => {
+          const { deserialize } = await import('bson');
+
+          console.log("raw result:",event)
+          if (event.data?.name === 'mw:auth:login') {
+            const payload = deserialize(event.data.payload);
+            console.log("12121212",deserialize(event.data.payload));
+            console.debug('auth:payload ===>', payload);
+            if (payload.access_token && payload.refresh_token) {
+              // 更新用户刷新令牌
+              this.userRefreshToken = payload.refresh_token;
+              // 使用新的访问令牌更新凭据
+              this.useCredentials({
+                accessToken: payload.access_token,
+              });
+              // 发送请求获取用户信息
+              await this.fetchUser();
+              // 如果可以使用浏览器本地存储，则将刷新令牌保存在本地
+              if (this._storageKey && canUseDom && this.userRefreshToken) {
+                const internalRefreshTokenKey = `${this._storageKey}:refresh`;
+                localStorage.setItem(
+                  internalRefreshTokenKey,
+                  this.userRefreshToken
+                );
+              }
+              // 返回用户信息和刷新令牌
+              console.log("access:"+payload.access_token)
+              console.log("refresh:"+payload.refresh_token)
+              resolve({
+                user: this.user,
+                refreshToken: this.userRefreshToken!,
+              });
+              // 关闭钱包授权弹窗
+              if (this._uxMode === 'popup') {
+                authWindow && authWindow.close();
+              } else {
+                windowEmitter.emit('close');
               }
             }
-            if (event.data.name === 'mw:auth:close') {
-              windowEmitter.emit('close');
-            }
-          };
-          if (this._uxMode === 'embedded') {
-            windowEmitter.on('message', handleWalletUIMessage);
-          } else {
-            window.addEventListener('message', handleWalletUIMessage);
           }
-          const shouldAutoCloseAfterLogin = true;
-          authWindow = await this.openWallet('', shouldAutoCloseAfterLogin);
-        } catch (e: any) {
-          reject(e.message);
+          if (event.data.name === 'mw:auth:close') {
+            windowEmitter.emit('close');
+          }
+        };
+  
+        // 注册钱包授权弹窗消息的监听器
+        if (this._uxMode === 'embedded') {
+          windowEmitter.on('message', handleWalletUIMessage);
+        } else {
+          window.addEventListener('message', handleWalletUIMessage);
         }
+  
+        // 打开钱包授权弹窗，并返回此窗口对象
+        const shouldAutoCloseAfterLogin = true;
+        authWindow = await this.openWallet('', shouldAutoCloseAfterLogin);
+      } catch (e: any) {
+        reject(e.message);
       }
-    );
+    });
   }
+
+  // 定义了一个 login() 函数，用于处理用户登录操作。
+  // 这个函数返回一个 Promise 对象，该 Promise 在用户登录成功后被解决并返回用户信息和刷新令牌，
+  // 或者在登录失败时被拒绝并返回错误信息。
+  // 在这个函数内部，我们定义了一个异步的回调函数 handleWalletUIMessage() 来处理钱包授权弹窗的消息通信，
+  // 然后注册这个回调函数来监听弹窗的消息事件。
+  // 最后，我们打开钱包授权弹窗并等待接收到弹窗中的用户登录信息。
+  
+  // login(): Promise<{
+  //   user: IUser;
+  //   refreshToken: string;
+  // }> {
+  //   return new Promise<{ user: IUser; refreshToken: string }>(
+  //     async (resolve, reject) => {
+  //       try {
+  //         let authWindow: Window | undefined = undefined;
+  //         const handleWalletUIMessage = async (event: MessageEvent) => {
+  //           const { deserialize } = await import('bson');
+  //           if (event.data?.name === 'mw:auth:login') {
+  //             const payload = deserialize(event.data.payload);
+  //             console.debug('auth:payload ===>', payload);
+  //             if (payload.access_token && payload.refresh_token) {
+  //               this.userRefreshToken = payload.refresh_token;
+  //               this.useCredentials({
+  //                 accessToken: payload.access_token,
+  //               });
+  //               await this.fetchUser();
+  //               if (this._storageKey && canUseDom && this.userRefreshToken) {
+  //                 const internalRefreshTokenKey = `${this._storageKey}:refresh`;
+  //                 localStorage.setItem(
+  //                   internalRefreshTokenKey,
+  //                   this.userRefreshToken
+  //                 );
+  //               }
+  //               resolve({
+  //                 user: this.user,
+  //                 refreshToken: this.userRefreshToken!,
+  //               });
+  //               if (this._uxMode === 'popup') {
+  //                 authWindow && authWindow.close();
+  //               } else {
+  //                 windowEmitter.emit('close');
+  //               }
+  //             }
+  //           }
+  //           if (event.data.name === 'mw:auth:close') {
+  //             windowEmitter.emit('close');
+  //           }
+  //         };
+  //         if (this._uxMode === 'embedded') {
+  //           windowEmitter.on('message', handleWalletUIMessage);
+  //         } else {
+  //           window.addEventListener('message', handleWalletUIMessage);
+  //         }
+  //         const shouldAutoCloseAfterLogin = true;
+  //         authWindow = await this.openWallet('', shouldAutoCloseAfterLogin);
+  //       } catch (e: any) {
+  //         reject(e.message);
+  //       }
+  //     }
+  //   );
+  // }
 
   private getApprovalToken = (payload: ICreateActionPayload) =>
     new Promise<{ action: IAction; authorization_token: string | undefined }>(
@@ -3107,6 +3210,30 @@ export class MirrorWorld {
       IResponse<RegisterCollectionResultV2>
     >(`/${this.base('metadata')}/collection/register`, payload);
     return response.data.data;
+  }
+
+  private async suiGetTransactionByDigest(digest:string){
+    this.warnAuthenticated();
+    let url = `/${this.base('wallet')}/transactions/${digest}`;
+    return await SUIWrapper.getTransactionByDigest(this.chainConfig,this.v2,url)
+  }
+
+  private async suiTransferSUI(payload: SUITransferSUIPayloadV2){
+    this.warnAuthenticated();
+    let url = `/${this.base('wallet')}/transfer-sui`;
+    return await SUIWrapper.transferSUI(payload,url,this.chainConfig,this.v2)
+  }
+
+  private async suiTransferToken(payload:SUITransferTokenPayload){
+    this.warnAuthenticated()
+    let url = `/${this.base('wallet')}/transfer-token`
+    return await SUIWrapper.transferToken(payload,url,this.chainConfig,this.v2)
+  }
+
+  private async suiGetTokens(){
+    this.warnAuthenticated()
+    let url = `/${this.base('wallet')}/tokens`
+    return await SUIWrapper.getTokens(url,this.chainConfig,this.v2)
   }
 
   private assertEVMOnly(methodName: string) {
