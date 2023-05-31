@@ -209,7 +209,7 @@ function assertSUIOnly(
   ) {
     return assertAvailableFor(methodName, chainConfig, [
       Sui('mainnet'),
-      Sui('devnet'),
+      Sui('testnet'),
     ]);
   }
 

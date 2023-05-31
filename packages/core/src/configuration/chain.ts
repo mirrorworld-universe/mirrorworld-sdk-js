@@ -2,7 +2,7 @@ export type EthereumNetworks = 'mainnet' | 'goerli';
 export type SolanaNetworks = 'mainnet-beta' | 'devnet';
 export type PolygonNetworks = 'mumbai-mainnet' | 'mumbai-testnet';
 export type BNBChainNetworks = 'bnb-mainnet' | 'bnb-testnet';
-export type SuiNetworks = 'mainnet' | 'devnet';
+export type SuiNetworks = 'mainnet' | 'testnet';
 
 export type ChainNetworks =
   | EthereumNetworks
@@ -16,7 +16,7 @@ export type EVMChains = Exclude<ChainTypes, 'solana' | 'sui'>;
 export type SolanaChain = Extract<ChainTypes, 'solana'>;
 export type EthereumChain = Extract<ChainTypes, 'ethereum'>;
 export type PolygonChain = Extract<ChainTypes, 'polygon'>;
-export type SuiChain = Extract<ChainTypes, 'solana'>;
+export type SuiChain = Extract<ChainTypes, 'sui'>;
 export type BNBChain = Extract<ChainTypes, 'bnb'>;
 
 export type MirrorWorldChains = {

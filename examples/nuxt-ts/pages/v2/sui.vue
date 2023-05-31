@@ -95,13 +95,21 @@
         border-width="1px"
         border-style="dashed"
         rounded="sm"
+        spacing="5"
       >
         <c-heading font-size="md"> Wallet </c-heading>
-        <c-wrap>
+        <c-wrap spacing="3">
           <c-wrap-item>
-            <c-button size="sm" variant="outline" color-scheme="gray">
-              PlaceHolder
-            </c-button>
+            <asset-sui-wallet-get-transaction-by-digest/>
+          </c-wrap-item>
+          <c-wrap-item>
+            <asset-sui-wallet-transfer-sui/>
+          </c-wrap-item>
+          <c-wrap-item>
+            <asset-sui-wallet-transfer-token/>
+          </c-wrap-item>
+          <c-wrap-item>
+            <asset-sui-wallet-get-tokens/>
           </c-wrap-item>
         </c-wrap>
       </c-stack>

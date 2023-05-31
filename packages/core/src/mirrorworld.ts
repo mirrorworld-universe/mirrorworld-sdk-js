@@ -1408,6 +1408,7 @@ export class MirrorWorld {
               });
               // 发送请求获取用户信息
               await this.fetchUser();
+              console.log("user:",this.user)
               // 如果可以使用浏览器本地存储，则将刷新令牌保存在本地
               if (this._storageKey && canUseDom && this.userRefreshToken) {
                 const internalRefreshTokenKey = `${this._storageKey}:refresh`;
@@ -2484,8 +2485,14 @@ export class MirrorWorld {
   // TODO
   //
   private warnAuthenticated() {
-    if (!this.user || !this.isLoggedIn || !this.__secretAccessKey) {
-      console.warn(`User is not logged in. Could potentially fail`);
+    if (!this.user) {
+      console.warn(`User is null, maybe not logged in. Could potentially fail`);
+    }
+    if (!this.isLoggedIn) {
+      console.warn(`isLoggedIn is false, maybe is not logged in. Could potentially fail`);
+    }
+    if (!this.__secretAccessKey) {
+      console.warn(`__secretAccessKey is null, maybe User is not logged in. Could potentially fail`);
     }
   }
   /**

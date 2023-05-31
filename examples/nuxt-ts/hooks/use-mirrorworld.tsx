@@ -6,6 +6,8 @@ import {
   ChainConfig,
   ChainTypes,
   IUser,
+  Sui,
+  Solana,
 } from '@usemirrorworld/web3.js';
 import { AnyFn } from '@vueuse/core';
 import { canUseDom } from '@/utils';
@@ -37,7 +39,8 @@ export interface MirrorWorldContext {
 }
 
 // const __chainConfig = Solana('devnet');
-const __chainConfig = Polygon('mumbai-testnet');
+// const __chainConfig = Polygon('mumbai-testnet');
+const __chainConfig = Sui('testnet');
 
 const autoLoginCredentials = canUseDom
   ? localStorage.getItem(`app-refresh-token`)
