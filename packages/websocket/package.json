@@ -1,6 +1,6 @@
 {
-  "name": "@usemirrorworld/websocket",
-  "version": "2.0.3",
+  "name": "@mirrorworld/websocket",
+  "version": "2.1.0",
   "description": "Mirror World Web SDK WebSocket",
   "keywords": [
     "mirrorworld",
@@ -16,8 +16,8 @@
   "author": "Jonathan Bakebwa <codebender828@gmail.com>",
   "homepage": "https://github.com/mirrorworld-universe/mirrorworld.web3.js#readme",
   "license": "MIT",
-  "main": "dist/usemirrorworld-websocket.cjs.js",
-  "module": "dist/usemirrorworld-websocket.esm.js",
+  "main": "dist/mirrorworld-websocket.cjs.js",
+  "module": "dist/mirrorworld-websocket.esm.js",
   "repository": "https://github.com/mirrorworld-universe/mirrorworld.web3.js/tree/main/packages/websocket",
   "sideEffects": false,
   "files": [

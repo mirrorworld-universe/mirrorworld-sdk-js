@@ -8,6 +8,19 @@ export interface SolanaTokenV2 {
   mint: string;
   amount: number;
   decimals: number;
+  metadata?: SolanaTokenMetadataV2;
+}
+
+export interface SolanaTokenMetadataV2 {
+  name: string;
+  symbol: string;
+  decimals: number;
+  chain: string;
+  network: string;
+  address: string;
+  logoURI?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface GetSolanaTransactionV2Data {

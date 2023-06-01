@@ -343,11 +343,7 @@
 
 <script lang="ts" setup>
 import { computed, onBeforeMount, ref } from 'vue';
-import {
-  MirrorWorld,
-  ClusterEnvironment,
-  Solana,
-} from '@usemirrorworld/web3.js';
+import { MirrorWorld, ClusterEnvironment, Solana } from '@mirrorworld/web3.js';
 //@ts-ignore
 import formatHighlight from 'json-format-highlight';
 import { useMirrorWorld } from '~~/hooks/use-mirrorworld';
