@@ -1,5 +1,12 @@
 # nuxt-example
 
+## 1.2.0
+
+### Patch Changes
+
+- Add SUI page and 4 wallet APIs of SUI
+- Updated dependencies
+  - @mirrorworld/web3.js@2.3.0
 ## 1.1.2
 
 ### Patch Changes
