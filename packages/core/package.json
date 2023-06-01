@@ -1,6 +1,6 @@
 {
-  "name": "@usemirrorworld/web3.js",
-  "version": "2.2.0",
+  "name": "@mirrorworld/web3.js",
+  "version": "2.2.2",
   "description": "Mirror World Web SDK",
   "keywords": [
     "mirrorworld",
@@ -16,8 +16,8 @@
   "author": "Jonathan Bakebwa <codebender828@gmail.com>",
   "homepage": "https://github.com/mirrorworld-universe/mirrorworld.web3.js#readme",
   "license": "MIT",
-  "main": "dist/usemirrorworld-web3.js.cjs.js",
-  "module": "dist/usemirrorworld-web3.js.esm.js",
+  "main": "dist/mirrorworld-web3.js.cjs.js",
+  "module": "dist/mirrorworld-web3.js.esm.js",
   "repository": "https://github.com/mirrorworld-universe/mirrorworld.web3.js/tree/main/packages/web",
   "sideEffects": false,
   "files": [

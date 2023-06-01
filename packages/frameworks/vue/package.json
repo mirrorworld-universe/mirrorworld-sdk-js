@@ -1,6 +1,6 @@
 {
-  "name": "@usemirrorworld/vue",
-  "version": "3.0.3",
+  "name": "@mirrorworld/vue",
+  "version": "3.1.0",
   "description": "Mirror World Web SDK - Vue",
   "keywords": [
     "mirrorworld",
@@ -18,8 +18,8 @@
   "author": "Jonathan Bakebwa <codebender828@gmail.com>",
   "homepage": "https://github.com/mirrorworld-universe/mirrorworld.web3.js/tree/main/packages/frameworks/vue",
   "license": "MIT",
-  "main": "dist/usemirrorworld-vue.cjs.js",
-  "module": "dist/usemirrorworld-vue.esm.js",
+  "main": "dist/mirrorworld-vue.cjs.js",
+  "module": "dist/mirrorworld-vue.esm.js",
   "repository": "https://github.com/mirrorworld-universe/mirrorworld.web3.js/tree/main/packages/frameworks/vue",
   "sideEffects": false,
   "files": [

@@ -1,4 +1,22 @@
-# @usemirrorworld/web3.js
+# @mirrorworld/web3.js
+
+## 2.2.2
+
+### Patch Changes
+
+- Add token metadata types"
+
+## 2.2.1
+
+### Patch Changes
+
+- 5ab9055: Fix return types
+
+## 2.2.0
+
+### Minor Changes
+
+- 113c546: update @mirrorworld/web3.js package
 
 ## 2.1.0
 
@@ -100,7 +118,7 @@
 
 ### Patch Changes
 
-- 3e0d989: Fix: release new tag on @usemirrorworld/namespace
+- 3e0d989: Fix: release new tag on @mirrorworld/namespace
 
 ## 1.3.1
 

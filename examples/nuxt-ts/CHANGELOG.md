@@ -1,11 +1,37 @@
 # nuxt-example
 
+## 1.1.2
+
+### Patch Changes
+
+- Add token metadata types"
+- Updated dependencies
+  - @mirrorworld/web3.js@2.2.2
+
+## 1.1.1
+
+### Patch Changes
+
+- Updated dependencies [5ab9055]
+  - @mirrorworld/web3.js@2.2.1
+
+## 1.1.0
+
+### Minor Changes
+
+- 113c546: update @mirrorworld/web3.js package
+
+### Patch Changes
+
+- Updated dependencies [113c546]
+  - @mirrorworld/web3.js@2.2.0
+
 ## 1.0.7
 
 ### Patch Changes
 
 - Updated dependencies [e2c2c11]
-  - @usemirrorworld/web3.js@2.1.0
+  - @mirrorworld/web3.js@2.1.0
 
 ## 1.0.6
 
@@ -13,7 +39,7 @@
 
 - Fixes types for the `QueryEVMNFTsPayloadV2` to support enumeration and range query types
 - Updated dependencies
-  - @usemirrorworld/web3.js@2.0.6
+  - @mirrorworld/web3.js@2.0.6
 
 ## 1.0.5
 
@@ -21,7 +47,7 @@
 
 - Fix types exports for marketplace methods"
 - Updated dependencies
-  - @usemirrorworld/web3.js@2.0.5
+  - @mirrorworld/web3.js@2.0.5
 
 ## 1.0.4
 
@@ -29,28 +55,28 @@
 
 - af76af2: Fixes types export for Asset service
 - Updated dependencies [af76af2]
-  - @usemirrorworld/web3.js@2.0.4
+  - @mirrorworld/web3.js@2.0.4
 
 ## 1.0.3
 
 ### Patch Changes
 
 - Updated dependencies [2781394]
-  - @usemirrorworld/web3.js@2.0.3
+  - @mirrorworld/web3.js@2.0.3
 
 ## 1.0.2
 
 ### Patch Changes
 
 - Updated dependencies [11f83a8]
-  - @usemirrorworld/web3.js@2.0.2
+  - @mirrorworld/web3.js@2.0.2
 
 ## 1.0.1
 
 ### Patch Changes
 
 - Updated dependencies
-  - @usemirrorworld/web3.js@2.0.1
+  - @mirrorworld/web3.js@2.0.1
 
 ## 1.0.0
 
@@ -67,7 +93,7 @@
 - Updated dependencies [50d2d5f]
 - Updated dependencies [a8cb205]
 - Updated dependencies [b5b5e02]
-  - @usemirrorworld/web3.js@2.0.0
+  - @mirrorworld/web3.js@2.0.0
 
 ## 1.0.0-v2.0
 
@@ -83,4 +109,4 @@
 - Updated dependencies [50d2d5f]
 - Updated dependencies [a8cb205]
 - Updated dependencies [b5b5e02]
-  - @usemirrorworld/web3.js@2.0.0-v2.0
+  - @mirrorworld/web3.js@2.0.0-v2.0

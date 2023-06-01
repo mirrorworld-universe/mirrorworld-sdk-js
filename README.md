@@ -8,21 +8,21 @@
 2. Install SDK in your project
 
 ```bash
-yarn add @usemirrorworld/web3.js
+yarn add @mirrorworld/web3.js
 
 #or with npm
-npm install @usemirrorworld/web3.js
+npm install @mirrorworld/web3.js
 ```
 
 ## Usage
 
 ```ts
-import { MirrorWorld, Solana } from '@usemirrorworld/web3.js';
+import { MirrorWorld, Solana } from '@mirrorworld/web3.js';
 
 const mirrorworld = ref<MirrorWorld>(
   new MirrorWorld({
     apiKey: 'YOUR_SECRET_API_KEY',
-    chainConfig: Solana("mainnet-beta")
+    chainConfig: Solana('mainnet-beta'),
   })
 );
 
@@ -31,7 +31,6 @@ async function login() {
   const { refreshToken } = await mirrorworld.value.login();
 }
 ```
-
 
 ## Full API Documentation
 
@@ -61,13 +60,11 @@ You can view the documentation for Mirror World SDK for Mobile on our [Official 
    4. Transfer SOL
    5. Transfer MATIC
    6. Transfer BNB
- 
 
 ## Get Started Today
 
 1. Go to [Mirror World Developer Dashboard](https://app.mirrorworld.fun) and create a project, create an application.
-2. Install Mirror World SDK Demo for Javascript using `yarn install @usemirrorworld/web3.js` and start building.
-
+2. Install Mirror World SDK Demo for Javascript using `yarn install @mirrorworld/web3.js` and start building.
 
 ## Community
 
