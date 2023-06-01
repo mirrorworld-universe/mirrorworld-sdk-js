@@ -1,18 +1,3 @@
-interface SUITransactionEffectData {
-    // 略
-  }
-  
-  interface SUITransactionEventData {
-    // 略
-  }
-  
-  interface SUIObjectChangeData {
-    // 略
-  }
-  
-  interface SUIBalanceChangeData {
-    // 略
-  }
 
   interface SUIToken {
     coinType: string;
@@ -24,10 +9,10 @@ interface SUITransactionEffectData {
   export type SUITransactionData = {
     digest: string;
     transaction: any;
-    effects: { [key: string]: SUITransactionEffectData };
-    events: SUITransactionEventData[];
-    objectChanges: SUIObjectChangeData[];
-    balanceChanges: SUIBalanceChangeData[];
+    effects: { [key: string]: any };
+    events: any[];
+    objectChanges: any[];
+    balanceChanges: any[];
     timestampMs: string;
     checkpoint: string;
   }
