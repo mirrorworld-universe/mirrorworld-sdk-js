@@ -37,55 +37,16 @@
         <c-heading font-size="2xl"> Assets Service </c-heading>
         <c-wrap spacing="3">
           <c-wrap-item>
-            <asset-list-solana-nft />
+            <asset-get-minted-collections/>
           </c-wrap-item>
           <c-wrap-item>
-            <asset-buy-solana-nft />
+            <asset-get-minted-nft-on-collection/>
           </c-wrap-item>
           <c-wrap-item>
-            <asset-cancel-solana-nft-listing />
+            <asset-mint-collection/>
           </c-wrap-item>
           <c-wrap-item>
-            <asset-transfer-solana-nft />
-          </c-wrap-item>
-          <c-wrap-item>
-            <asset-create-solana-marketplace />
-          </c-wrap-item>
-          <c-wrap-item>
-            <asset-update-solana-marketplace />
-          </c-wrap-item>
-          <c-wrap-item>
-            <asset-query-solana-marketplaces />
-          </c-wrap-item>
-          <c-wrap-item>
-            <asset-query-solana-transaction-status />
-          </c-wrap-item>
-          <c-wrap-item>
-            <asset-query-solana-mints-status />
-          </c-wrap-item>
-          <c-wrap-item>
-            <asset-create-solana-verified-collection />
-          </c-wrap-item>
-          <c-wrap-item>
-            <asset-mint-solana-nft-to-collection />
-          </c-wrap-item>
-          <c-wrap-item>
-            <asset-verify-solana-mint-config />
-          </c-wrap-item>
-          <c-wrap-item>
-            <asset-search-solana-nfts-by-mint-addresses />
-          </c-wrap-item>
-          <c-wrap-item>
-            <asset-search-solana-nfts-by-owner-addresses />
-          </c-wrap-item>
-          <c-wrap-item>
-            <asset-search-solana-nfts-by-creator-addresses />
-          </c-wrap-item>
-          <c-wrap-item>
-            <asset-search-solana-nfts-by-update-authority-addresses />
-          </c-wrap-item>
-          <c-wrap-item>
-            <asset-search-solana-nft-by-mint-address />
+            <asset-mint-nft/>
           </c-wrap-item>
         </c-wrap>
       </c-stack>

@@ -199,7 +199,7 @@ import {
   RegisterCollectionResultV2,
 } from './types/metadata.common.v2';
 import { string } from 'joi';
-import { SUITransferSUIPayloadV2, SUITransferTokenPayload } from './types/wallet.sui.v2';
+import { SUIMintCollectionPayload, SUIMintNFTPayload, SUITransferSUIPayloadV2, SUITransferTokenPayload } from './types/wallet.sui.v2';
 
 export class MirrorWorld {
   // System variables
@@ -1373,6 +1373,10 @@ export class MirrorWorld {
   get SUI() {
     /** Asset Service Methods for SUI */
     const Asset = Object.freeze({
+      getMintedCollections:this.suiGetMintedCollections.bind(this),
+      getMintedNFTOnCollection:this.suiGetMintedNFTOnCollection.bind(this),
+      mintCollection:this.suiMintCollection.bind(this),
+      mintNFT:this.suiMintNFT.bind(this)
     });
     /** Wallet Service Methods for SUI */
     const Wallet = Object.freeze({
@@ -3425,6 +3429,30 @@ export class MirrorWorld {
     this.warnAuthenticated()
     let url = `/${this.base('wallet')}/tokens`
     return await SUIWrapper.getTokens(url,this.chainConfig,this.v2)
+  }
+
+  private async suiGetMintedCollections(){
+    this.warnAuthenticated()
+    let url = `/${this.base('asset')}/mint/get-collections`
+    return await SUIWrapper.getMintedCollections(url,this.chainConfig,this.v2)
+  }
+
+  private async suiGetMintedNFTOnCollection(collection_address:string){
+    this.warnAuthenticated()
+    let url = `/${this.base('asset')}/mint/get-collection-nfts/` + collection_address
+    return await SUIWrapper.getMintedNFTOnCollection(url,this.chainConfig,this.v2)
+  }
+
+  private async suiMintCollection(payload:SUIMintCollectionPayload){
+    this.warnAuthenticated()
+    let url = `/${this.base('asset')}/mint/collection`
+    return await SUIWrapper.mintCollection(payload,url,this.chainConfig,this.v2)
+  }
+
+  private async suiMintNFT(payload:SUIMintNFTPayload){
+    this.warnAuthenticated()
+    let url = `/${this.base('asset')}/mint/nft`
+    return await SUIWrapper.mintNFT(payload,url,this.chainConfig,this.v2)
   }
 
   private assertEVMOnly(methodName: string) {
