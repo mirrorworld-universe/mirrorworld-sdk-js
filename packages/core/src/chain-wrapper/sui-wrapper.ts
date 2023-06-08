@@ -195,13 +195,18 @@ import {
   RegisterCollectionPayloadV2,
   RegisterCollectionResultV2,
 } from '../types/metadata.common.v2';
-import { SUIGetTokensData, SUITransactionData, SUITransferSUIData, SUITransferSUIPayloadV2, SUITransferTokenPayload } from '../types/wallet.sui.v2';
+import { SUIGetTokensData, SUIMintCollectionData, SUIMintCollectionPayload, SUIMintNFTData, SUIMintNFTPayload, SUITransactionData, SUITransferSUIData, SUITransferSUIPayloadV2, SUITransferTokenPayload } from '../types/wallet.sui.v2';
   
 export const SUIWrapper = {
     getTransactionByDigest,
     transferSUI,
     transferToken,
-    getTokens
+    getTokens,
+    //Asset
+    getMintedCollections,
+    getMintedNFTOnCollection,
+    mintCollection,
+    mintNFT
 }
 function assertSUIOnly(
     methodName: string,
@@ -212,6 +217,8 @@ function assertSUIOnly(
       Sui('testnet'),
     ]);
   }
+
+  //Wallet
 
   async function getTransactionByDigest(
     chainConfig: ChainConfig<ChainTypes>,
@@ -260,4 +267,53 @@ async function getTokens(
     const response = await v2Client.api.get('wallet')!.get<
     IResponse<SUIGetTokensData>>(url);
     return response.data.data;
+}
+
+//Asset
+async function getMintedCollections(
+  url:string,
+  chainConfig:ChainConfig<ChainTypes>,
+  v2Client:MirrorWorldAPIClientV2
+){
+  assertSUIOnly('getMintedCollections', chainConfig);
+
+  const response = await v2Client.api.get('asset')!.get<IResponse<any[]>>(url);
+  return response.data.data;
+}
+
+async function getMintedNFTOnCollection(
+  url:string,
+  chainConfig:ChainConfig<ChainTypes>,
+  v2Client:MirrorWorldAPIClientV2
+){
+  assertSUIOnly('getMintedCollections', chainConfig);
+
+  const response = await v2Client.api.get('asset')!.get<IResponse<any[]>>(url);
+  return response.data.data;
+}
+
+async function mintCollection(
+  payload:SUIMintCollectionPayload,
+  url:string,
+  chainConfig:ChainConfig<ChainTypes>,
+  v2Client:MirrorWorldAPIClientV2
+){
+  assertSUIOnly('mintCollection', chainConfig);
+
+  const response = await v2Client.api.get('asset')!.post<
+  IResponse<SUIMintCollectionData>>(url,payload);
+  return response.data.data;
+}
+
+async function mintNFT(
+  payload:SUIMintNFTPayload,
+  url:string,
+  chainConfig:ChainConfig<ChainTypes>,
+  v2Client:MirrorWorldAPIClientV2
+){
+  assertSUIOnly('mintNFT', chainConfig);
+
+  const response = await v2Client.api.get('asset')!.post<
+  IResponse<SUIMintNFTData>>(url,payload);
+  return response.data.data;
 }
