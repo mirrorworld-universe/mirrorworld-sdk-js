@@ -1,5 +1,11 @@
 # @mirrorworld/web3.js
 
+## 2.5.0
+
+### Minor Changes
+
+- 5f882b5: Added APIs under 4 Asset functional modules.
+
 ## 2.4.0
 
 ### Minor Changes
