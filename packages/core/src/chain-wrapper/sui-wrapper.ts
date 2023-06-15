@@ -195,7 +195,7 @@ import {
   RegisterCollectionPayloadV2,
   RegisterCollectionResultV2,
 } from '../types/metadata.common.v2';
-import { SUIGetTokensData, SUIMintCollectionData, SUIMintCollectionPayload, SUIMintNFTData, SUIMintNFTPayload, SUITransactionData, SUITransferSUIData, SUITransferSUIPayloadV2, SUITransferTokenPayload } from '../types/wallet.sui.v2';
+import { SUIGetTokensData, SUIMintCollectionData, SUIMintCollectionPayload, SUIMintNFTData, SUIMintNFTPayload, SUIQueryNFTData, SUISearchNFTsByOwnerPayload, SUISearchNFTsPayload, SUITransactionData, SUITransferSUIData, SUITransferSUIPayloadV2, SUITransferTokenPayload } from '../types/wallet.sui.v2';
   
 export const SUIWrapper = {
     getTransactionByDigest,
@@ -206,7 +206,10 @@ export const SUIWrapper = {
     getMintedCollections,
     getMintedNFTOnCollection,
     mintCollection,
-    mintNFT
+    mintNFT,
+    queryNFT,
+    searchNFTsByOwner,
+    searchNFTs,
 }
 function assertSUIOnly(
     methodName: string,
@@ -315,5 +318,46 @@ async function mintNFT(
 
   const response = await v2Client.api.get('asset')!.post<
   IResponse<SUIMintNFTData>>(url,payload);
+  return response.data.data;
+}
+
+
+async function queryNFT(
+  chainConfig: ChainConfig<ChainTypes>,
+  v2Client:MirrorWorldAPIClientV2,
+  url:string
+): Promise<SUIQueryNFTData[]> {
+  assertSUIOnly('queryNFT', chainConfig);
+  const response = await v2Client.api.get('asset')!.get<IResponse<SUIQueryNFTData[]>>(url);
+  return response.data.data;
+}
+
+async function searchNFTsByOwner(
+  payload:SUISearchNFTsByOwnerPayload,
+  url:string,
+  chainConfig:ChainConfig<ChainTypes>,
+  v2Client:MirrorWorldAPIClientV2
+):Promise<SUIQueryNFTData[]>{
+  assertSUIOnly('mintCollection', chainConfig);
+
+  const response = await v2Client.api.get('asset')!.post<
+  IResponse<SUIQueryNFTData[]>>(url,payload);
+  return response.data.data;
+}
+
+async function searchNFTs(
+  payload:SUISearchNFTsPayload,
+  url:string,
+  chainConfig:ChainConfig<ChainTypes>,
+  v2Client:MirrorWorldAPIClientV2
+):Promise<SUIQueryNFTData[]>{
+  assertSUIOnly('mintCollection', chainConfig);
+
+  const distinctIds = [...new Set(payload.nft_object_ids)];
+  const deduplicatedPayload: SUISearchNFTsPayload = {
+    nft_object_ids: distinctIds,
+  };
+  const response = await v2Client.api.get('asset')!.post<
+  IResponse<SUIQueryNFTData[]>>(url,deduplicatedPayload);
   return response.data.data;
 }

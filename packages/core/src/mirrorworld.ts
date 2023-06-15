@@ -199,7 +199,7 @@ import {
   RegisterCollectionResultV2,
 } from './types/metadata.common.v2';
 import { string } from 'joi';
-import { SUIMintCollectionPayload, SUIMintNFTPayload, SUITransferSUIPayloadV2, SUITransferTokenPayload } from './types/wallet.sui.v2';
+import { SUIMintCollectionPayload, SUIMintNFTPayload, SUISearchNFTsByOwnerPayload, SUISearchNFTsPayload, SUITransferSUIPayloadV2, SUITransferTokenPayload } from './types/wallet.sui.v2';
 
 export class MirrorWorld {
   // System variables
@@ -1376,7 +1376,10 @@ export class MirrorWorld {
       getMintedCollections:this.suiGetMintedCollections.bind(this),
       getMintedNFTOnCollection:this.suiGetMintedNFTOnCollection.bind(this),
       mintCollection:this.suiMintCollection.bind(this),
-      mintNFT:this.suiMintNFT.bind(this)
+      mintNFT:this.suiMintNFT.bind(this),
+      queryNFT:this.suiQueryNFT.bind(this),
+      searchNFTsByOwner:this.suiSearchNFTsByOwner.bind(this),
+      searchNFTs:this.suiSearchNFTs.bind(this)
     });
     /** Wallet Service Methods for SUI */
     const Wallet = Object.freeze({
@@ -3453,6 +3456,24 @@ export class MirrorWorld {
     this.warnAuthenticated()
     let url = `/${this.base('asset')}/mint/nft`
     return await SUIWrapper.mintNFT(payload,url,this.chainConfig,this.v2)
+  }
+
+  private async suiQueryNFT(nft_object_id:string){
+    this.warnAuthenticated()
+    let url = `/${this.base('asset')}/nft/` + nft_object_id
+    return await SUIWrapper.getTokens(url,this.chainConfig,this.v2)
+  }
+
+  private async suiSearchNFTsByOwner(payload:SUISearchNFTsByOwnerPayload){
+    this.warnAuthenticated()
+    let url = `/${this.base('asset')}/nft/owner`
+    return await SUIWrapper.searchNFTsByOwner(payload,url,this.chainConfig,this.v2)
+  }
+
+  private async suiSearchNFTs(payload:SUISearchNFTsPayload){
+    this.warnAuthenticated()
+    let url = `/${this.base('asset')}/nft/mints`
+    return await SUIWrapper.searchNFTs(payload,url,this.chainConfig,this.v2)
   }
 
   private assertEVMOnly(methodName: string) {

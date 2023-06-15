@@ -82,3 +82,28 @@ export type SUIMintNFTData = {
   user_id: number;
   client_id: string;
 }
+
+export type SUIQueryNFTData = {
+  id: string;
+  url: string;
+  name: string;
+  description: string;
+  attributes: SUIQueryNFTValue[];
+  owner_address: string;
+  package_module: string;
+  package_module_class_name: string;
+  collection_package_id: string;
+}
+
+export type SUIQueryNFTValue = {
+    key:string;
+    value:string;
+}
+
+export type SUISearchNFTsByOwnerPayload = {
+  owner_address:string
+}
+
+export type SUISearchNFTsPayload = {
+  nft_object_ids:string[]
+}
