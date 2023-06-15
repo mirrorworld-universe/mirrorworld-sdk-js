@@ -1,5 +1,11 @@
 # @mirrorworld/web3.js
 
+## 2.6.0
+
+### Minor Changes
+
+- 181a960: Added 3 APIs onto SUI chain.
+
 ## 2.5.0
 
 ### Minor Changes
