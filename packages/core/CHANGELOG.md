@@ -1,5 +1,23 @@
 # @mirrorworld/web3.js
 
+## 2.5.0
+
+### Minor Changes
+
+- 5f882b5: Added APIs under 4 Asset functional modules.
+
+## 2.4.0
+
+### Minor Changes
+
+- 225dfd2: Added support for the SUI chain and implemented four interfaces for the wallet module on the SUI chain.
+
+## 2.3.0
+
+### Patch Changes
+
+- Added support for the SUI chain and implemented four interfaces for the wallet module on the SUI chain.
+
 ## 2.2.2
 
 ### Patch Changes

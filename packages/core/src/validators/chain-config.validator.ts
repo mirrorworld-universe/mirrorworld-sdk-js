@@ -55,7 +55,7 @@ export const chainConfigurationSchema = joi.object({
     .when('chain', {
       is: 'sui',
       then: joi
-        .valid('mainnet', 'devnet')
+        .valid('mainnet', 'testnet')
         .error(
           MirrorWorldSDKError.new(
             'INVALID_CHAIN_CONFIGURAITON_OPTIONS',

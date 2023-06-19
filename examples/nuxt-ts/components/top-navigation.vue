@@ -18,6 +18,15 @@
     >
       V2 EVM Routes
     </c-button>
+    <c-button
+      size="sm"
+      :as="NuxtLink"
+      to="/v2/sui"
+      rounded="none"
+      variant="outline"
+    >
+      V2 SUI Routes
+    </c-button>
   </c-h-stack>
 </template>
 
