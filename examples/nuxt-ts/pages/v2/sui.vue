@@ -48,6 +48,15 @@
           <c-wrap-item>
             <asset-mint-nft/>
           </c-wrap-item>
+          <c-wrap-item>
+            <asset-search-query-nft/>
+          </c-wrap-item>
+          <c-wrap-item>
+            <asset-search-search-nfts-by-owner/>
+          </c-wrap-item>
+          <c-wrap-item>
+            <asset-search-search-nfts/>
+          </c-wrap-item>
         </c-wrap>
       </c-stack>
       <c-stack
