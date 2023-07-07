@@ -239,6 +239,9 @@ export class MirrorWorld {
       auth,
     } = result.value;
     this._staging = staging;
+    console.log("staging:"+staging)
+    console.log("apiKey:"+apiKey)
+    console.log("env:"+env)
     this._apiKey = apiKey;
     this._env = env;
     this._chainConfig = chainConfig;
@@ -740,6 +743,14 @@ export class MirrorWorld {
 
   private get authView() {
     return `https://auth${this._staging ? '-staging' : ''}.mirrorworld.fun`;
+  }
+
+  private get walletUrl(){
+    return `https://auth-next${this._staging ? '-staging' : ''}.mirrorworld.fun/v1/assets/tokens`;
+  }
+
+  private get loginUrl(){
+    return `https://auth-next${this._staging ? '-staging' : ''}.mirrorworld.fun/v1/auth/login`;
   }
 
   /**
@@ -1417,9 +1428,6 @@ export class MirrorWorld {
     shouldAutoClose = false,
     isWholePath = false
   ): Promise<Window | undefined> {
-    if(path == '' && isWholePath){
-      path = "https://auth-next.mirrorworld.fun/v1/assets/tokens"
-    }
     console.log("open wallet method:"+this._uxMode)
     if (this._uxMode === 'popup') {
       return this.openPopupWallet(path,isWholePath);
@@ -1429,7 +1437,8 @@ export class MirrorWorld {
   }
 
   public async openWallet() : Promise<Window| undefined>{
-    return this.openWalletPage("",false,true);
+    let walletUrl = `${this.walletUrl}`
+    return this.openWalletPage(walletUrl,false,true);
   }
 
   /***
@@ -1497,7 +1506,7 @@ export class MirrorWorld {
 
         // 打开钱包授权弹窗，并返回此窗口对象
         const shouldAutoCloseAfterLogin = true;
-        authWindow = await this.openWalletPage('https://auth-next.mirrorworld.fun/v1/auth/login', shouldAutoCloseAfterLogin,true);
+        authWindow = await this.openWalletPage(`${this.loginUrl}`, shouldAutoCloseAfterLogin,true);
       } catch (e: any) {
         reject(e.message);
       }
