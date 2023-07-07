@@ -239,9 +239,6 @@ export class MirrorWorld {
       auth,
     } = result.value;
     this._staging = staging;
-    console.log("staging:"+staging)
-    console.log("apiKey:"+apiKey)
-    console.log("env:"+env)
     this._apiKey = apiKey;
     this._env = env;
     this._chainConfig = chainConfig;
