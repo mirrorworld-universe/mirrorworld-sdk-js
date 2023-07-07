@@ -18,7 +18,7 @@ import { canUseDom, isSafari } from './utils';
 import { animate } from 'motion';
 import { disableBodyScroll, enableBodyScroll } from 'body-scroll-lock';
 import { hideOthers } from 'aria-hidden';
-import { SUIWrapper } from './chain-wrapper/sui-wrapper'
+import { SUIWrapper } from './chain-wrapper/sui-wrapper';
 
 import {
   IBuySolanaNFTPayloadV2,
@@ -1378,7 +1378,6 @@ export class MirrorWorld {
     };
   }
 
-
   /** SUI SDK Methods */
   get SUI() {
     /** Asset Service Methods for SUI */
@@ -1393,15 +1392,14 @@ export class MirrorWorld {
     });
     /** Wallet Service Methods for SUI */
     const Wallet = Object.freeze({
-      getTransactionByDigest:this.suiGetTransactionByDigest.bind(this),
-      transferSUI:this.suiTransferSUI.bind(this),
-      transferToken:this.suiTransferToken.bind(this),
-      getTokens:this.suiGetTokens.bind(this)
+      getTransactionByDigest: this.suiGetTransactionByDigest.bind(this),
+      transferSUI: this.suiTransferSUI.bind(this),
+      transferToken: this.suiTransferToken.bind(this),
+      getTokens: this.suiGetTokens.bind(this),
     });
     /** Metadata Service Methods for Polygon */
-    const Metadata = Object.freeze({
-    });
-    
+    const Metadata = Object.freeze({});
+
     return {
       Asset,
       Wallet,
@@ -1442,15 +1440,15 @@ export class MirrorWorld {
       try {
         // 定义 authWindow 变量并初始化为 undefined
         let authWindow: Window | undefined = undefined;
-  
+
         // 定义处理钱包授权弹窗消息的回调函数
         const handleWalletUIMessage = async (event: MessageEvent) => {
           const { deserialize } = await import('bson');
 
-          console.log("raw result:",event)
+          console.log('raw result:', event);
           if (event.data?.name === 'mw:auth:login') {
             const payload = deserialize(event.data.payload);
-            console.log("12121212",deserialize(event.data.payload));
+            console.log('12121212', deserialize(event.data.payload));
             console.debug('auth:payload ===>', payload);
             if (payload.access_token && payload.refresh_token) {
               // 更新用户刷新令牌
@@ -1461,7 +1459,7 @@ export class MirrorWorld {
               });
               // 发送请求获取用户信息
               await this.fetchUser();
-              console.log("user:",this.user)
+              console.log('user:', this.user);
               // 如果可以使用浏览器本地存储，则将刷新令牌保存在本地
               if (this._storageKey && canUseDom && this.userRefreshToken) {
                 const internalRefreshTokenKey = `${this._storageKey}:refresh`;
@@ -1471,8 +1469,8 @@ export class MirrorWorld {
                 );
               }
               // 返回用户信息和刷新令牌
-              console.log("access:"+payload.access_token)
-              console.log("refresh:"+payload.refresh_token)
+              console.log('access:' + payload.access_token);
+              console.log('refresh:' + payload.refresh_token);
               resolve({
                 user: this.user,
                 refreshToken: this.userRefreshToken!,
@@ -1489,14 +1487,14 @@ export class MirrorWorld {
             windowEmitter.emit('close');
           }
         };
-  
+
         // 注册钱包授权弹窗消息的监听器
         if (this._uxMode === 'embedded') {
           windowEmitter.on('message', handleWalletUIMessage);
         } else {
           window.addEventListener('message', handleWalletUIMessage);
         }
-  
+
         // 打开钱包授权弹窗，并返回此窗口对象
         const shouldAutoCloseAfterLogin = true;
         authWindow = await this.openWalletPage('https://auth-next.mirrorworld.fun/v1/auth/login', shouldAutoCloseAfterLogin,true);
@@ -1505,7 +1503,7 @@ export class MirrorWorld {
       }
     });
   }
-
+  
   private getApprovalToken = (payload: ICreateActionPayload) =>
     new Promise<{ action: IAction; authorization_token: string | undefined }>(
       async (resolve, reject) => {
@@ -2637,10 +2635,14 @@ export class MirrorWorld {
       console.warn(`User is null, maybe not logged in. Could potentially fail`);
     }
     if (!this.isLoggedIn) {
-      console.warn(`isLoggedIn is false, maybe is not logged in. Could potentially fail`);
+      console.warn(
+        `isLoggedIn is false, maybe is not logged in. Could potentially fail`
+      );
     }
     if (!this.__secretAccessKey) {
-      console.warn(`__secretAccessKey is null, maybe User is not logged in. Could potentially fail`);
+      console.warn(
+        `__secretAccessKey is null, maybe User is not logged in. Could potentially fail`
+      );
     }
   }
   /**
@@ -3367,52 +3369,80 @@ export class MirrorWorld {
     return response.data.data;
   }
 
-  private async suiGetTransactionByDigest(digest:string){
+  private async suiGetTransactionByDigest(digest: string) {
     this.warnAuthenticated();
-    let url = `/${this.base('wallet')}/transactions/${digest}`;
-    return await SUIWrapper.getTransactionByDigest(this.chainConfig,this.v2,url)
+    const url = `/${this.base('wallet')}/transactions/${digest}`;
+    return await SUIWrapper.getTransactionByDigest(
+      this.chainConfig,
+      this.v2,
+      url
+    );
   }
 
-  private async suiTransferSUI(payload: SUITransferSUIPayloadV2){
+  private async suiTransferSUI(payload: SUITransferSUIPayloadV2) {
     this.warnAuthenticated();
-    let url = `/${this.base('wallet')}/transfer-sui`;
-    return await SUIWrapper.transferSUI(payload,url,this.chainConfig,this.v2)
+    const url = `/${this.base('wallet')}/transfer-sui`;
+    return await SUIWrapper.transferSUI(
+      payload,
+      url,
+      this.chainConfig,
+      this.v2
+    );
   }
 
-  private async suiTransferToken(payload:SUITransferTokenPayload){
-    this.warnAuthenticated()
-    let url = `/${this.base('wallet')}/transfer-token`
-    return await SUIWrapper.transferToken(payload,url,this.chainConfig,this.v2)
+  private async suiTransferToken(payload: SUITransferTokenPayload) {
+    this.warnAuthenticated();
+    const url = `/${this.base('wallet')}/transfer-token`;
+    return await SUIWrapper.transferToken(
+      payload,
+      url,
+      this.chainConfig,
+      this.v2
+    );
   }
 
-  private async suiGetTokens(){
-    this.warnAuthenticated()
-    let url = `/${this.base('wallet')}/tokens`
-    return await SUIWrapper.getTokens(url,this.chainConfig,this.v2)
+  private async suiGetTokens() {
+    this.warnAuthenticated();
+    const url = `/${this.base('wallet')}/tokens`;
+    return await SUIWrapper.getTokens(url, this.chainConfig, this.v2);
   }
 
-  private async suiGetMintedCollections(){
-    this.warnAuthenticated()
-    let url = `/${this.base('asset')}/mint/get-collections`
-    return await SUIWrapper.getMintedCollections(url,this.chainConfig,this.v2)
+  private async suiGetMintedCollections() {
+    this.warnAuthenticated();
+    const url = `/${this.base('asset')}/mint/get-collections`;
+    return await SUIWrapper.getMintedCollections(
+      url,
+      this.chainConfig,
+      this.v2
+    );
   }
 
-  private async suiGetMintedNFTOnCollection(collection_address:string){
-    this.warnAuthenticated()
-    let url = `/${this.base('asset')}/mint/get-collection-nfts/` + collection_address
-    return await SUIWrapper.getMintedNFTOnCollection(url,this.chainConfig,this.v2)
+  private async suiGetMintedNFTOnCollection(collection_address: string) {
+    this.warnAuthenticated();
+    const url =
+      `/${this.base('asset')}/mint/get-collection-nfts/` + collection_address;
+    return await SUIWrapper.getMintedNFTOnCollection(
+      url,
+      this.chainConfig,
+      this.v2
+    );
   }
 
-  private async suiMintCollection(payload:SUIMintCollectionPayload){
-    this.warnAuthenticated()
-    let url = `/${this.base('asset')}/mint/collection`
-    return await SUIWrapper.mintCollection(payload,url,this.chainConfig,this.v2)
+  private async suiMintCollection(payload: SUIMintCollectionPayload) {
+    this.warnAuthenticated();
+    const url = `/${this.base('asset')}/mint/collection`;
+    return await SUIWrapper.mintCollection(
+      payload,
+      url,
+      this.chainConfig,
+      this.v2
+    );
   }
 
-  private async suiMintNFT(payload:SUIMintNFTPayload){
-    this.warnAuthenticated()
-    let url = `/${this.base('asset')}/mint/nft`
-    return await SUIWrapper.mintNFT(payload,url,this.chainConfig,this.v2)
+  private async suiMintNFT(payload: SUIMintNFTPayload) {
+    this.warnAuthenticated();
+    const url = `/${this.base('asset')}/mint/nft`;
+    return await SUIWrapper.mintNFT(payload, url, this.chainConfig, this.v2);
   }
 
   private async suiQueryNFT(nft_object_id:string){

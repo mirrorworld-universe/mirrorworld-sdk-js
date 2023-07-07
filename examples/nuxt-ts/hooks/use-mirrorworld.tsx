@@ -49,11 +49,11 @@ const autoLoginCredentials = canUseDom
 let __mirrorworld: MirrorWorld;
 
 function createMirrorWorld() {
-  console.log("=======createMirrorWorld=======");
+  console.log('=======createMirrorWorld=======');
   return new MirrorWorld({
     // apiKey: "mw_4UBrXhk4sCp40pMO98FWk8eMkbGpk5dyMKB",
     // apiKey: 'mw_oEW0ZFiiPewhvktSKU1uJi3ZqyfTSHLtzd3',
-    apiKey:"mw_TaIB0eljYJZXsXrxpdOXvAkA4XyCuUGxNWp",
+    apiKey: 'mw_TaIB0eljYJZXsXrxpdOXvAkA4XyCuUGxNWp',
     env: ClusterEnvironment.testnet,
     // staging: true,
     chainConfig: __chainConfig,
