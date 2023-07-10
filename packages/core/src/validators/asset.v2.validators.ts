@@ -910,6 +910,18 @@ export const BaseEVMAuctionSchemaV2 = joi.object<IBaseEVMAuctionPayloadV2>({
         )
       )
     ),
+  from_wallet_address: joi
+    .string()
+    .optional()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_NFT_AUCTION_PAYLOAD',
+        toErrorMessage(
+          'INVALID_NFT_AUCTION_PAYLOAD',
+          '`from_wallet_address` should be a valid evm address'
+        )
+      )
+    ),
 });
 
 export const BuyEVMNFTSchemaV2 = BaseEVMAuctionSchemaV2;
@@ -1002,6 +1014,18 @@ export const TransferEVMNFTSchemaV2 = joi.object<ITransferEVMNFTPayloadV2>({
         toErrorMessage(
           'INVALID_TRANSFER_NFT_PAYLOAD',
           '`to_wallet_address` should be a valid string'
+        )
+      )
+    ),
+  from_wallet_address: joi
+    .string()
+    .optional()
+    .error(
+      MirrorWorldSDKError.new(
+        'INVALID_TRANSFER_NFT_PAYLOAD',
+        toErrorMessage(
+          'INVALID_TRANSFER_NFT_PAYLOAD',
+          '`from_wallet_address` should be a valid evm address'
         )
       )
     ),
@@ -1265,7 +1289,6 @@ export const MintEVMNFTToCollectionSchemaV2: joi.ObjectSchema<MintEVMNFTToCollec
       ),
     to_wallet_address: joi
       .string()
-      .uri()
       .optional()
       .error(
         MirrorWorldSDKError.new(
@@ -1312,15 +1335,14 @@ export const VerifyEVMMintConfigSchemaV2: joi.ObjectSchema<VerifyEVMMintConfigPa
 export const SearchEVMNFTsByOwnerAddressesSchemaV2 =
   joi.object<SearchEVMNFTsByOwnerAddressesPayloadV2>({
     owner_address: joi
-      .array()
-      .items(joi.string())
+      .string()
       .required()
       .error(
         MirrorWorldSDKError.new(
           'INVALID_SEARCH_EVM_NFT_PAYLOAD',
           toErrorMessage(
             'INVALID_SEARCH_EVM_NFT_PAYLOAD',
-            '`owner_address` should be a valid array of strings'
+            '`owner_address` should be a string'
           )
         )
       ),

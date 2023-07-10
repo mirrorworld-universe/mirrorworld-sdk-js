@@ -60,8 +60,20 @@ jobs:
 
       - name: Setup CI Git User
         run: |
-          git config --global user.name "codebender828"
-          git config --global user.email "jbakebwa@163.com"
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Configure npm
+        run: |
+          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc
+          cat .npmrc
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Sleep for 60 seconds
+        run: sleep 60s
+        shell: bash
 
       - name: Create Release Pull Request
         uses: changesets/action@v1
@@ -76,9 +88,8 @@ jobs:
       - name: Release to dev tag
         if: steps.changesets.outputs.published != 'true'
         run: |
-          git checkout main
           yarn changeset version --snapshot dev
           yarn changeset publish --tag dev
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

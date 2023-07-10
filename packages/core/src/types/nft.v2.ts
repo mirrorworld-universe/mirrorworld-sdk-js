@@ -117,7 +117,7 @@ export interface SolanaNFTInfo {
   update_authority: string;
 }
 
-export interface Attribute {
+interface Attribute {
   trait_type: string;
   value: string;
 }

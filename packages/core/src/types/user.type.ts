@@ -13,6 +13,7 @@ export interface IUser {
 export interface Wallet {
   eth_address: string;
   sol_address: string;
+  sui_address:string;
 }
 
 export interface UserWithWallet extends IUser {

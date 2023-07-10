@@ -18,6 +18,7 @@ import { canUseDom, isSafari } from './utils';
 import { animate } from 'motion';
 import { disableBodyScroll, enableBodyScroll } from 'body-scroll-lock';
 import { hideOthers } from 'aria-hidden';
+import { SUIWrapper } from './chain-wrapper/sui-wrapper';
 
 import {
   IBuySolanaNFTPayloadV2,
@@ -123,6 +124,7 @@ import {
   SearchSolanaNFTsByMintAddressesPayloadV2,
   SearchSolanaNFTsByOwnersPayloadV2,
   SearchSolanaNFTsByUpdateAuthoritiesPayloadV2,
+  SearchSolanaNFTsResponseV2,
   SolanaNFT,
   SolanaNFTDevnet,
   SolanaNFTListingV2,
@@ -135,7 +137,9 @@ import {
   CreateEVMCollectionResultV2,
   CreateEVMCollectionV2Payload,
   EVMCollectionV2,
+  EVMNFTListingTransactionV2,
   EVMNFTListingV2,
+  EvmWalletRequest,
   MintEVMNFTToCollectionResultV2,
   MintEVMNFTToCollectionV2Payload,
   SearchEVMNFTsByOwnerAddressesPayloadV2,
@@ -194,6 +198,8 @@ import {
   RegisterCollectionPayloadV2,
   RegisterCollectionResultV2,
 } from './types/metadata.common.v2';
+import { string } from 'joi';
+import { SUIMintCollectionPayload, SUIMintNFTPayload, SUISearchNFTsByOwnerPayload, SUISearchNFTsPayload, SUITransferSUIPayloadV2, SUITransferTokenPayload } from './types/wallet.sui.v2';
 
 export class MirrorWorld {
   // System variables
@@ -323,7 +329,8 @@ export class MirrorWorld {
 
   async openEmbeddedWallet(
     path = '/',
-    shouldAutoClose = false
+    shouldAutoClose = false,
+    useWholePath = false
   ): Promise<Window | undefined> {
     const isMobile = window.innerWidth < 768;
     const iframeMobileStyles: CSS.Properties = {
@@ -404,7 +411,12 @@ export class MirrorWorld {
     console.debug('mounting iframe');
     const iframe = document.createElement('iframe');
     Object.assign(iframe.style, iframeStyles);
-    iframe.src = `${this.authView}${path}`;
+    if(useWholePath){
+      iframe.src = path;
+    }else{
+      iframe.src = `${this.authView}${path}`;
+    }
+    
     iframe.id = 'mirrorworld-wallet-ui';
     portalBody.appendChild(iframe);
 
@@ -529,20 +541,6 @@ export class MirrorWorld {
     return this._apiKey;
   }
 
-  /** Get instance's environment */
-  get clusterEnv(): ClusterEnvironment {
-    return this._env;
-  }
-
-  /** Get instance's environment */
-  get network(): 'mainnet' | 'devnet' {
-    return this._env === ClusterEnvironment.mainnet
-      ? 'mainnet'
-      : this._env === ClusterEnvironment.testnet
-      ? 'devnet'
-      : 'devnet';
-  }
-
   get chainConfig(): ChainConfig<ChainTypes> {
     return this._chainConfig;
   }
@@ -596,7 +594,7 @@ export class MirrorWorld {
     event: T,
     payload: MirrorWorldEvents[T]
   ): void {
-    return emitter.emit(event, payload);
+    emitter.emit(event, payload);
   }
 
   private defineInternalListeners() {
@@ -605,7 +603,7 @@ export class MirrorWorld {
     });
   }
 
-  private useCredentials({ accessToken }: { accessToken: string }) {
+  public useCredentials({ accessToken }: { accessToken: string }) {
     const createAccessTokenInterceptor =
       (accessToken: string) => (config: AxiosRequestConfig) => {
         return {
@@ -618,7 +616,8 @@ export class MirrorWorld {
         };
       };
 
-    const preferredCredential = this.__secretAccessKey || accessToken;
+    // const preferredCredential = this.__secretAccessKey || accessToken;
+    const preferredCredential = accessToken;
     const serviceCredentialsInterceptorId = this.api.interceptors.request.use(
       createAccessTokenInterceptor(preferredCredential)
     );
@@ -743,12 +742,20 @@ export class MirrorWorld {
     return `https://auth${this._staging ? '-staging' : ''}.mirrorworld.fun`;
   }
 
+  private get walletUrl(){
+    return `https://auth-next${this._staging ? '-staging' : ''}.mirrorworld.fun/v1/assets/tokens`;
+  }
+
+  private get loginUrl(){
+    return `https://auth-next${this._staging ? '-staging' : ''}.mirrorworld.fun/v1/auth/login`;
+  }
+
   /**
    * Opens wallet window
    * @param path
    * @private
    */
-  private async openPopupWallet(path?: string): Promise<Window | undefined> {
+  private async openPopupWallet(path?: string,isWholePath?:boolean): Promise<Window | undefined> {
     if (!canUseDom) {
       console.warn(`Auth Window Login is only available in the Browser.`);
     }
@@ -776,9 +783,13 @@ export class MirrorWorld {
     const systemZoom = width / window.screen.availWidth;
     const left = (width - w) / 2 / systemZoom + dualScreenLeft;
     const top = (height - h) / 2 / systemZoom + dualScreenTop;
+    let realPath = `${this.authView}${path}`
+    if(isWholePath){
+      realPath = `${path}`;
+    }
     const authWindow =
       (await window.open(
-        `${this.authView}${path}`,
+        realPath,
         '_blank',
         `
         popup=true
@@ -840,7 +851,7 @@ export class MirrorWorld {
       queryAssetMintsStatus: this.querySolanaAssetMintsStatus.bind(this),
       /** Creates a new verified collection on Solana  */
       createVerifiedCollection: this.createSolanaVerifiedCollection.bind(this),
-      /** Creates a new verified collection on Solana  */
+      /** Gets the collection's created by an authenticated user.  */
       getCollections: this.getSolanaCollections.bind(this),
       /** Queries the Solana NFTs minted on a collection  */
       getCollectionNFTs: this.getSolanaCollectionNFTs.bind(this),
@@ -924,12 +935,20 @@ export class MirrorWorld {
     const Asset = Object.freeze({
       /** Purchase NFT on Ethereum Marketplace Address */
       buyNFT: this.buyEVMNFT.bind(this),
-      /** Purchase NFT on Ethereum Marketplace Address */
+      /** List NFT on Ethereum Marketplace Address */
       listNFT: this.listEVMNFT.bind(this),
       /** Cancel NFT Listing on Ethereum Marketplace Address */
       cancelListing: this.cancelEVMNFTListing.bind(this),
       /**  Transfer Ethereum NFT to another address */
       transferNFT: this.transferEVMNFT.bind(this),
+      /** Create Purchase NFT transaction on Ethereum Marketplace Address */
+      buyNFTTransaction: this.buyEVMNFTTransaction.bind(this),
+      /** Create List NFT transaction on Ethereum Marketplace Address */
+      listNFTTransaction: this.listEVMNFTTransaction.bind(this),
+      /** Create Cancel NFT Listing transaction on Ethereum Marketplace Address */
+      cancelListingTransaction: this.cancelEVMNFTListingTransaction.bind(this),
+      /** Create Transfer Ethereum NFT to another address transaction */
+      transferNFTTransaction: this.transferNFTTransaction.bind(this),
       /** Create a new NFT Marketplace on Ethereum */
       createMarketplace: this.createEVMMarketplace.bind(this),
       /** Updates a sn existing NFT Marketplace on Ethereum */
@@ -1068,12 +1087,20 @@ export class MirrorWorld {
     const Asset = Object.freeze({
       /** Purchase NFT on BNB Chain Marketplace Address */
       buyNFT: this.buyEVMNFT.bind(this),
-      /** Purchase NFT on BNB Chain Marketplace Address */
+      /** List NFT on BNB Chain Marketplace Address */
       listNFT: this.listEVMNFT.bind(this),
       /** Cancel NFT Listing on BNB Chain Marketplace Address */
       cancelListing: this.cancelEVMNFTListing.bind(this),
       /**  Transfer BNB Chain NFT to another address */
       transferNFT: this.transferEVMNFT.bind(this),
+      /** Create Purchase NFT transaction on Ethereum Marketplace Address */
+      buyNFTTransaction: this.buyEVMNFTTransaction.bind(this),
+      /** Create List NFT transaction on Ethereum Marketplace Address */
+      listNFTTransaction: this.listEVMNFTTransaction.bind(this),
+      /** Create Cancel NFT Listing transaction on Ethereum Marketplace Address */
+      cancelListingTransaction: this.cancelEVMNFTListingTransaction.bind(this),
+      /** Create Transfer Ethereum NFT to another address transaction */
+      transferNFTTransaction: this.transferNFTTransaction.bind(this),
       /** Create a new NFT Marketplace on BNB Chain */
       createMarketplace: this.createEVMMarketplace.bind(this),
       /** Updates a sn existing NFT Marketplace on BNB Chain */
@@ -1212,12 +1239,20 @@ export class MirrorWorld {
     const Asset = Object.freeze({
       /** Purchase NFT on Polygon Marketplace Address */
       buyNFT: this.buyEVMNFT.bind(this),
-      /** Purchase NFT on Polygon Marketplace Address */
+      /** List NFT on Polygon Marketplace Address */
       listNFT: this.listEVMNFT.bind(this),
       /** Cancel NFT Listing on Polygon Marketplace Address */
       cancelListing: this.cancelEVMNFTListing.bind(this),
       /**  Transfer Polygon NFT to another address */
       transferNFT: this.transferEVMNFT.bind(this),
+      /** Create Purchase NFT transaction on Ethereum Marketplace Address */
+      buyNFTTransaction: this.buyEVMNFTTransaction.bind(this),
+      /** Create List NFT transaction on Ethereum Marketplace Address */
+      listNFTTransaction: this.listEVMNFTTransaction.bind(this),
+      /** Create Cancel NFT Listing transaction on Ethereum Marketplace Address */
+      cancelListingTransaction: this.cancelEVMNFTListingTransaction.bind(this),
+      /** Create Transfer Ethereum NFT to another address transaction */
+      transferNFTTransaction: this.transferNFTTransaction.bind(this),
       /** Create a new NFT Marketplace on Polygon */
       createMarketplace: this.createEVMMarketplace.bind(this),
       /** Updates a sn existing NFT Marketplace on Polygon */
@@ -1343,6 +1378,7 @@ export class MirrorWorld {
        * */
       registerCollection: this.registerCollection.bind(this),
     });
+
     return {
       Asset,
       Wallet,
@@ -1350,81 +1386,130 @@ export class MirrorWorld {
     };
   }
 
+  /** SUI SDK Methods */
+  get SUI() {
+    /** Asset Service Methods for SUI */
+    const Asset = Object.freeze({
+      getMintedCollections:this.suiGetMintedCollections.bind(this),
+      getMintedNFTOnCollection:this.suiGetMintedNFTOnCollection.bind(this),
+      mintCollection:this.suiMintCollection.bind(this),
+      mintNFT:this.suiMintNFT.bind(this),
+      queryNFT:this.suiQueryNFT.bind(this),
+      searchNFTsByOwner:this.suiSearchNFTsByOwner.bind(this),
+      searchNFTs:this.suiSearchNFTs.bind(this)
+    });
+    /** Wallet Service Methods for SUI */
+    const Wallet = Object.freeze({
+      getTransactionByDigest: this.suiGetTransactionByDigest.bind(this),
+      transferSUI: this.suiTransferSUI.bind(this),
+      transferToken: this.suiTransferToken.bind(this),
+      getTokens: this.suiGetTokens.bind(this),
+    });
+    /** Metadata Service Methods for Polygon */
+    const Metadata = Object.freeze({});
+
+    return {
+      Asset,
+      Wallet,
+      Metadata,
+    };
+  }
   /**
    * Opens wallet UI
    * @param path
    * @param shouldAutoClose
    * @returns
    */
-  public async openWallet(
+  public async openWalletPage(
     path = '',
-    shouldAutoClose = false
+    shouldAutoClose = false,
+    isWholePath = false
   ): Promise<Window | undefined> {
+    console.log("open wallet method:"+this._uxMode)
     if (this._uxMode === 'popup') {
-      return this.openPopupWallet(path);
+      return this.openPopupWallet(path,isWholePath);
     } else if (this._uxMode === 'embedded') {
-      return this.openEmbeddedWallet(path, shouldAutoClose);
+      return this.openEmbeddedWallet(path, shouldAutoClose,isWholePath);
     }
+  }
+
+  public async openWallet() : Promise<Window| undefined>{
+    let walletUrl = `${this.walletUrl}`
+    return this.openWalletPage(walletUrl,false,true);
   }
 
   /***
    * Logs in a user. Opens a popup window for the login operation
    */
-  login(): Promise<{
-    user: IUser;
-    refreshToken: string;
-  }> {
-    return new Promise<{ user: IUser; refreshToken: string }>(
-      async (resolve, reject) => {
-        try {
-          let authWindow: Window | undefined = undefined;
-          const handleWalletUIMessage = async (event: MessageEvent) => {
-            const { deserialize } = await import('bson');
-            if (event.data?.name === 'mw:auth:login') {
-              const payload = deserialize(event.data.payload);
-              console.debug('auth:payload ===>', payload);
-              if (payload.access_token && payload.refresh_token) {
-                this.userRefreshToken = payload.refresh_token;
-                this.useCredentials({
-                  accessToken: payload.access_token,
-                });
-                await this.fetchUser();
-                if (this._storageKey && canUseDom && this.userRefreshToken) {
-                  const internalRefreshTokenKey = `${this._storageKey}:refresh`;
-                  localStorage.setItem(
-                    internalRefreshTokenKey,
-                    this.userRefreshToken
-                  );
-                }
-                resolve({
-                  user: this.user,
-                  refreshToken: this.userRefreshToken!,
-                });
-                if (this._uxMode === 'popup') {
-                  authWindow && authWindow.close();
-                } else {
-                  windowEmitter.emit('close');
-                }
+  login(): Promise<{ user: any; refreshToken: string }> {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // 定义 authWindow 变量并初始化为 undefined
+        let authWindow: Window | undefined = undefined;
+
+        // 定义处理钱包授权弹窗消息的回调函数
+        const handleWalletUIMessage = async (event: MessageEvent) => {
+          const { deserialize } = await import('bson');
+
+          console.log('raw result:', event);
+          if (event.data?.name === 'mw:auth:login') {
+            const payload = deserialize(event.data.payload);
+            console.log('12121212', deserialize(event.data.payload));
+            console.debug('auth:payload ===>', payload);
+            if (payload.access_token && payload.refresh_token) {
+              // 更新用户刷新令牌
+              this.userRefreshToken = payload.refresh_token;
+              // 使用新的访问令牌更新凭据
+              this.useCredentials({
+                accessToken: payload.access_token,
+              });
+              // 发送请求获取用户信息
+              await this.fetchUser();
+              console.log('user:', this.user);
+              // 如果可以使用浏览器本地存储，则将刷新令牌保存在本地
+              if (this._storageKey && canUseDom && this.userRefreshToken) {
+                const internalRefreshTokenKey = `${this._storageKey}:refresh`;
+                localStorage.setItem(
+                  internalRefreshTokenKey,
+                  this.userRefreshToken
+                );
+              }
+              // 返回用户信息和刷新令牌
+              console.log('access:' + payload.access_token);
+              console.log('refresh:' + payload.refresh_token);
+              resolve({
+                user: this.user,
+                refreshToken: this.userRefreshToken!,
+              });
+              // 关闭钱包授权弹窗
+              if (this._uxMode === 'popup') {
+                authWindow && authWindow.close();
+              } else {
+                windowEmitter.emit('close');
               }
             }
-            if (event.data.name === 'mw:auth:close') {
-              windowEmitter.emit('close');
-            }
-          };
-          if (this._uxMode === 'embedded') {
-            windowEmitter.on('message', handleWalletUIMessage);
-          } else {
-            window.addEventListener('message', handleWalletUIMessage);
           }
-          const shouldAutoCloseAfterLogin = true;
-          authWindow = await this.openWallet('', shouldAutoCloseAfterLogin);
-        } catch (e: any) {
-          reject(e.message);
-        }
-      }
-    );
-  }
+          if (event.data.name === 'mw:auth:close') {
+            windowEmitter.emit('close');
+          }
+        };
 
+        // 注册钱包授权弹窗消息的监听器
+        if (this._uxMode === 'embedded') {
+          windowEmitter.on('message', handleWalletUIMessage);
+        } else {
+          window.addEventListener('message', handleWalletUIMessage);
+        }
+
+        // 打开钱包授权弹窗，并返回此窗口对象
+        const shouldAutoCloseAfterLogin = true;
+        authWindow = await this.openWalletPage(`${this.loginUrl}`, shouldAutoCloseAfterLogin,true);
+      } catch (e: any) {
+        reject(e.message);
+      }
+    });
+  }
+  
   private getApprovalToken = (payload: ICreateActionPayload) =>
     new Promise<{ action: IAction; authorization_token: string | undefined }>(
       async (resolve, reject) => {
@@ -1484,7 +1569,7 @@ export class MirrorWorld {
             window.addEventListener('message', handleApprovalEvent);
           }
 
-          approvalWindow = await this.openWallet(approvalPath);
+          approvalWindow = await this.openWalletPage(approvalPath);
         } catch (e: any) {
           reject(e.message);
         }
@@ -1977,11 +2062,9 @@ export class MirrorWorld {
   /**
    * Searches Solana NFTs by Owner Addresses
    */
-  private async searchSolanaNFTsByOwnerAddresses<
-    T extends ChainConfig<SolanaChain>['network']
-  >(
+  private async searchSolanaNFTsByOwnerAddresses(
     payload: SearchSolanaNFTsByOwnersPayloadV2
-  ): Promise<T extends 'devnet' ? SolanaNFTDevnet : SolanaNFT> {
+  ): Promise<SearchSolanaNFTsResponseV2> {
     assertSolanaOnly('searchSolanaNFTsByOwnerAddresses', this.chainConfig);
     const result = SearchSolanaNFTsByOwnerAddressesSchemaV2.validate(payload);
     if (result.error) {
@@ -1992,10 +2075,9 @@ export class MirrorWorld {
         `[MirrorWorld:searchSolanaNFTsByOwnerAddresses]: "searchSolanaNFTsByOwnerAddresses" is a long-running task on Solana devnet and may time. We're currently working to improve its performance.`
       );
     }
-    const response = await this.asset.post<IResponse<any>>(
-      `/${this.base('asset')}/nft/owners`,
-      result.value
-    );
+    const response = await this.asset.post<
+      IResponse<SearchSolanaNFTsResponseV2>
+    >(`/${this.base('asset')}/nft/owners`, result.value);
     return response.data.data;
   }
 
@@ -2053,6 +2135,39 @@ export class MirrorWorld {
     return response.data.data;
   }
 
+  private async buyEVMNFTTransaction(
+    payload: IBuyEVMNFTPayloadV2
+  ): Promise<EvmWalletRequest> {
+    assertEVMOnly('buyEVMNFT', this.chainConfig);
+    const result = BuyEVMNFTSchemaV2.validate(payload);
+    if (result.error) {
+      throw result.error;
+    }
+    if (!(window as Window & { ethereum?: any })?.ethereum) {
+      throw new Error('Ethereum provider is not defined');
+    }
+    if (!result.value.from_wallet_address) {
+      throw new Error('from_wallet_address is required');
+    }
+
+    const { data } = await this.asset.post<
+      IResponse<EVMNFTListingTransactionV2>
+    >(`/${this.base('asset')}/auction/buy/transaction`, result.value);
+
+    return (window as Window & { ethereum?: any }).ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [
+        {
+          from: data.data.tx?.from, // The user's active address.
+          to: data.data.tx?.to,
+          data: data.data.tx?.data,
+          value: data.data.tx?.value?.hex,
+          gas: '100000',
+        },
+      ],
+    });
+  }
+
   /**
    * List NFT on EVM Marketplace Address
    */
@@ -2083,6 +2198,61 @@ export class MirrorWorld {
       }
     );
     return response.data.data;
+  }
+
+  private async listEVMNFTTransaction(
+    payload: IListEVMNFTPayloadV2
+  ): Promise<EVMNFTListingV2 | EvmWalletRequest> {
+    assertEVMOnly('listEVMNFT', this.chainConfig);
+    const result = ListEVMNFTSchemaV2.validate(payload);
+    if (result.error) {
+      throw result.error;
+    }
+    if (!(window as Window & { ethereum?: any })?.ethereum) {
+      throw new Error('Ethereum provider is not defined');
+    }
+    if (!result.value.from_wallet_address) {
+      throw new Error('from_wallet_address is required');
+    }
+    const { data } = await this.asset.post<
+      IResponse<EVMNFTListingTransactionV2>
+    >(`/${this.base('asset')}/auction/list/transaction`, result.value);
+    if (data.data.type === 'approval') {
+      return (window as Window & { ethereum?: any }).ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [
+          {
+            from: data.data.tx?.from, // The user's active address.
+            to: data.data.tx?.to, // Required except during contract publications.
+            data: data.data.tx?.data,
+            gas: '100000',
+          },
+        ],
+      });
+    }
+
+    const signature = await this.signMessage(
+      result.value.from_wallet_address,
+      data.data.order_msg as string
+    );
+
+    const { data: submitData } = await this.asset.post<
+      IResponse<EVMNFTListingV2>
+    >(`/${this.base('asset')}/auction/list/submit`, {
+      action_id: data.data.action_id,
+      signature,
+    });
+
+    return submitData.data;
+  }
+
+  private async signMessage(account: string, message: string) {
+    const params = [account, message];
+    const method = 'eth_signTypedData_v4';
+    return (window as Window & { ethereum?: any }).ethereum.request({
+      method: method,
+      params: params,
+    });
   }
 
   /**
@@ -2117,6 +2287,45 @@ export class MirrorWorld {
     return response.data.data;
   }
 
+  private async cancelEVMNFTListingTransaction(
+    payload: ICancelListingEVMPayloadV2
+  ): Promise<EVMNFTListingV2> {
+    assertEVMOnly('cancelEVMNFTListing', this.chainConfig);
+    const result = CancelEVMNFTListingSchemaV2.validate(payload);
+    if (result.error) {
+      throw result.error;
+    }
+    if (!(window as Window & { ethereum?: any })?.ethereum) {
+      throw new Error('Ethereum provider is not defined');
+    }
+    if (!result.value.from_wallet_address) {
+      throw new Error('from_wallet_address is required');
+    }
+    const { data } = await this.asset.post<
+      IResponse<EVMNFTListingTransactionV2>
+    >(`/${this.base('asset')}/auction/cancel/transaction`, result.value);
+
+    if (data.data.type === 'cancel') {
+      await (window as Window & { ethereum?: any }).ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [
+          {
+            from: data.data.tx?.from, // The user's active address.
+            to: data.data.tx?.to, // Required except during contract publications.
+            data: data.data.tx?.data,
+            gas: '100000',
+          },
+        ],
+      });
+    }
+
+    const { data: submitData } = await this.asset.post<
+      IResponse<EVMNFTListingV2>
+    >(`/${this.base('asset')}/auction/cancel/submit`, result.value);
+
+    return submitData.data;
+  }
+
   /**
    * Transfer EVM NFT to another address
    */
@@ -2147,6 +2356,39 @@ export class MirrorWorld {
       }
     );
     return response.data.data;
+  }
+
+  private async transferNFTTransaction(
+    payload: ITransferEVMNFTPayloadV2
+  ): Promise<EvmWalletRequest> {
+    assertEVMOnly('buyEVMNFT', this.chainConfig);
+    const result = BuyEVMNFTSchemaV2.validate(payload);
+    if (result.error) {
+      throw result.error;
+    }
+    if (!(window as Window & { ethereum?: any })?.ethereum) {
+      throw new Error('Ethereum provider is not defined');
+    }
+    if (!result.value.from_wallet_address) {
+      throw new Error('from_wallet_address is required');
+    }
+
+    const { data } = await this.asset.post<
+      IResponse<EVMNFTListingTransactionV2>
+    >(`/${this.base('asset')}/auction/transfer/transaction`, result.value);
+
+    return (window as Window & { ethereum?: any }).ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [
+        {
+          from: data.data.tx?.from, // The user's active address.
+          to: data.data.tx?.to,
+          data: data.data.tx?.data,
+          value: data.data.tx?.value?.hex,
+          gas: '100000',
+        },
+      ],
+    });
   }
 
   /**
@@ -2395,8 +2637,18 @@ export class MirrorWorld {
   // TODO
   //
   private warnAuthenticated() {
-    if (!this.user || !this.isLoggedIn || !this.__secretAccessKey) {
-      console.warn(`User is not logged in. Could potentially fail`);
+    if (!this.user) {
+      console.warn(`User is null, maybe not logged in. Could potentially fail`);
+    }
+    if (!this.isLoggedIn) {
+      console.warn(
+        `isLoggedIn is false, maybe is not logged in. Could potentially fail`
+      );
+    }
+    if (!this.__secretAccessKey) {
+      console.warn(
+        `__secretAccessKey is null, maybe User is not logged in. Could potentially fail`
+      );
     }
   }
   /**
@@ -3121,6 +3373,100 @@ export class MirrorWorld {
       IResponse<RegisterCollectionResultV2>
     >(`/${this.base('metadata')}/collection/register`, payload);
     return response.data.data;
+  }
+
+  private async suiGetTransactionByDigest(digest: string) {
+    this.warnAuthenticated();
+    const url = `/${this.base('wallet')}/transactions/${digest}`;
+    return await SUIWrapper.getTransactionByDigest(
+      this.chainConfig,
+      this.v2,
+      url
+    );
+  }
+
+  private async suiTransferSUI(payload: SUITransferSUIPayloadV2) {
+    this.warnAuthenticated();
+    const url = `/${this.base('wallet')}/transfer-sui`;
+    return await SUIWrapper.transferSUI(
+      payload,
+      url,
+      this.chainConfig,
+      this.v2
+    );
+  }
+
+  private async suiTransferToken(payload: SUITransferTokenPayload) {
+    this.warnAuthenticated();
+    const url = `/${this.base('wallet')}/transfer-token`;
+    return await SUIWrapper.transferToken(
+      payload,
+      url,
+      this.chainConfig,
+      this.v2
+    );
+  }
+
+  private async suiGetTokens() {
+    this.warnAuthenticated();
+    const url = `/${this.base('wallet')}/tokens`;
+    return await SUIWrapper.getTokens(url, this.chainConfig, this.v2);
+  }
+
+  private async suiGetMintedCollections() {
+    this.warnAuthenticated();
+    const url = `/${this.base('asset')}/mint/get-collections`;
+    return await SUIWrapper.getMintedCollections(
+      url,
+      this.chainConfig,
+      this.v2
+    );
+  }
+
+  private async suiGetMintedNFTOnCollection(collection_address: string) {
+    this.warnAuthenticated();
+    const url =
+      `/${this.base('asset')}/mint/get-collection-nfts/` + collection_address;
+    return await SUIWrapper.getMintedNFTOnCollection(
+      url,
+      this.chainConfig,
+      this.v2
+    );
+  }
+
+  private async suiMintCollection(payload: SUIMintCollectionPayload) {
+    this.warnAuthenticated();
+    const url = `/${this.base('asset')}/mint/collection`;
+    return await SUIWrapper.mintCollection(
+      payload,
+      url,
+      this.chainConfig,
+      this.v2
+    );
+  }
+
+  private async suiMintNFT(payload: SUIMintNFTPayload) {
+    this.warnAuthenticated();
+    const url = `/${this.base('asset')}/mint/nft`;
+    return await SUIWrapper.mintNFT(payload, url, this.chainConfig, this.v2);
+  }
+
+  private async suiQueryNFT(nft_object_id:string){
+    this.warnAuthenticated()
+    let url = `/${this.base('asset')}/nft/` + nft_object_id
+    return await SUIWrapper.getTokens(url,this.chainConfig,this.v2)
+  }
+
+  private async suiSearchNFTsByOwner(payload:SUISearchNFTsByOwnerPayload){
+    this.warnAuthenticated()
+    let url = `/${this.base('asset')}/nft/owner`
+    return await SUIWrapper.searchNFTsByOwner(payload,url,this.chainConfig,this.v2)
+  }
+
+  private async suiSearchNFTs(payload:SUISearchNFTsPayload){
+    this.warnAuthenticated()
+    let url = `/${this.base('asset')}/nft/mints`
+    return await SUIWrapper.searchNFTs(payload,url,this.chainConfig,this.v2)
   }
 
   private assertEVMOnly(methodName: string) {

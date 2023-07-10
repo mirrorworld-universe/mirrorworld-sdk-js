@@ -9,8 +9,9 @@ export interface MirrorWorldOptions {
   apiKey: string;
   /**
    * Environment wherein Mirror World APIs are executed.
+   * @deprecated
    */
-  env: ClusterEnvironment;
+  env?: ClusterEnvironment;
   /**
    * When passed, the Mirror World SDK will automatically log in
    * the user using their `refresh_token`. This expects the

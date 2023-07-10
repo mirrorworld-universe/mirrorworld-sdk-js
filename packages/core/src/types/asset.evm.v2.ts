@@ -15,6 +15,16 @@ export interface EVMNFTListingV2 {
   transaction_hash: string;
 }
 
+export type EvmWalletRequest = any;
+
+export interface EVMNFTListingTransactionV2 {
+  type: string;
+  tx?: any;
+  order?: any;
+  order_msg?: string;
+  action_id?: number;
+}
+
 export interface CreateEVMCollectionV2Payload
   extends EVMTransactionControlOptions {
   /** The base url of nft json config files. Full url to individual NFT json configuration will be base_url + token_id  */
@@ -129,8 +139,11 @@ export type ComputeSearchEVMNFTRequestPayload<T extends SearchEVMNftsFilters> =
       [K in T]: string[];
     };
 
-export type SearchEVMNFTsByOwnerAddressesPayloadV2 =
-  ComputeSearchEVMNFTRequestPayload<'owner_address'>;
+export type SearchEVMNFTsByOwnerAddressesPayloadV2 = {
+  limit?: number;
+  offset?: number;
+  owner_address: string;
+};
 
 export interface SearchEVMNFTsPayloadV2 {
   tokens: {

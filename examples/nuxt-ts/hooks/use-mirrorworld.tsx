@@ -2,22 +2,17 @@ import { ref, readonly, Ref } from 'vue';
 import {
   MirrorWorld,
   ClusterEnvironment,
-  Solana,
   Polygon,
   ChainConfig,
   ChainTypes,
   IUser,
+  Sui,
+  Solana,
 } from '@usemirrorworld/web3.js';
 import { AnyFn } from '@vueuse/core';
 import { canUseDom } from '@/utils';
 
-// excellence@jbakebwa.dev
-const SECRET_ACCESS_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Nzc3OCwiZXRoX2FkZHJlc3MiOiIweEI5MzVDNDlFMjc4MTE3MUU2Njg5MkNkOEE0QTMxNjE3NTZEMEFlMzIiLCJzb2xfYWRkcmVzcyI6IkdMTnlmckhvNjhieWJTa2RndkRRMnk4TUNWUjhrNlJNSHdmRDJIWW5tMUF5IiwiZW1haWwiOiJleGNlbGxlbmNlQGpiYWtlYndhLmRldiIsIndhbGxldCI6eyJldGhfYWRkcmVzcyI6IjB4QjkzNUM0OUUyNzgxMTcxRTY2ODkyQ2Q4QTRBMzE2MTc1NkQwQWUzMiIsInNvbF9hZGRyZXNzIjoiRkJYbTgzSHZ0SDM0blIzY3F5QWV0b1haTXRnbnR2TnFqZGZGeXZRRkppMVYifSwiY2xpZW50X2lkIjoiNHNpdzN3czBtTVlIbm1kLTlJZDNpbW9rMGxKeDZZdVd2dzA0Lm9mZDFsZmMyLm1pcnJvcndvcmxkLmZ1biIsInR5cGUiOiJzZWNyZXRfYWNjZXNzX2tleSIsImlhdCI6MTY3OTAzNjMyMywiZXhwIjoxNjgxNjI4MzIzLCJpc3MiOiI0c2l3M3dzMG1NWUhubWQtOUlkM2ltb2swbEp4Nll1V3Z3MDQub2ZkMWxmYzIubWlycm9yd29ybGQuZnVuIiwianRpIjoic2FrOjc3Nzg6YXV0aDozMDkifQ.OGi8ykGWl_LRN2z8D3kF7IKQBjOxVwGy5X6Jzq1xtsU';
-
-// // jbakebwa@gmail.com
-//   const SECRET_ACCESS_KEY =
-//   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTA3MjEsImV0aF9hZGRyZXNzIjoiMHg3ODY5YUI3RUZmMTU2NjY5ZGY2NDk5MkViMTllNTE4NjEwZjM5MjQwIiwic29sX2FkZHJlc3MiOiI3S2ZUZHpqZld3OEc1TXlZejd0ZnYzWTlEY252WTFGSldSaGNSMnplSmpBMSIsImVtYWlsIjoiamJha2Vid2FAZ21haWwuY29tIiwid2FsbGV0Ijp7ImV0aF9hZGRyZXNzIjoiMHg3ODY5YUI3RUZmMTU2NjY5ZGY2NDk5MkViMTllNTE4NjEwZjM5MjQwIiwic29sX2FkZHJlc3MiOiI3S2ZUZHpqZld3OEc1TXlZejd0ZnYzWTlEY252WTFGSldSaGNSMnplSmpBMSJ9LCJjbGllbnRfaWQiOiJlYmNmZjc5YS0yODJmLTExZWQtOWJjNS0wZTFiYTdhZjE5MmQuZWJjZmY3YWUubWlycm9yd29ybGQuZnVuIiwidHlwZSI6InNlY3JldF9hY2Nlc3Nfa2V5IiwiaWF0IjoxNjc4ODYwMTM3LCJleHAiOjE2ODE0NTIxMzcsImlzcyI6ImViY2ZmNzlhLTI4MmYtMTFlZC05YmM1LTBlMWJhN2FmMTkyZC5lYmNmZjdhZS5taXJyb3J3b3JsZC5mdW4iLCJqdGkiOiJzYWs6MTA3MjE6YXV0aDozMDQifQ.VhL5Sc_WY-U9xmr7MrJwwxq-2iDCyDpgl_kHgJbihLI';
+// const SECRET_ACCESS_KEY = 'YOUR_SECRET_ACCESS_KEY';
 
 function forcePurgeClientStorage() {
   console.debug('call:forcePurgeClientStorage:useMirrorWorld');
@@ -44,7 +39,8 @@ export interface MirrorWorldContext {
 }
 
 // const __chainConfig = Solana('devnet');
-const __chainConfig = Polygon('mumbai-testnet');
+// const __chainConfig = Polygon('mumbai-testnet');
+const __chainConfig = Sui('testnet');
 
 const autoLoginCredentials = canUseDom
   ? localStorage.getItem(`app-refresh-token`)
@@ -53,10 +49,12 @@ const autoLoginCredentials = canUseDom
 let __mirrorworld: MirrorWorld;
 
 function createMirrorWorld() {
+  console.log('=======createMirrorWorld=======');
   return new MirrorWorld({
     // apiKey: "mw_4UBrXhk4sCp40pMO98FWk8eMkbGpk5dyMKB",
-    apiKey: 'mw_oEW0ZFiiPewhvktSKU1uJi3ZqyfTSHLtzd3',
-    env: ClusterEnvironment.mainnet,
+    // apiKey: 'mw_oEW0ZFiiPewhvktSKU1uJi3ZqyfTSHLtzd3',
+    apiKey: 'mw_TaIB0eljYJZXsXrxpdOXvAkA4XyCuUGxNWp',
+    env: ClusterEnvironment.testnet,
     // staging: true,
     chainConfig: __chainConfig,
     ...(!!autoLoginCredentials && { autoLoginCredentials }),
@@ -64,7 +62,7 @@ function createMirrorWorld() {
     //   uxMode: "popup"
     //  }
     auth: {
-      secretAccessKey: SECRET_ACCESS_KEY,
+      // secretAccessKey: SECRET_ACCESS_KEY,
     },
   });
 }

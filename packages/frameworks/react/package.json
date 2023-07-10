@@ -1,6 +1,6 @@
 {
-  "name": "@usemirrorworld/react",
-  "version": "3.0.0-v2.0",
+  "name": "@mirrorworld/react",
+  "version": "3.1.0",
   "description": "Mirror World Web SDK - React",
   "keywords": [
     "mirrorworld",
@@ -18,8 +18,8 @@
   "author": "Jonathan Bakebwa <codebender828@gmail.com>",
   "homepage": "https://github.com/mirrorworld-universe/mirrorworld.web3.js/tree/main/packages/frameworks/react",
   "license": "MIT",
-  "main": "dist/usemirrorworld-react.cjs.js",
-  "module": "dist/usemirrorworld-react.esm.js",
+  "main": "dist/mirrorworld-react.cjs.js",
+  "module": "dist/mirrorworld-react.esm.js",
   "repository": "https://github.com/mirrorworld-universe/mirrorworld.web3.js/tree/main/packages/frameworks/react",
   "sideEffects": false,
   "files": [
