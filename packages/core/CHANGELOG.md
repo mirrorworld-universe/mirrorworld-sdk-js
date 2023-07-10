@@ -1,5 +1,15 @@
 # @mirrorworld/web3.js
 
+## 2.7.0
+
+### Minor Changes
+
+- 5b80b1e: Use new login page & wallet page.
+
+### Patch Changes
+
+- 41326a5: Fix releases
+
 ## 2.6.0
 
 ### Minor Changes
