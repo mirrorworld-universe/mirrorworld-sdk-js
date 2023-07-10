@@ -85,8 +85,8 @@ jobs:
         if: steps.changesets.outputs.published != 'true'
         run: |
           git checkout develop
-          yarn changeset version --snapshot dev
-          yarn changeset publish --tag dev
+          yarn changeset pre enter dev 
+          yarn release:dev
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
