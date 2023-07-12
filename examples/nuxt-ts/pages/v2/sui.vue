@@ -24,6 +24,16 @@
               Welcome, <chakra-text>{{ user }}</chakra-text>!
             </div>
           </c-wrap-item>
+          <c-wrap-item>
+            <c-button
+              @click="mirrorworld.openWallet()"
+              size="sm"
+              variant="outline"
+              color-scheme="gray"
+            >
+              OpenWallet
+            </c-button>
+          </c-wrap-item>
         </c-wrap>
       </c-stack>
       <c-stack
