@@ -3094,7 +3094,7 @@ export class MirrorWorld {
     this.warnAuthenticated();
 
     const { authorization_token } = await this.getApprovalToken({
-      type: 'sign_transaction',
+      type: 'transfer_sol',
       value: 0,
       params: payload,
     });
@@ -3119,14 +3119,14 @@ export class MirrorWorld {
     this.warnAuthenticated();
 
     const { authorization_token } = await this.getApprovalToken({
-      type: 'sign_transaction',
+      type: 'transfer_spl_token',
       value: 0,
       params: payload,
     });
 
     const response = await this._wallet.get<
       IResponse<SolanaBaseSignatureResultV2>
-    >(`/${this.base('wallet')}/transfer-sol`, {
+    >(`/${this.base('wallet')}/transfer-token`, {
       headers: {
         ...(authorization_token && {
           'x-authorization-token': authorization_token,
