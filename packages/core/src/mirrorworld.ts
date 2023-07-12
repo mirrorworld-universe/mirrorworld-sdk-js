@@ -3058,15 +3058,15 @@ export class MirrorWorld {
     assertSolanaOnly('transferSOLV2', this.chainConfig);
     this.warnAuthenticated();
 
-    const { authorization_token } = await this.getApprovalToken({
+    var { authorization_token } = await this.getApprovalToken({
       type: 'transfer_sol',
       value: 0,
       params: payload,
     });
-
-    const response = await this._wallet.get<
+    
+    const response = await this._wallet.post<
       IResponse<SolanaBaseSignatureResultV2>
-    >(`/${this.base('wallet')}/transfer-sol`, {
+    >(`/${this.base('wallet')}/transfer-sol`, payload, {
       headers: {
         ...(authorization_token && {
           'x-authorization-token': authorization_token,
@@ -3089,9 +3089,9 @@ export class MirrorWorld {
       params: payload,
     });
 
-    const response = await this._wallet.get<
+    const response = await this._wallet.post<
       IResponse<SolanaBaseSignatureResultV2>
-    >(`/${this.base('wallet')}/transfer-token`, {
+    >(`/${this.base('wallet')}/transfer-token`, payload,{
       headers: {
         ...(authorization_token && {
           'x-authorization-token': authorization_token,
