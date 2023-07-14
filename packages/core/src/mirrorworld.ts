@@ -742,6 +742,10 @@ export class MirrorWorld {
     return `https://auth${this._staging ? '-staging' : ''}.mirrorworld.fun`;
   }
 
+  private get newAuthView(){
+    return `https://auth-next${this._staging ? '-staging' : ''}.mirrorworld.fun`;
+  }
+
   private get walletUrl(){
     return `https://auth-next${this._staging ? '-staging' : ''}.mirrorworld.fun/v1/assets/tokens`;
   }
@@ -1425,7 +1429,6 @@ export class MirrorWorld {
     shouldAutoClose = false,
     isWholePath = false
   ): Promise<Window | undefined> {
-    console.log("open wallet method:"+this._uxMode)
     if (this._uxMode === 'popup') {
       return this.openPopupWallet(path,isWholePath);
     } else if (this._uxMode === 'embedded') {
@@ -1569,7 +1572,8 @@ export class MirrorWorld {
             window.addEventListener('message', handleApprovalEvent);
           }
 
-          approvalWindow = await this.openWalletPage(approvalPath);
+          const pagePath = `${this.newAuthView}${approvalPath}`
+          approvalWindow = await this.openWalletPage(pagePath,false,true);
         } catch (e: any) {
           reject(e.message);
         }
