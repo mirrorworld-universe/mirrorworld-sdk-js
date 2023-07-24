@@ -742,16 +742,16 @@ export class MirrorWorld {
     return `https://auth${this._staging ? '-staging' : ''}.mirrorworld.fun`;
   }
 
-  private get newAuthView(){
-    return `https://auth-next${this._staging ? '-staging' : ''}.mirrorworld.fun`;
-  }
-
   private get walletUrl(){
     return `https://auth-next${this._staging ? '-staging' : ''}.mirrorworld.fun/v1/assets/tokens`;
   }
 
   private get loginUrl(){
     return `https://auth-next${this._staging ? '-staging' : ''}.mirrorworld.fun/v1/auth/login`;
+  }
+
+  private get approvePageUrl(){
+    return `https://auth-next${this._staging ? '-staging' : ''}.mirrorworld.fun/v1/approve/`;
   }
 
   /**
@@ -1539,7 +1539,7 @@ export class MirrorWorld {
 
           console.debug('action_created', action);
           console.debug('action:requesting_approval for', action.uuid);
-          const approvalPath = `/approve/${action.uuid}`;
+          const approvalPath = `${this.approvePageUrl}${action.uuid}`
           let approvalWindow: Window | undefined = undefined;
           const { deserialize } = await import('bson');
           const handleApprovalEvent = (event: MessageEvent) => {
@@ -1572,8 +1572,7 @@ export class MirrorWorld {
             window.addEventListener('message', handleApprovalEvent);
           }
 
-          const pagePath = `${this.newAuthView}${approvalPath}`
-          approvalWindow = await this.openWalletPage(pagePath,false,true);
+          approvalWindow = await this.openWalletPage(approvalPath,false,true);
         } catch (e: any) {
           reject(e.message);
         }
