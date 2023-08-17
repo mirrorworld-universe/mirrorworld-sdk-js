@@ -1530,7 +1530,6 @@ export class MirrorWorld {
           );
 
           const action = response.data.data;
-
           const approvalPath = `${this.approvePageUrl}${action.uuid}`
           let approvalWindow: Window | undefined = undefined;
           const { deserialize } = await import('bson');
