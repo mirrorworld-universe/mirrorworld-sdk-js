@@ -1454,11 +1454,8 @@ export class MirrorWorld {
         const handleWalletUIMessage = async (event: MessageEvent) => {
           const { deserialize } = await import('bson');
 
-          console.log('raw result:', event);
           if (event.data?.name === 'mw:auth:login') {
             const payload = deserialize(event.data.payload);
-            console.log('12121212', deserialize(event.data.payload));
-            console.debug('auth:payload ===>', payload);
             if (payload.access_token && payload.refresh_token) {
               // 更新用户刷新令牌
               this.userRefreshToken = payload.refresh_token;
@@ -1468,7 +1465,6 @@ export class MirrorWorld {
               });
               // 发送请求获取用户信息
               await this.fetchUser();
-              console.log('user:', this.user);
               // 如果可以使用浏览器本地存储，则将刷新令牌保存在本地
               if (this._storageKey && canUseDom && this.userRefreshToken) {
                 const internalRefreshTokenKey = `${this._storageKey}:refresh`;
@@ -1478,8 +1474,6 @@ export class MirrorWorld {
                 );
               }
               // 返回用户信息和刷新令牌
-              console.log('access:' + payload.access_token);
-              console.log('refresh:' + payload.refresh_token);
               resolve({
                 user: this.user,
                 refreshToken: this.userRefreshToken!,
@@ -1513,8 +1507,8 @@ export class MirrorWorld {
     });
   }
   
-  private getApprovalToken = (payload: ICreateActionPayload) =>
-    new Promise<{ action: IAction; authorization_token: string | undefined }>(
+  private getApprovalToken = (payload: ICreateActionPayload) =>{
+    return new Promise<{ action: IAction; authorization_token: string | undefined }>(
       async (resolve, reject) => {
         if (this.__secretAccessKey) {
           resolve({
@@ -1537,8 +1531,6 @@ export class MirrorWorld {
 
           const action = response.data.data;
 
-          console.debug('action_created', action);
-          console.debug('action:requesting_approval for', action.uuid);
           const approvalPath = `${this.approvePageUrl}${action.uuid}`
           let approvalWindow: Window | undefined = undefined;
           const { deserialize } = await import('bson');
@@ -1546,7 +1538,6 @@ export class MirrorWorld {
             if (event.data?.name === 'mw:action:approve') {
               const payload = deserialize(event.data.payload);
               if (payload.action && payload.action.uuid === action.uuid) {
-                console.debug('auth:approved_action', payload);
                 if (this._uxMode === 'popup') {
                   approvalWindow && approvalWindow.close();
                 } else {
@@ -1572,12 +1563,12 @@ export class MirrorWorld {
             window.addEventListener('message', handleApprovalEvent);
           }
 
-          approvalWindow = await this.openWalletPage(approvalPath,false,true);
+          approvalWindow = await this.openWalletPage(approvalPath,true,true);
         } catch (e: any) {
           reject(e.message);
         }
-      }
-    );
+      })
+  };
 
   // ==========================================================================================================
   //   V2 SDK METHODS
