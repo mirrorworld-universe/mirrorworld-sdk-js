@@ -1,5 +1,11 @@
 # @mirrorworld/web3.js
 
+## 2.8.0
+
+### Minor Changes
+
+- 7d88c4a: Use a new page to approve user operations.
+
 ## 2.7.0
 
 ### Minor Changes
