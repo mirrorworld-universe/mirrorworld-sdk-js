@@ -11,7 +11,7 @@
       <h2>Get tokens</h2>
       <button @click="getTokens">Get tokens</button>
       <pre
-        v-if="mirrorworld.tokens"
+        v-if="getTokensRes"
         v-html="tokens"
         style="white-space: pre-wrap; max-height: 300px; overflow: scroll"
       />
@@ -21,7 +21,7 @@
       <h2>Get NFTs</h2>
       <button @click="getNFTs">Get NFTs</button>
       <pre
-        v-if="mirrorworld.nfts"
+        v-if="getNFTsRes"
         v-html="nfts"
         style="white-space: pre-wrap; max-height: 300px; overflow: scroll"
       />
@@ -31,7 +31,7 @@
       <h2>Get transactions</h2>
       <button @click="getTransactions">Get transactions</button>
       <pre
-        v-if="mirrorworld.transactions"
+        v-if="getTransactionRes"
         v-html="transactions"
         style="white-space: pre-wrap; max-height: 300px; overflow: scroll"
       />
@@ -342,116 +342,159 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeMount, ref } from 'vue';
-import { MirrorWorld, ClusterEnvironment, Solana } from '@mirrorworld/web3.js';
+import { computed, onBeforeMount, ref } from "vue";
+// import { MirrorWorld, ClusterEnvironment, Solana } from "@mirrorworld/web3.js";
+import { useMirrorWorld } from '@/hooks/use-mirrorworld';
 //@ts-ignore
-import formatHighlight from 'json-format-highlight';
-import { useMirrorWorld } from '~~/hooks/use-mirrorworld';
+import formatHighlight from "json-format-highlight";
+import { ClusterEnvironment, Solana, MirrorWorld } from "@usemirrorworld/web3.js";
 
-const { mirrorworld, logout, login, user: _user } = useMirrorWorld();
+var env = ClusterEnvironment.testnet
+var chainConfig = Solana('devnet')
+var apiKey = "mw_YGPw4YIh4ZWtBYVRjpsTIloaB2oa5sJQsGM"
+//use this before 0712
+// const mirrorworld = ref<MirrorWorld>(
+//   new MirrorWorld({
+//     apiKey: apiKey,
+//     env: env,
+//     chainConfig: chainConfig,
+//   })
+// );
+//Use this for testing
+const { mirrorworld } = useMirrorWorld();
 
 const user = computed(() =>
-  formatHighlight(JSON.stringify(_user.value, null, 2))
+  formatHighlight(JSON.stringify(mirrorworld.value.user, null, 2))
 );
 const tokens = computed(() =>
-  formatHighlight(JSON.stringify(mirrorworld.value.tokens, null, 2))
+  formatHighlight(JSON.stringify(getTokensRes.value))
 );
 const transactions = computed(() =>
-  formatHighlight(JSON.stringify(mirrorworld.value.transactions, null, 2))
+  formatHighlight(JSON.stringify(getTransactionRes.value, null, 2))
 );
 const nfts = computed(() =>
-  formatHighlight(JSON.stringify(mirrorworld.value.nfts, null, 2))
+  formatHighlight(JSON.stringify(getNFTsRes.value, null, 2))
 );
 
+async function login() {
+  try {
+    const { refreshToken } = await mirrorworld.value.login();
+    localStorage.setItem(`app-refresh-token`, refreshToken);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+const getTokensRes = ref();
 async function getTokens() {
-  await mirrorworld.value.getTokens();
+  getTokensRes.value = await mirrorworld.value.Solana.Wallet.fetchTokens();
 }
 
+const getTransactionRes = ref();
 async function getTransactions() {
-  await mirrorworld.value.getTransactions();
+  getTransactionRes.value = await mirrorworld.value.Solana.Wallet.fetchTransactions();
 }
 
+const getNFTsRes = ref();
 async function getNFTs() {
-  await mirrorworld.value.getNFTs({
-    limit: 20,
+  getNFTsRes.value = await mirrorworld.value.Solana.Asset.searchNFTsByOwnerAddresses({
+    owners: [mirrorworld.value.user.wallet.sol_address],
+    limit: 10,
     offset: 0,
   });
 }
 
 const transferResult = ref();
 const transferPayload = reactive({
-  recipientAddress: '',
+  recipientAddress: "",
   amount: 0,
-  tokenMint: '',
-  tokenDecimals: 6,
+  tokenMint: "",
+  tokenDecimals: 6
 });
 const parsedTransferResult = computed(() =>
   formatHighlight(JSON.stringify(transferResult.value, null, 2))
 );
 async function transferSPLToken() {
-  transferResult.value = await mirrorworld.value.transferSPLToken(
-    transferPayload
+  transferResult.value = await mirrorworld.value.Solana.Wallet.transferSPLToken(
+    {
+      to_publickey: transferPayload.recipientAddress,
+      amount: transferPayload.amount,
+      token_mint: transferPayload.tokenMint,
+      decimals: transferPayload.tokenDecimals
+    }
   );
 }
 
 const transferSOLResult = ref();
 const transferSOLPayload = reactive({
-  recipientAddress: '',
+  recipientAddress: "",
   amount: 0,
 });
 const parsedTransferSOLResult = computed(() =>
   formatHighlight(JSON.stringify(transferSOLResult.value, null, 2))
 );
 async function transferSOL() {
-  transferResult.value = await mirrorworld.value.transferSOL(
-    transferSOLPayload
+  transferSOLResult.value = await mirrorworld.value.Solana.Wallet.transferSol(
+    {
+      to_publickey: transferSOLPayload.recipientAddress,
+      amount: transferSOLPayload.amount
+    }
   );
 }
 
 const createVerifiedCollectionResult = ref();
 const createVerifiedCollectionPayload = reactive({
-  name: '',
-  symbol: '',
-  metadataUri: 'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json',
+  name: "",
+  symbol: "",
+  metadataUri: "https://metadata-assets.mirrorworld.fun/mirror_jump/metadata/1001.json",
 });
 const parsedCreateVerifiedCollection = computed(() =>
   formatHighlight(JSON.stringify(createVerifiedCollectionResult.value, null, 2))
 );
 async function createVerifiedCollection() {
   createVerifiedCollectionResult.value =
-    await mirrorworld.value.createVerifiedCollection(
-      createVerifiedCollectionPayload
+    await mirrorworld.value.Solana.Asset.createVerifiedCollection(
+      {
+        name: createVerifiedCollectionPayload.name,
+        symbol: createVerifiedCollectionPayload.symbol,
+        url: createVerifiedCollectionPayload.metadataUri
+      }
     );
 }
 
 const mintNFTResult = ref();
 const mintNFTPayload = reactive({
-  name: '',
-  symbol: '',
-  metadataUri: 'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json',
-  collection: '',
+  name: "",
+  symbol: "",
+  metadataUri: "https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json",
+  collection: "",
 });
 const parsedNFT = computed(() =>
   formatHighlight(JSON.stringify(mintNFTResult.value, null, 2))
 );
 async function mintNFT() {
-  mintNFTResult.value = await mirrorworld.value.mintNFT(mintNFTPayload);
+  mintNFTResult.value = await mirrorworld.value.Solana.Asset.mintNFT({
+    name: mintNFTPayload.name,
+    symbol: mintNFTPayload.symbol,
+    url: mintNFTPayload.metadataUri,
+    collection_mint: mintNFTPayload.collection
+  });
 }
 
 const updateNFTResult = ref();
 const updateNFTPayload = reactive({
-  name: '',
-  symbol: '',
-  metadataUri: 'https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json',
-  mintAddress: '',
-  updateAuthority: '',
+  name: "",
+  symbol: "",
+  metadataUri: "https://mirrormetaplextest.s3.amazonaws.com/assets/15976.json",
+  mintAddress: "",
+  updateAuthority: "",
   sellerFeeBasisPoints: 100,
 });
 
 const _updateNFTPayload = computed(() => ({
   ...updateNFTPayload,
   updateAuthority:
-    updateNFTPayload.updateAuthority === ''
+    updateNFTPayload.updateAuthority === ""
       ? undefined
       : updateNFTPayload.updateAuthority,
 }));
@@ -460,36 +503,53 @@ const parsedUpdateNFT = computed(() =>
   formatHighlight(JSON.stringify(updateNFTResult.value, null, 2))
 );
 async function updateNFT() {
-  updateNFTResult.value = await mirrorworld.value.updateNFT(
-    _updateNFTPayload.value
+  updateNFTResult.value = await mirrorworld.value.Solana.Asset.updateNFTMetadata(
+    {
+        /**  The mint address of the NFT */
+      mint_address:  _updateNFTPayload.value.mintAddress,
+      /**  The url of the NFT's json config */
+      url:  _updateNFTPayload.value.metadataUri,
+      /**  The seller fee basis points of the NFT */
+      seller_fee_basis_points:  _updateNFTPayload.value.sellerFeeBasisPoints,
+      /**  The name of the NFT */
+      name:  _updateNFTPayload.value.name,
+      /**  The symbol of the NFT */
+      symbol:  _updateNFTPayload.value.symbol,
+      /**  The update authority of the NFT */
+      update_authority:  _updateNFTPayload.value.updateAuthority
+    }
+   
   );
 }
 
 const transferNFTResult = ref();
 const transferNFTPayload = reactive({
-  mintAddress: '',
-  recipientAddress: '',
+  mintAddress: "",
+  recipientAddress: "",
 });
 const parsedTransferNFTResult = computed(() =>
   formatHighlight(JSON.stringify(transferNFTResult.value, null, 2))
 );
 async function transferNFT() {
-  transferNFTResult.value = await mirrorworld.value.transferNFT(
-    transferNFTPayload
+  transferNFTResult.value = await mirrorworld.value.Solana.Asset.transferNFT(
+    {
+      mint_address: transferNFTPayload.mintAddress,
+      to_wallet_address: transferNFTPayload.recipientAddress
+    }
   );
 }
 
 const listNFTResult = ref();
 const listNFTPayload = reactive({
-  mintAddress: '',
+  mintAddress: "",
   price: 1,
-  auctionHouse: '',
+  auctionHouse: "",
 });
 
 const _listNFTPayload = computed(() => ({
   ...listNFTPayload,
   auctionHouse:
-    listNFTPayload.auctionHouse === ''
+    listNFTPayload.auctionHouse === ""
       ? undefined
       : listNFTPayload.auctionHouse,
 }));
@@ -498,40 +558,51 @@ const parsedListNFTResult = computed(() =>
   formatHighlight(JSON.stringify(listNFTResult.value, null, 2))
 );
 async function listNFT() {
-  listNFTResult.value = await mirrorworld.value.listNFT(_listNFTPayload.value);
+  listNFTResult.value = await mirrorworld.value.Solana.Asset.listNFT(
+    {
+      mint_address: _listNFTPayload.value.mintAddress,
+      price: _listNFTPayload.value.price,
+      auction_house: _listNFTPayload.value.auctionHouse,
+    });
 }
 
 const buyNFTResult = ref();
 const buyNFTPayload = reactive({
-  mintAddress: '',
+  mintAddress: "",
   price: 1,
-  auctionHouse: '',
+  auctionHouse: "",
 });
 
 const _buyNFTPayload = computed(() => ({
   ...buyNFTPayload,
   auctionHouse:
-    buyNFTPayload.auctionHouse === '' ? undefined : buyNFTPayload.auctionHouse,
+    buyNFTPayload.auctionHouse === "" ? undefined : buyNFTPayload.auctionHouse,
 }));
 
 const parsedBuyNFTResult = computed(() =>
   formatHighlight(JSON.stringify(buyNFTResult.value, null, 2))
 );
 async function buyNFT() {
-  buyNFTResult.value = await mirrorworld.value.buyNFT(_buyNFTPayload.value);
+  buyNFTResult.value = await mirrorworld.value.Solana.Asset.buyNFT(
+    {
+      mint_address: _buyNFTPayload.value.mintAddress,
+      price: _buyNFTPayload.value.price,
+      auction_house: _buyNFTPayload.value.auctionHouse,
+    }  
+  );
 }
 
 const updateListingResult = ref();
 const updateListingPayload = reactive({
-  mintAddress: '',
+  mintAddress: "",
   price: 1,
-  auctionHouse: '',
+  auctionHouse: "",
 });
 
 const _updateListingPayload = computed(() => ({
   ...updateListingPayload,
   auctionHouse:
-    updateListingPayload.auctionHouse === ''
+    updateListingPayload.auctionHouse === ""
       ? undefined
       : updateListingPayload.auctionHouse,
 }));
@@ -540,22 +611,27 @@ const parsedUpdateListingResult = computed(() =>
   formatHighlight(JSON.stringify(updateListingResult.value, null, 2))
 );
 async function updateListing() {
-  updateListingResult.value = await mirrorworld.value.updateNFTListing(
-    _updateListingPayload.value
+  updateListingResult.value = await mirrorworld.value.Solana.Asset.listNFT(
+    {
+      mint_address: _updateListingPayload.value.mintAddress,
+      price: _updateListingPayload.value.price,
+      auction_house: _updateListingPayload.value.auctionHouse
+    }
+    
   );
 }
 
 const cancelListingResult = ref();
 const cancelListingPayload = reactive({
-  mintAddress: '',
+  mintAddress: "",
   price: 1,
-  auctionHouse: '',
+  auctionHouse: "",
 });
 
 const _cancelListingPayload = computed(() => ({
   ...cancelListingPayload,
   auctionHouse:
-    cancelListingPayload.auctionHouse === ''
+    cancelListingPayload.auctionHouse === ""
       ? undefined
       : cancelListingPayload.auctionHouse,
 }));
@@ -564,21 +640,25 @@ const parsedCancelListingResult = computed(() =>
   formatHighlight(JSON.stringify(cancelListingResult.value, null, 2))
 );
 async function cancelListing() {
-  cancelListingResult.value = await mirrorworld.value.cancelNFTListing(
-    _cancelListingPayload.value
+  cancelListingResult.value = await mirrorworld.value.Solana.Asset.cancelListing(
+    {
+      mint_address: _cancelListingPayload.value.mintAddress,
+      price: _cancelListingPayload.value.price,
+      auction_house: _cancelListingPayload.value.auctionHouse
+    }
   );
 }
 
 const createMarketplaceResult = ref();
 const createMarketplacePayload = reactive({
-  treasuryMint: '',
+  treasuryMint: "",
   sellerFeeBasisPoints: 200,
 });
 
 const _createMarketplacePayload = computed(() => ({
   ...createMarketplacePayload,
   treasuryMint:
-    createMarketplacePayload.treasuryMint === ''
+    createMarketplacePayload.treasuryMint === ""
       ? undefined
       : createMarketplacePayload.treasuryMint,
 }));
@@ -587,8 +667,41 @@ const parsedCreateMarketplaceResult = computed(() =>
   formatHighlight(JSON.stringify(createMarketplaceResult.value, null, 2))
 );
 async function createMarketplace() {
-  createMarketplaceResult.value = await mirrorworld.value.createMarketplace(
-    _createMarketplacePayload.value
+  createMarketplaceResult.value = await mirrorworld.value.Solana.Asset.createMarketplace(
+    {
+      treasury_mint: _createMarketplacePayload.value.treasuryMint,
+      seller_fee_basis_points: _createMarketplacePayload.value.sellerFeeBasisPoints
+    }
+    
   );
 }
+
+async function logout() {
+  if (mirrorworld.value.user) {
+    console.debug("logout user");
+    await mirrorworld.value.logout();
+  }
+}
+
+// onBeforeMount(() => {
+//   const refreshToken = localStorage.getItem(`app-refresh-token`);
+//   if (refreshToken) {
+//     mirrorworld.value = new MirrorWorld({
+//       apiKey: apiKey,
+//     env: env,
+//     chainConfig: chainConfig,
+//       autoLoginCredentials: refreshToken,
+//     });
+//     mirrorworld.value.on("auth:refreshToken", async (refreshToken) => {
+//       await localStorage.setItem(`app-refresh-token`, refreshToken);
+//       await mirrorworld.value.fetchUser();
+//     });
+//   } else {
+//     mirrorworld.value = new MirrorWorld({
+//       apiKey: apiKey,
+//     env: env,
+//     chainConfig: chainConfig,
+//     });
+//   }
+// });
 </script>

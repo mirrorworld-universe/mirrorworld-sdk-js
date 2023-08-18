@@ -139,8 +139,11 @@ export type ComputeSearchEVMNFTRequestPayload<T extends SearchEVMNftsFilters> =
       [K in T]: string[];
     };
 
-export type SearchEVMNFTsByOwnerAddressesPayloadV2 =
-  ComputeSearchEVMNFTRequestPayload<'owner_address'>;
+export type SearchEVMNFTsByOwnerAddressesPayloadV2 = {
+  limit?: number;
+  offset?: number;
+  owner_address: string;
+};
 
 export interface SearchEVMNFTsPayloadV2 {
   tokens: {

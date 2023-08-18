@@ -1335,15 +1335,14 @@ export const VerifyEVMMintConfigSchemaV2: joi.ObjectSchema<VerifyEVMMintConfigPa
 export const SearchEVMNFTsByOwnerAddressesSchemaV2 =
   joi.object<SearchEVMNFTsByOwnerAddressesPayloadV2>({
     owner_address: joi
-      .array()
-      .items(joi.string())
+      .string()
       .required()
       .error(
         MirrorWorldSDKError.new(
           'INVALID_SEARCH_EVM_NFT_PAYLOAD',
           toErrorMessage(
             'INVALID_SEARCH_EVM_NFT_PAYLOAD',
-            '`owner_address` should be a valid array of strings'
+            '`owner_address` should be a string'
           )
         )
       ),
