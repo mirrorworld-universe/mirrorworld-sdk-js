@@ -1,12 +1,30 @@
 <template>
   <main style="padding: 60px">
-    <h1>Mirror World SDK Demo</h1>
+    <h1>Mirror World SDK Demo(Solana)</h1>
     <div>
       <h2>Login</h2>
       <button @click="login">Login</button>
       <pre v-if="user" v-html="user" style="white-space: pre-wrap" />
     </div>
-    <br />
+    <br/>
+    
+    <div>
+      <h2>SetAccessToken</h2>
+      <button @click="setAccessToken">SetAccessToken</button>
+      <label style="display: block"
+        >new access token:
+        <input
+          v-model="setAccessTokenPayload.newAccessToken"
+          placeholder="new access token"
+      /></label>
+      <pre
+        v-if="setAccessToken"
+        v-html="parseSetAccessTokenResult"
+        style="white-space: pre-wrap"
+      />
+    </div>
+
+    <br/>
     <div>
       <h2>Get tokens</h2>
       <button @click="getTokens">Get tokens</button>
@@ -440,6 +458,17 @@ async function transferSOL() {
       amount: transferSOLPayload.amount
     }
   );
+}
+
+const setAccessTokenResult = ref();
+const setAccessTokenPayload = reactive({
+  newAccessToken: ""
+});
+const parseSetAccessTokenResult = computed(() =>
+  formatHighlight(JSON.stringify(setAccessTokenResult.value))
+);
+async function setAccessToken() {
+  setAccessTokenResult.value = await mirrorworld.value.setAccessToken(setAccessTokenPayload.newAccessToken)
 }
 
 const createVerifiedCollectionResult = ref();

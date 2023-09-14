@@ -617,7 +617,7 @@ export class MirrorWorld {
       };
 
     // const preferredCredential = this.__secretAccessKey || accessToken;
-    const preferredCredential = accessToken;
+    var preferredCredential = accessToken;
     const serviceCredentialsInterceptorId = this.api.interceptors.request.use(
       createAccessTokenInterceptor(preferredCredential)
     );
@@ -1502,6 +1502,22 @@ export class MirrorWorld {
         const shouldAutoCloseAfterLogin = true;
         authWindow = await this.openWalletPage(`${this.loginUrl}`, shouldAutoCloseAfterLogin,true);
       } catch (e: any) {
+        reject(e.message);
+      }
+    });
+  }
+
+  setAccessToken(newAccessToken:string):Promise<any> {
+    this.useCredentials({
+      accessToken: newAccessToken,
+    });
+    // 发送请求获取用户信息
+    
+    return new Promise(async (resolve, reject) => {
+      try{
+        await this.fetchUser();
+        resolve(this.user);
+      }catch (e:any){
         reject(e.message);
       }
     });
