@@ -1536,6 +1536,70 @@ export class MirrorWorld {
     });
   }
 
+  private getApprovalToken1111 = (payload: ICreateActionPayload) => {
+    return new Promise<{
+      action: IAction;
+      authorization_token: string | undefined;
+    }>(async (resolve, reject) => {
+      if (this.__secretAccessKey) {
+        resolve({
+          action: {} as any,
+          authorization_token: undefined,
+        });
+        return;
+      }
+
+      try {
+        const result = createActionSchema.validate(payload);
+        if (result.error) {
+          throw result.error;
+        }
+
+        const response = await this.auth.post<IResponse<IAction>>(
+          `/actions/request`,
+          payload
+        );
+
+        const action = response.data.data;
+        const approvalPath = `${this.approvePageUrl}${action.uuid}`;
+        let approvalWindow: Window | undefined = undefined;
+        const { deserialize } = await import('bson');
+        const handleApprovalEvent = (event: MessageEvent) => {
+          if (event.data?.name === 'mw:action:approve') {
+            const payload = deserialize(event.data.payload);
+            if (payload.action && payload.action.uuid === action.uuid) {
+              if (this._uxMode === 'popup') {
+                approvalWindow && approvalWindow.close();
+              } else {
+                windowEmitter.emit('close');
+              }
+              resolve({
+                authorization_token: payload.authorization_token,
+                action: payload.action,
+              });
+            } else if (event.data?.name === 'mw:action:cancel') {
+              reject(`User denied approval for action:${action.uuid}.`);
+            }
+          }
+
+          if (event.data.name === 'mw:auth:close') {
+            windowEmitter.emit('close');
+          }
+        };
+
+        if (this._uxMode === 'embedded') {
+          windowEmitter.on('message', handleApprovalEvent);
+        } else {
+          window.addEventListener('message', handleApprovalEvent);
+        }
+
+        approvalWindow = await this.openWalletPage(approvalPath, true, true);
+      } catch (e: any) {
+        reject(e.message);
+      }
+    });
+  };
+
   private getApprovalToken = (payload: ICreateActionPayload) => {
     return new Promise<{
       action: IAction;
