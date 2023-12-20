@@ -2687,9 +2687,9 @@ export class MirrorWorld {
       );
     }
     if (!this.__secretAccessKey) {
-      console.warn(
-        `__secretAccessKey is null, maybe User is not logged in. Could potentially fail`
-      );
+      // console.warn(
+      //   `__secretAccessKey is null, maybe User is not logged in. Could potentially fail`
+      // );
     }
   }
   /**

@@ -114,7 +114,7 @@
 </template>
 
 <script setup lang="ts">
-import { chakra, CWrap, CWrapItem } from '@chakra-ui/vue-next';
+import { CWrap, CWrapItem } from '@chakra-ui/vue-next';
 import { useMirrorWorld } from '@/hooks/use-mirrorworld';
 import {
   AssetBuySolanaNft,

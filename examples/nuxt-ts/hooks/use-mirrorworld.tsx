@@ -39,9 +39,9 @@ export interface MirrorWorldContext {
   logout: VoidFunction;
 }
 
-const __chainConfig = Solana('devnet');
+// const __chainConfig = Solana('devnet');
 // const __chainConfig = Polygon('mumbai-testnet');
-// const __chainConfig = Sui('testnet');
+const __chainConfig = Sui('testnet');
 
 const autoLoginCredentials = canUseDom
   ? localStorage.getItem(`app-refresh-token`)
