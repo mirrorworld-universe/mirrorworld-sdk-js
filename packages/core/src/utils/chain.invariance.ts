@@ -12,7 +12,7 @@ export function assertAvailableFor<T extends ChainConfig<ChainTypes>>(
   if (matchIndex < 0) {
     throwError(
       'METHOD_UNAVAILABLE_ON_CURRENT_CHAIN_CONFIG',
-      `The method "${method}" is not available on ${config.chain}:${config.network}. To explore more availeble methods on ${config.chain}, please refer to the TS/JS API Reference on the docs: https://mirrorworld.fun/docs/api-reference/js/`
+      `The method "${method}" is not available on ${config.chain}:${config.network}. Now your chain is ${config.chain}, make sure you initialize the correct chain.`
     );
   }
 }

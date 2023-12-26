@@ -53,6 +53,14 @@ export interface MirrorWorldOptions {
    * Chain configuration for Mirror World SDK
    */
   chainConfig: ChainConfig<ChainTypes>;
+
+  customTokens: Record<
+    ChainTypes,
+    {
+      network: ChainConfig<ChainTypes>['network'];
+      tokens: string[];
+    }
+  >;
 }
 
 export type MirrorWorldEvents = {

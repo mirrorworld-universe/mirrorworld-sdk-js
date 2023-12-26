@@ -13,6 +13,7 @@ import { AnyFn } from '@vueuse/core';
 import { canUseDom } from '@/utils';
 
 // const SECRET_ACCESS_KEY = 'YOUR_SECRET_ACCESS_KEY';
+const JWT_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjM3NjAsImV0aF9hZGRyZXNzIjoiMHg1ZjhiY2NiMzVkNDk2ODgzQzg0QThDZENGQTE4MDY5ZmFDNTAyN2FmIiwic29sX2FkZHJlc3MiOiJGWG9wdkJzSEtGcFZuSnprTXNhWTJCdE1uaUhaTGF4QXBIekF2UjNianRKUiIsInN1aV9hZGRyZXNzIjoiMHhlZjFmMzYyNDhhODQzMjQ2MDAxNjA5NDIzYTNjZjM4ZDUzZTk0ZTYzOTUxZTdjYjQwZDExODcyN2NjY2NmY2VhIiwiYXB0b3NfYWRkcmVzcyI6bnVsbCwiZW1haWwiOiJzcXVhbGwyMDMwQGdtYWlsLmNvbSIsIndhbGxldCI6eyJldGhfYWRkcmVzcyI6IjB4NWY4YmNjYjM1ZDQ5Njg4M0M4NEE4Q2RDRkExODA2OWZhQzUwMjdhZiIsInNvbF9hZGRyZXNzIjoiRlhvcHZCc0hLRnBWbkp6a01zYVkyQnRNbmlIWkxheEFwSHpBdlIzYmp0SlIiLCJzdWlfYWRkcmVzcyI6IjB4ZWYxZjM2MjQ4YTg0MzI0NjAwMTYwOTQyM2EzY2YzOGQ1M2U5NGU2Mzk1MWU3Y2I0MGQxMTg3MjdjY2NjZmNlYSIsImFwdG9zX2FkZHJlc3MiOm51bGx9LCJjbGllbnRfaWQiOiJTOG5QWjVjR3VOZlhaVEx1TGdpUDQ4Y0RBYnpEWjJYWGZ5eGcueUlEY0dBZ00ubWlycm9yd29ybGQuZnVuIiwidHlwZSI6ImFjY2Vzc190b2tlbiIsInJlZnJlc2hfdG9rZW5faWQiOjc5MTc4LCJpYXQiOjE2OTQ3NTUyNzMsImV4cCI6MTcwMjUzMTI3MywiaXNzIjoiUzhuUFo1Y0d1TmZYWlRMdUxnaVA0OGNEQWJ6RFoyWFhmeXhnLnlJRGNHQWdNLm1pcnJvcndvcmxkLmZ1biIsImp0aSI6ImF1dGg6MjM3NjAifQ.F8wp_5klHS7w3ZPiS6IN4aYGwQOQ1zgTnmfHQ0-3cSY";
 
 function forcePurgeClientStorage() {
   console.debug('call:forcePurgeClientStorage:useMirrorWorld');
@@ -38,9 +39,9 @@ export interface MirrorWorldContext {
   logout: VoidFunction;
 }
 
-const __chainConfig = Solana('devnet');
+// const __chainConfig = Solana('devnet');
 // const __chainConfig = Polygon('mumbai-testnet');
-// const __chainConfig = Sui('testnet');
+const __chainConfig = Sui('testnet');
 
 const autoLoginCredentials = canUseDom
   ? localStorage.getItem(`app-refresh-token`)
@@ -63,6 +64,7 @@ function createMirrorWorld() {
     //  }
     auth: {
       // secretAccessKey: SECRET_ACCESS_KEY,
+      // authToken: JWT_KEY,
     },
   });
 }

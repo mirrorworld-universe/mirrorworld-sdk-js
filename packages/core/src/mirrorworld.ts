@@ -199,7 +199,14 @@ import {
   RegisterCollectionResultV2,
 } from './types/metadata.common.v2';
 import { string } from 'joi';
-import { SUIMintCollectionPayload, SUIMintNFTPayload, SUISearchNFTsByOwnerPayload, SUISearchNFTsPayload, SUITransferSUIPayloadV2, SUITransferTokenPayload } from './types/wallet.sui.v2';
+import {
+  SUIMintCollectionPayload,
+  SUIMintNFTPayload,
+  SUISearchNFTsByOwnerPayload,
+  SUISearchNFTsPayload,
+  SUITransferSUIPayloadV2,
+  SUITransferTokenPayload,
+} from './types/wallet.sui.v2';
 
 export class MirrorWorld {
   // System variables
@@ -212,6 +219,13 @@ export class MirrorWorld {
   _transactions: ISolanaTransaction[] = [];
   _nfts: SolanaNFTExtended[] | EVMNFTExtended[] = [];
   _chainConfig: ChainConfig<ChainTypes>;
+  _customTokens: Record<
+    ChainTypes,
+    {
+      network: ChainConfig<ChainTypes>['network'];
+      tokens: string[];
+    }
+  >;
 
   private __secretAccessKey?: string;
 
@@ -237,11 +251,13 @@ export class MirrorWorld {
       staging = false,
       chainConfig,
       auth,
+      customTokens,
     } = result.value;
     this._staging = staging;
     this._apiKey = apiKey;
     this._env = env;
     this._chainConfig = chainConfig;
+    this._customTokens = customTokens;
     this._api = createAPIClient(
       {
         apiKey,
@@ -411,12 +427,12 @@ export class MirrorWorld {
     console.debug('mounting iframe');
     const iframe = document.createElement('iframe');
     Object.assign(iframe.style, iframeStyles);
-    if(useWholePath){
+    if (useWholePath) {
       iframe.src = path;
-    }else{
+    } else {
       iframe.src = `${this.authView}${path}`;
     }
-    
+
     iframe.id = 'mirrorworld-wallet-ui';
     portalBody.appendChild(iframe);
 
@@ -617,7 +633,7 @@ export class MirrorWorld {
       };
 
     // const preferredCredential = this.__secretAccessKey || accessToken;
-    const preferredCredential = accessToken;
+    var preferredCredential = accessToken;
     const serviceCredentialsInterceptorId = this.api.interceptors.request.use(
       createAccessTokenInterceptor(preferredCredential)
     );
@@ -742,16 +758,22 @@ export class MirrorWorld {
     return `https://auth${this._staging ? '-staging' : ''}.mirrorworld.fun`;
   }
 
-  private get walletUrl(){
-    return `https://auth-next${this._staging ? '-staging' : ''}.mirrorworld.fun/v1/assets/tokens`;
+  private get walletUrl() {
+    return `https://auth-next${
+      this._staging ? '-staging' : ''
+    }.mirrorworld.fun/v1/assets/tokens`;
   }
 
-  private get loginUrl(){
-    return `https://auth-next${this._staging ? '-staging' : ''}.mirrorworld.fun/v1/auth/login`;
+  private get loginUrl() {
+    return `https://auth-next${
+      this._staging ? '-staging' : ''
+    }.mirrorworld.fun/v1/auth/login`;
   }
 
-  private get approvePageUrl(){
-    return `https://auth-next${this._staging ? '-staging' : ''}.mirrorworld.fun/v1/approve/`;
+  private get approvePageUrl() {
+    return `https://auth-next${
+      this._staging ? '-staging' : ''
+    }.mirrorworld.fun/v1/approve/`;
   }
 
   /**
@@ -759,7 +781,10 @@ export class MirrorWorld {
    * @param path
    * @private
    */
-  private async openPopupWallet(path?: string,isWholePath?:boolean): Promise<Window | undefined> {
+  private async openPopupWallet(
+    path?: string,
+    isWholePath?: boolean
+  ): Promise<Window | undefined> {
     if (!canUseDom) {
       console.warn(`Auth Window Login is only available in the Browser.`);
     }
@@ -787,8 +812,8 @@ export class MirrorWorld {
     const systemZoom = width / window.screen.availWidth;
     const left = (width - w) / 2 / systemZoom + dualScreenLeft;
     const top = (height - h) / 2 / systemZoom + dualScreenTop;
-    let realPath = `${this.authView}${path}`
-    if(isWholePath){
+    let realPath = `${this.authView}${path}`;
+    if (isWholePath) {
       realPath = `${path}`;
     }
     const authWindow =
@@ -1394,13 +1419,13 @@ export class MirrorWorld {
   get SUI() {
     /** Asset Service Methods for SUI */
     const Asset = Object.freeze({
-      getMintedCollections:this.suiGetMintedCollections.bind(this),
-      getMintedNFTOnCollection:this.suiGetMintedNFTOnCollection.bind(this),
-      mintCollection:this.suiMintCollection.bind(this),
-      mintNFT:this.suiMintNFT.bind(this),
-      queryNFT:this.suiQueryNFT.bind(this),
-      searchNFTsByOwner:this.suiSearchNFTsByOwner.bind(this),
-      searchNFTs:this.suiSearchNFTs.bind(this)
+      getMintedCollections: this.suiGetMintedCollections.bind(this),
+      getMintedNFTOnCollection: this.suiGetMintedNFTOnCollection.bind(this),
+      mintCollection: this.suiMintCollection.bind(this),
+      mintNFT: this.suiMintNFT.bind(this),
+      queryNFT: this.suiQueryNFT.bind(this),
+      searchNFTsByOwner: this.suiSearchNFTsByOwner.bind(this),
+      searchNFTs: this.suiSearchNFTs.bind(this),
     });
     /** Wallet Service Methods for SUI */
     const Wallet = Object.freeze({
@@ -1430,15 +1455,15 @@ export class MirrorWorld {
     isWholePath = false
   ): Promise<Window | undefined> {
     if (this._uxMode === 'popup') {
-      return this.openPopupWallet(path,isWholePath);
+      return this.openPopupWallet(path, isWholePath);
     } else if (this._uxMode === 'embedded') {
-      return this.openEmbeddedWallet(path, shouldAutoClose,isWholePath);
+      return this.openEmbeddedWallet(path, shouldAutoClose, isWholePath);
     }
   }
 
-  public async openWallet() : Promise<Window| undefined>{
-    let walletUrl = `${this.walletUrl}`
-    return this.openWalletPage(walletUrl,false,true);
+  public async openWallet(): Promise<Window | undefined> {
+    const walletUrl = `${this.walletUrl}`;
+    return this.openWalletPage(walletUrl, false, true);
   }
 
   /***
@@ -1500,73 +1525,96 @@ export class MirrorWorld {
 
         // 打开钱包授权弹窗，并返回此窗口对象
         const shouldAutoCloseAfterLogin = true;
-        authWindow = await this.openWalletPage(`${this.loginUrl}`, shouldAutoCloseAfterLogin,true);
+        authWindow = await this.openWalletPage(
+          `${this.loginUrl}`,
+          shouldAutoCloseAfterLogin,
+          true
+        );
       } catch (e: any) {
         reject(e.message);
       }
     });
   }
-  
-  private getApprovalToken = (payload: ICreateActionPayload) =>{
-    return new Promise<{ action: IAction; authorization_token: string | undefined }>(
-      async (resolve, reject) => {
-        if (this.__secretAccessKey) {
-          resolve({
-            action: {} as any,
-            authorization_token: undefined,
-          });
-          return;
+
+
+  setAccessToken(newAccessToken:string):Promise<any> {
+    this.useCredentials({
+      accessToken: newAccessToken,
+    });
+    // 发送请求获取用户信息
+    
+    return new Promise(async (resolve, reject) => {
+      try{
+        await this.fetchUser();
+        resolve(this.user);
+      }catch (e:any){
+        reject(e.message);
+      }
+    });
+  }
+
+  private getApprovalToken = (payload: ICreateActionPayload) => {
+    return new Promise<{
+      action: IAction;
+      authorization_token: string | undefined;
+    }>(async (resolve, reject) => {
+      if (this.__secretAccessKey) {
+        resolve({
+          action: {} as any,
+          authorization_token: undefined,
+        });
+        return;
+      }
+
+      try {
+        const result = createActionSchema.validate(payload);
+        if (result.error) {
+          throw result.error;
         }
 
-        try {
-          const result = createActionSchema.validate(payload);
-          if (result.error) {
-            throw result.error;
-          }
+        const response = await this.auth.post<IResponse<IAction>>(
+          `/actions/request`,
+          payload
+        );
 
-          const response = await this.auth.post<IResponse<IAction>>(
-            `/actions/request`,
-            payload
-          );
-
-          const action = response.data.data;
-          const approvalPath = `${this.approvePageUrl}${action.uuid}`
-          let approvalWindow: Window | undefined = undefined;
-          const { deserialize } = await import('bson');
-          const handleApprovalEvent = (event: MessageEvent) => {
-            if (event.data?.name === 'mw:action:approve') {
-              const payload = deserialize(event.data.payload);
-              if (payload.action && payload.action.uuid === action.uuid) {
-                if (this._uxMode === 'popup') {
-                  approvalWindow && approvalWindow.close();
-                } else {
-                  windowEmitter.emit('close');
-                }
-                resolve({
-                  authorization_token: payload.authorization_token,
-                  action: payload.action,
-                });
-              } else if (event.data?.name === 'mw:action:cancel') {
-                reject(`User denied approval for action:${action.uuid}.`);
+        const action = response.data.data;
+        const approvalPath = `${this.approvePageUrl}${action.uuid}`;
+        let approvalWindow: Window | undefined = undefined;
+        const { deserialize } = await import('bson');
+        const handleApprovalEvent = (event: MessageEvent) => {
+          if (event.data?.name === 'mw:action:approve') {
+            const payload = deserialize(event.data.payload);
+            if (payload.action && payload.action.uuid === action.uuid) {
+              if (this._uxMode === 'popup') {
+                approvalWindow && approvalWindow.close();
+              } else {
+                windowEmitter.emit('close');
               }
+              resolve({
+                authorization_token: payload.authorization_token,
+                action: payload.action,
+              });
+            } else if (event.data?.name === 'mw:action:cancel') {
+              reject(`User denied approval for action:${action.uuid}.`);
             }
-
-            if (event.data.name === 'mw:auth:close') {
-              windowEmitter.emit('close');
-            }
-          };
-
-          if (this._uxMode === 'embedded') {
-            windowEmitter.on('message', handleApprovalEvent);
-          } else {
-            window.addEventListener('message', handleApprovalEvent);
           }
 
-          approvalWindow = await this.openWalletPage(approvalPath,true,true);
-        } catch (e: any) {
-          reject(e.message);
+          if (event.data.name === 'mw:auth:close') {
+            windowEmitter.emit('close');
+          }
+        };
+
+        if (this._uxMode === 'embedded') {
+          windowEmitter.on('message', handleApprovalEvent);
+        } else {
+          window.addEventListener('message', handleApprovalEvent);
         }
-      })
+
+        approvalWindow = await this.openWalletPage(approvalPath, true, true);
+      } catch (e: any) {
+        reject(e.message);
+      }
+    });
   };
 
   // ==========================================================================================================
@@ -2639,9 +2687,9 @@ export class MirrorWorld {
       );
     }
     if (!this.__secretAccessKey) {
-      console.warn(
-        `__secretAccessKey is null, maybe User is not logged in. Could potentially fail`
-      );
+      // console.warn(
+      //   `__secretAccessKey is null, maybe User is not logged in. Could potentially fail`
+      // );
     }
   }
   /**
@@ -2650,8 +2698,18 @@ export class MirrorWorld {
   private async fetchEVMUserTokens(): Promise<GetEVMUserTokensV2Data> {
     assertEVMOnly('fetchEVMUserTokens', this.chainConfig);
     this.warnAuthenticated();
+    const network = this.base('wallet');
+    let url = `/${network}/tokens`;
+    const chainName = network.split('/')[0];
+
+    if (this._customTokens[chainName]) {
+      if (network === `${chainName}/${this._customTokens[chainName].network}`) {
+        url = `/${network}/tokens?custom_tokens=${this._customTokens[chainName].tokens}`;
+      }
+    }
+
     const response = await this._wallet.get<IResponse<GetEVMUserTokensV2Data>>(
-      `/${this.base('wallet')}/tokens`
+      `${url}`
     );
     return response.data.data;
   }
@@ -2983,8 +3041,20 @@ export class MirrorWorld {
   private async fetchSolanaUserTokens(): Promise<GetSolanaTokensV2Data> {
     assertSolanaOnly('fetchSolanaUserTokens', this.chainConfig);
     this.warnAuthenticated();
+    const network = this.base('wallet');
+    let url = `/${network}/tokens`;
+
+    if (this._customTokens.solana) {
+      if (network === `solana/${this._customTokens.solana.network}`) {
+        url = `/${network}/tokens?custom_tokens=${this._customTokens.solana.tokens}`;
+      }
+    }
+
     const response = await this._wallet.get<IResponse<GetSolanaTokensV2Data>>(
-      `/${this.base('wallet')}/tokens`
+      url,
+      {
+        params: {},
+      }
     );
     return response.data.data;
   }
@@ -3051,12 +3121,12 @@ export class MirrorWorld {
     assertSolanaOnly('transferSOLV2', this.chainConfig);
     this.warnAuthenticated();
 
-    var { authorization_token } = await this.getApprovalToken({
+    const { authorization_token } = await this.getApprovalToken({
       type: 'transfer_sol',
       value: 0,
       params: payload,
     });
-    
+
     const response = await this._wallet.post<
       IResponse<SolanaBaseSignatureResultV2>
     >(`/${this.base('wallet')}/transfer-sol`, payload, {
@@ -3084,7 +3154,7 @@ export class MirrorWorld {
 
     const response = await this._wallet.post<
       IResponse<SolanaBaseSignatureResultV2>
-    >(`/${this.base('wallet')}/transfer-token`, payload,{
+    >(`/${this.base('wallet')}/transfer-token`, payload, {
       headers: {
         ...(authorization_token && {
           'x-authorization-token': authorization_token,
@@ -3444,22 +3514,27 @@ export class MirrorWorld {
     return await SUIWrapper.mintNFT(payload, url, this.chainConfig, this.v2);
   }
 
-  private async suiQueryNFT(nft_object_id:string){
-    this.warnAuthenticated()
-    let url = `/${this.base('asset')}/nft/` + nft_object_id
-    return await SUIWrapper.getTokens(url,this.chainConfig,this.v2)
+  private async suiQueryNFT(nft_object_id: string) {
+    this.warnAuthenticated();
+    const url = `/${this.base('asset')}/nft/` + nft_object_id;
+    return await SUIWrapper.getTokens(url, this.chainConfig, this.v2);
   }
 
-  private async suiSearchNFTsByOwner(payload:SUISearchNFTsByOwnerPayload){
-    this.warnAuthenticated()
-    let url = `/${this.base('asset')}/nft/owner`
-    return await SUIWrapper.searchNFTsByOwner(payload,url,this.chainConfig,this.v2)
+  private async suiSearchNFTsByOwner(payload: SUISearchNFTsByOwnerPayload) {
+    this.warnAuthenticated();
+    const url = `/${this.base('asset')}/nft/owner`;
+    return await SUIWrapper.searchNFTsByOwner(
+      payload,
+      url,
+      this.chainConfig,
+      this.v2
+    );
   }
 
-  private async suiSearchNFTs(payload:SUISearchNFTsPayload){
-    this.warnAuthenticated()
-    let url = `/${this.base('asset')}/nft/mints`
-    return await SUIWrapper.searchNFTs(payload,url,this.chainConfig,this.v2)
+  private async suiSearchNFTs(payload: SUISearchNFTsPayload) {
+    this.warnAuthenticated();
+    const url = `/${this.base('asset')}/nft/mints`;
+    return await SUIWrapper.searchNFTs(payload, url, this.chainConfig, this.v2);
   }
 
   private assertEVMOnly(methodName: string) {
