@@ -1,5 +1,11 @@
 # @mirrorworld/web3.js
 
+## 2.9.0
+
+### Minor Changes
+
+- e67eeca: optimization
+
 ## 2.8.0
 
 ### Minor Changes
